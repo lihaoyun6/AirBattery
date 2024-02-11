@@ -1,0 +1,37 @@
+/* 
+  Localizable.strings
+  DockBattery
+
+  Created by apple on 2023/9/7.
+  
+*/
+"Display Mode" = "显示模式";
+"Battery" = "仅电量";
+"Dashboard" = "仪表盘";
+"Appearance" = "图标主题";
+"Automatic" = "自动切换";
+"Light" = "浅色";
+"Dark" = "深色";
+"See My Location" = "查看当前定位";
+"Open Calendar" = "打开日历";
+"Battery Settings" = "电池设置";
+"Settings..." = "偏好设置...";
+"No Battery!" = "未检测到电池!";
+"Time until full: " = "距充满还剩: ";
+"Remaining time: " = "可用时长: ";
+"Weather" = "天气信息";
+"Location: " = "当前定位: ";
+"Hidden" = "隐藏";
+"Use °C" = "摄氏度";
+"Use °F" = "华氏度";
+"Time Left" = "剩余时间";
+"Show" = "显示";
+"Refresh Weather Data" = "刷新天气";
+"About DockBattery" = "关于 DockBattery";
+" (Case)" = " (充电盒)";
+" mins ago" = " 分钟前";
+"Percent" = "电量数值";
+"Icon" = "图标";
+"Show This Mac" = "显示本机信息";
+"This Mac" = "本机电量";
+"Battery on Dock" = "指定设备显示";
