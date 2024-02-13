@@ -27,7 +27,7 @@ brew install lihaoyun6/tap/dockbattery
 
 ## 常见问题
 **1. 为什么我的 iPhone/iPad 并没有显示?**  
-> 请确保 iPhone/iPad 至少连接到次Mac一次, 且已信任此 Mac. 并确保其与 Mac 处于同一局域网中.  
+> 请确保 iPhone/iPad 已信任此 Mac 且开启 WiFi 同步. 并确保其与 Mac 处于同一局域网中.  
 
 **2. 我的 Apple Watch 也需要进行预连接吗?**  
 > 不需要, 一旦 DockBattery 检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息.
