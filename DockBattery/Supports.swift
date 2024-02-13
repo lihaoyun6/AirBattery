@@ -235,155 +235,214 @@ func getIbByID(id: String = "@MacInternalBattery") -> iBattery {
     return ib
 }
 
-func getDeviceIcon(_ d: Device) -> Image {
+func getDeviceIcon(_ d: Device) -> NSImage? {
     switch d.deviceType {
     case "iPhone":
         if let model = d.deviceModel, let m = model.components(separatedBy: ",").first, let id = m.components(separatedBy: "e").last {
-            if (Int(id) ?? 0 > 9) && !["iPhone12,8", "iPhone14,6"].contains(model) { return Image(systemName: "iphone") }
-            return Image(systemName: "iphone.homebutton") }
-        return Image(systemName: "iphone")
+            if (Int(id) ?? 0 > 9) && !["iPhone12,8", "iPhone14,6"].contains(model) { return NSImage(systemSymbolName: "iphone" , accessibilityDescription: nil) }
+            return NSImage(systemSymbolName: "iphone.homebutton" , accessibilityDescription: nil) }
+        return NSImage(systemSymbolName: "iphone" , accessibilityDescription: nil)
     case "iPad":
         if let model = d.deviceModel, let m = model.components(separatedBy: ",").first {
-            if ["iPad8", "iPad13", "iPad14"].contains(m) { return Image(systemName: "ipad") }
-            return Image(systemName: "ipad.homebutton") }
-        return Image(systemName: "ipad")
+            if ["iPad8", "iPad13", "iPad14"].contains(m) { return NSImage(systemSymbolName: "ipad" , accessibilityDescription: nil) }
+            return NSImage(systemSymbolName: "ipad.homebutton" , accessibilityDescription: nil) }
+        return NSImage(systemSymbolName: "ipad" , accessibilityDescription: nil)
     case "iWatch":
-        return Image(systemName: "applewatch")
+        return NSImage(systemSymbolName: "applewatch" , accessibilityDescription: nil)
     case "hid_tpd":
-        return Image("trackpad.fill")
+        return NSImage(named: "trackpad.fill")
     case "hid_kbd":
-        return Image(systemName: "keyboard.fill")
+        return NSImage(systemSymbolName: "keyboard.fill" , accessibilityDescription: nil)
     case "hid_mus":
-        return Image(systemName: "magicmouse.fill")
+        return NSImage(systemSymbolName: "magicmouse.fill" , accessibilityDescription: nil)
     case "ap_pod_right":
         if let model = d.deviceModel {
             switch model {
             case "Airpods":
-                return Image(systemName: "airpod.right")
+                return NSImage(systemSymbolName: "airpod.right" , accessibilityDescription: nil)
             case "Airpods Pro":
-                return Image(systemName: "airpodpro.right")
+                return NSImage(systemSymbolName: "airpodpro.right" , accessibilityDescription: nil)
             case "Airpods Max":
-                return Image("airpodsmax")
+                return NSImage(named: "airpodsmax")
             case "Airpods 2":
-                return Image(systemName: "airpod.right")
+                return NSImage(systemSymbolName: "airpod.right" , accessibilityDescription: nil)
             case "Airpods 3":
-                return Image("airpod3.right")
+                return NSImage(named: "airpod3.right")
             case "Airpods Pro 2":
-                return Image(systemName: "airpodpro.right")
+                return NSImage(systemSymbolName: "airpodpro.right" , accessibilityDescription: nil)
             case "PowerBeats":
-                return Image("beats.powerbeats.right")
+                return NSImage(named: "beats.powerbeats.right")
             case "PowerBeats Pro":
-                return Image("beats.powerbeatspro.right")
+                return NSImage(named: "beats.powerbeatspro.right")
             case "Beats Solo Pro":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio Buds":
-                return Image("beats.studiobud.right")
+                return NSImage(named: "beats.studiobud.right")
             case "Beats Flex":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "BeatsX":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "Beats Solo3":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio3":
-                return Image("beats.studiobud.right")
+                return NSImage(named: "beats.studiobud.right")
             case "Beats Studio Pro":
-                return Image("beats.studiobud.right")
+                return NSImage(named: "beats.studiobud.right")
             case "Beats Fit Pro":
-                return Image("beats.fitpro.right")
+                return NSImage(named: "beats.fitpro.right")
             case "Beats Studio Buds+":
-                return Image("beats.studiobud.right")
+                return NSImage(named: "beats.studiobud.right")
             default:
-                return Image(systemName: "airpod.right")
+                return NSImage(systemSymbolName: "airpod.right" , accessibilityDescription: nil)
             }
         }
-        return Image(systemName: "airpod.right")
+        return NSImage(systemSymbolName: "airpod.right" , accessibilityDescription: nil)
     case "ap_pod_left":
         if let model = d.deviceModel {
             switch model {
             case "Airpods":
-                return Image(systemName: "airpod.left")
+                return NSImage(systemSymbolName: "airpod.left" , accessibilityDescription: nil)
             case "Airpods Pro":
-                return Image(systemName: "airpodpro.left")
+                return NSImage(systemSymbolName: "airpodpro.left" , accessibilityDescription: nil)
             case "Airpods Max":
-                return Image("airpodsmax")
+                return NSImage(named: "airpodsmax")
             case "Airpods 2":
-                return Image(systemName: "airpod.left")
+                return NSImage(systemSymbolName: "airpod.left" , accessibilityDescription: nil)
             case "Airpods 3":
-                return Image("airpod3.right")
+                return NSImage(named: "airpod3.right")
             case "Airpods Pro 2":
-                return Image(systemName: "airpodpro.left")
+                return NSImage(systemSymbolName: "airpodpro.left" , accessibilityDescription: nil)
             case "PowerBeats":
-                return Image("beats.powerbeats.left")
+                return NSImage(named: "beats.powerbeats.left")
             case "PowerBeats Pro":
-                return Image("beats.powerbeatspro.left")
+                return NSImage(named: "beats.powerbeatspro.left")
             case "Beats Solo Pro":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio Buds":
-                return Image("beats.studiobud.left")
+                return NSImage(named: "beats.studiobud.left")
             case "Beats Flex":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "BeatsX":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "Beats Solo3":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio3":
-                return Image("beats.studiobud.left")
+                return NSImage(named: "beats.studiobud.left")
             case "Beats Studio Pro":
-                return Image("beats.studiobud.left")
+                return NSImage(named: "beats.studiobud.left")
             case "Beats Fit Pro":
-                return Image("beats.fitpro.left")
+                return NSImage(named: "beats.fitpro.left")
             case "Beats Studio Buds+":
-                return Image("beats.studiobud.left")
+                return NSImage(named: "beats.studiobud.left")
             default:
-                return Image(systemName: "airpod.left")
+                return NSImage(systemSymbolName: "airpod.left" , accessibilityDescription: nil)
             }
         }
-        return Image(systemName: "airpod.left")
+        return NSImage(systemSymbolName: "airpod.left" , accessibilityDescription: nil)
     case "ap_pod_all":
-        return Image(systemName: "airpodspro")
+        return NSImage(systemSymbolName: "airpodspro" , accessibilityDescription: nil)
     case "ap_case":
         if let model = d.deviceModel {
             switch model {
             case "Airpods":
-                return Image("airpods.case.fill")
+                return NSImage(named: "airpods.case.fill")
             case "Airpods Pro":
-                return Image("airpodspro.case.fill")
+                return NSImage(named: "airpodspro.case.fill")
             case "Airpods Max":
-                return Image("airpodsmax")
+                return NSImage(named: "airpodsmax")
             case "Airpods 2":
-                return Image("airpods.case.fill")
+                return NSImage(named: "airpods.case.fill")
             case "Airpods 3":
-                return Image("airpods3.case.fill")
+                return NSImage(named: "airpods3.case.fill")
             case "Airpods Pro 2":
-                return Image("airpodspro.case.fill")
+                return NSImage(named: "airpodspro.case.fill")
             case "PowerBeats":
-                return Image("beats.powerbeatspro.case.fill")
+                return NSImage(named: "beats.powerbeatspro.case.fill")
             case "PowerBeats Pro":
-                return Image("beats.powerbeatspro.case.fill")
+                return NSImage(named: "beats.powerbeatspro.case.fill")
             case "Beats Solo Pro":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio Buds":
-                return Image("beats.studiobuds.case.fill")
+                return NSImage(named: "beats.studiobuds.case.fill")
             case "Beats Flex":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "BeatsX":
-                return Image("beats.earphones")
+                return NSImage(named: "beats.earphones")
             case "Beats Solo3":
-                return Image("beats.headphones")
+                return NSImage(named: "beats.headphones")
             case "Beats Studio3":
-                return Image("beats.studiobuds.case.fill")
+                return NSImage(named: "beats.studiobuds.case.fill")
             case "Beats Studio Pro":
-                return Image("beats.studiobuds.case.fill")
+                return NSImage(named: "beats.studiobuds.case.fill")
             case "Beats Fit Pro":
-                return Image("beats.fitpro.case.fill")
+                return NSImage(named: "beats.fitpro.case.fill")
             case "Beats Studio Buds+":
-                return Image("beats.studiobuds.case.fill")
+                return NSImage(named: "beats.studiobuds.case.fill")
             default:
-                return Image("airpodspro.case.fill")
+                return NSImage(named: "airpodspro.case.fill")
             }
         }
-        return Image("airpodspro.case.fill")
+        return NSImage(named: "airpodspro.case.fill")
     default:
-        return Image(systemName: "dot.radiowaves.left.and.right")
+        return NSImage(systemSymbolName: "dot.radiowaves.left.and.right" , accessibilityDescription: nil)
     }
+}
+
+func getMacModelID() -> String? {
+    var modelName: String?
+    var key = kIOMasterPortDefault
+    if #available(macOS 12, *) { key = kIOMainPortDefault }
+    let platformExpert = IOServiceGetMatchingService(key, IOServiceMatching("IOPlatformExpertDevice"))
+    defer { IOObjectRelease(platformExpert) }
+
+    if let modelData = IORegistryEntryCreateCFProperty(platformExpert, "model" as CFString, kCFAllocatorDefault, 0)?.takeUnretainedValue() as? Data,
+       let model = String(data: modelData, encoding: .utf8) {
+        modelName = model
+    }
+
+    return modelName
+}
+
+func getMacIcon(_ model:String) -> NSImage? {
+    /*
+    if let model = getMacModelID() {
+        if model.lowercased().contains("mac14,7") { return NSImage(named: "macbook.gen1") }
+        if model.lowercased().contains("mac14,8") { return NSImage(named: "macpro.gen3.fill") }
+        if model.lowercased().contains("mac14") { return NSImage(named: "macbook") }
+        if model.lowercased().contains("mac14,3")||model.lowercased().contains("mac14,2") { return NSImage(systemSymbolName: "macmini.fill", accessibilityDescription: nil) }
+        if model.lowercased().contains("macbook") { return NSImage(named: "macbook") }
+        if model.lowercased().contains("macmini") { return NSImage(systemSymbolName: "macmini.fill", accessibilityDescription: nil) }
+        if model.lowercased().contains("macpro7") { return NSImage(named: "macpro.gen3.fill") }
+        if model.lowercased().contains("macpro6") { return NSImage(systemSymbolName: "macpro.gen2.fill", accessibilityDescription: nil) }
+        if model.lowercased().contains("imac") { return NSImage(named: "desktopcomputer") }
+    }
+    return NSImage(systemSymbolName: "display", accessibilityDescription: nil)
+    */
+    let m = model.lowercased().replacingOccurrences(of: " ", with: "")
+    if m.contains("macbook") { return NSImage(named: "macbook") }
+    if m.contains("macmini") { return NSImage(systemSymbolName: "macmini.fill", accessibilityDescription: nil) }
+    if m.contains("macstudio") { return NSImage(named: "macstudio.fill") }
+    if m.contains("macpro") { return NSImage(named: "macpro.gen3.fill") }
+    if m.contains("imac") { return NSImage(named: "desktopcomputer") }
+    return NSImage(systemSymbolName: "display", accessibilityDescription: nil)
+}
+
+func sliceList(data: [String], length: Int, count: Int) -> [String] {
+    let totalLength = length * count
+    if totalLength <= data.count { return Array(data[totalLength-length..<totalLength]) }
+    if totalLength-length > data.count { return [] }
+    var list = Array(data[totalLength-length..<data.count])
+    if list != [] { while list.count < length { list.append("") } }
+    return list
+}
+
+func getMachineName() -> String {
+    guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPHardwareDataType", "-json"]) else { return "Mac" }
+    if let json = try? JSONSerialization.jsonObject(with: Data(result.utf8), options: []) as? [String: Any],
+       let SPHardwareDataTypeRaw = json["SPHardwareDataType"] as? [Any],
+       let SPHardwareDataType = SPHardwareDataTypeRaw[0] as? [String: Any],
+       let model = SPHardwareDataType["machine_name"] as? String{
+        return model
+    }
+    return "Mac"
 }

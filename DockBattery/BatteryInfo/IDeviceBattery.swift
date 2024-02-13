@@ -49,6 +49,7 @@ class IDeviceBattery {
     
     func writeBatteryInfo(_ id: String, _ connectType: String) {
         let lastUpdate = Date().timeIntervalSince1970
+        if connectType == "" { _ = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/wificonnection", arguments: ["-u", id, "true"]) }
         if let deviceInfo = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/ideviceinfo", arguments: [connectType, "-u", id]){
             let i = deviceInfo.components(separatedBy: .newlines)
             if let deviceName = i.filter({ $0.contains("DeviceName") }).first?.components(separatedBy: ": ").last,

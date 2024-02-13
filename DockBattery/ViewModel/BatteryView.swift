@@ -4,7 +4,7 @@
 //
 //  Created by apple on 2023/9/7.
 //
-
+/*
 import SwiftUI
 
 struct BatteryView: View {
@@ -102,3 +102,4 @@ struct BatteryView: View {
         .onReceive(batteryTimer) { t in ibStatus = getPowerState() }
     }
 }
+*/

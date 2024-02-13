@@ -34,4 +34,12 @@
 "Icon" = "图标";
 "Show This Mac" = "显示本机信息";
 "This Mac" = "本机电量";
-"Battery on Dock" = "指定设备显示";
+"Battery on Dock" = "显示指定设备";
+"Quit DockBattery" = "退出 DockBattery";
+"Show Batteries on…" = "显示位置";
+"Dock" = "程序坞";
+"Status Bar" = "状态栏";
+"Both" = "同时";
+"Scrolling Mode" = "轮换显示";
+"Enabled" = "启用轮换";
+"Disabled" = "关闭轮换";

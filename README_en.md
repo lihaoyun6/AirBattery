@@ -26,12 +26,12 @@ brew install lihaoyun6/tap/dockbattery
 
 ## Q&A
 **1. Why isn't my iPhone/iPad displayed?**
-> Please make sure your iPhone/iPad has trusted this Mac ***(iOS17 or later also needs to turn on WiFi Connections)***. And make sure it is in the same LAN as the Mac.  
+> Please make sure the iPhone/iPad has trusted this Mac ***(and connected the Mac with a data cable at least once while DockBattery is running to pair)***. Then just make sure it is on the same LAN as the Mac.  
 
 **2. Does my Apple Watch need to be pre-connected?**
 > No, once DockBattery detects your iPhone, it will automatically read the battery information of the Apple Watch paired with it.  
 
-**3. Why do some device name have a ⚠️?**
+**3. Why do some device name have a ⚠️ symbol?**
 > If this symbol appears, it means that the device has not updated its battery information for more than ten minutes, and may be offline or turned off.  
 
 **4. Can it read the battery of an iPhone not connected to Wi-Fi?**

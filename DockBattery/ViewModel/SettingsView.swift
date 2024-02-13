@@ -12,6 +12,8 @@ struct SettingsView: View {
     @AppStorage("dockTheme") var dockTheme = "battery"
     @AppStorage("weatherMode") var weatherMode = "off"
     @AppStorage("timeLeft") var timeLeft = "false"
+    @AppStorage("showOn") var showOn = "dock"
+    @AppStorage("rollingMode") var rollingMode = "off"
     @AppStorage("showThisMac") var showThisMac = "icon"
     @AppStorage("multiInfoMainBattery") var multiInfoMainBattery:String = "@MacInternalBattery"
     @ObservedObject var locationManager = LocationManagerSingleton.shared
@@ -70,16 +72,6 @@ struct SettingsView: View {
                 .frame(width: 230, height: 110)
             }.padding(.top)
             VStack(spacing: 10){
-                Text("Appearance")
-                    .font(.system(size: 10, weight: .medium))
-                Picker("", selection: $appearance) {
-                    Text("Automatic").tag("auto")
-                    Text("Light").tag("false")
-                    Text("Dark").tag("true")
-                }
-                .font(.system(size: 10, weight: .medium))
-                .pickerStyle(.radioGroup)
-                .horizontalRadioGroupLayout()
                 if dockTheme == "multinfo" {
                     Text("Weather")
                         .font(.system(size: 10, weight: .medium))
@@ -104,6 +96,15 @@ struct SettingsView: View {
                     .pickerStyle(MenuPickerStyle())
                     //.horizontalRadioGroupLayout()
                 } else if dockTheme == "battery" {
+                    Text("Scrolling Mode")
+                        .font(.system(size: 10, weight: .medium))
+                    Picker("", selection: $rollingMode) {
+                        Text("Enabled").tag("on")
+                        Text("Disabled").tag("off")
+                    }
+                    .font(.system(size: 10, weight: .medium))
+                    .pickerStyle(.radioGroup)
+                    .horizontalRadioGroupLayout()
                     Text("Show This Mac")
                         .font(.system(size: 10, weight: .medium))
                     Picker("", selection: $showThisMac) {
@@ -115,9 +116,30 @@ struct SettingsView: View {
                     .pickerStyle(.radioGroup)
                     .horizontalRadioGroupLayout()
                 }
+                Divider()
+                Text("Appearance")
+                    .font(.system(size: 10, weight: .medium))
+                Picker("", selection: $appearance) {
+                    Text("Automatic").tag("auto")
+                    Text("Light").tag("false")
+                    Text("Dark").tag("true")
+                }
+                .font(.system(size: 10, weight: .medium))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
+                Text("Show Batteries on…")
+                    .font(.system(size: 10, weight: .medium))
+                Picker("", selection: $showOn) {
+                    Text("Dock").tag("dock")
+                    Text("Status Bar").tag("sbar")
+                    Text("Both").tag("both")
+                }
+                .font(.system(size: 10, weight: .medium))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
             }
             .padding(.bottom)
-            .frame(width: 230, height: 170)
+            .frame(width: 230, height: 230)
         }
         .onAppear{ devices = AirBatteryModel.getAllName() }
         .onReceive(themeTimer) { _ in devices = AirBatteryModel.getAllName() }

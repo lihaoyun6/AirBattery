@@ -5,6 +5,7 @@
 //  Created by apple on 2023/9/4.
 //
 import SwiftUI
+import AppKit
 //import CoreLocation
 //import CoreBluetooth
 
@@ -19,16 +20,20 @@ struct DockBatteryApp: App {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("weatherMode") var weatherMode = "off"
     @AppStorage("dockTheme") var dockTheme = "battery"
-    @AppStorage("forceWeather") var forceWeather = false
+    //@AppStorage("forceWeather") var forceWeather = false
     @AppStorage("machineName") var machineName = "Mac"
+    @AppStorage("showOn") var showOn = "dock"
+    
+    var statusBarItem: NSStatusItem!
+    var menu: NSMenu = NSMenu()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        if showOn == "sbar" { NSApp.setActivationPolicy(.accessory) }
         if let window = NSApplication.shared.windows.first { window.close() }
-        NSApp.dockTile.contentView = NSHostingView(rootView: InitView())
-        NSApp.dockTile.display()
+        
         machineName = getMachineName()
         let airpodsBattery = AirpodsBattery()
         airpodsBattery.startScanning()
@@ -38,20 +43,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ideviceBattery.startScanning()
         let weathers = Weathers()
         weathers.startGetting()
+        
+        menu.delegate = self
+        statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
+        statusBarItem.menu = menu
+        if let button = statusBarItem.button { button.image = NSImage(named: "menuItem") }
+        if showOn == "dock" { statusBarItem.isVisible = false }
+        
+        NSApp.dockTile.contentView = NSHostingView(rootView: InitView(statusBarItem: statusBarItem))
+        NSApp.dockTile.display()
     }
     
-    func getMachineName() -> String {
-        guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPHardwareDataType", "-json"]) else { return "Mac" }
-        if let json = try? JSONSerialization.jsonObject(with: Data(result.utf8), options: []) as? [String: Any],
-           let SPHardwareDataTypeRaw = json["SPHardwareDataType"] as? [Any],
-           let SPHardwareDataType = SPHardwareDataTypeRaw[0] as? [String: Any],
-           let model = SPHardwareDataType["machine_name"] as? String{
-            return model
+    func getImageResize(_ i: NSImage) -> NSSize {
+        let w = i.size.width
+        let h = i.size.height
+        if w > h {
+            let r = Double(h)/w
+            return NSSize(width: 16, height: 16*r)
         }
-        return "Mac"
+        if w < h {
+            let r = Double(w)/h
+            return NSSize(width: 16, height: 16*r)
+        }
+        return NSSize(width: 16, height: 16)
     }
     
-    @objc func openCalendar() {
+    @objc func blank() {}
+    
+    func menuWillOpen(_ menu: NSMenu) {
+        getMenu()
+    }
+    
+    /*@objc func openCalendar() {
         if let photosApp = FileManager.default.urls(
                 for: .applicationDirectory,
                 in: .systemDomainMask
@@ -62,7 +85,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func openBattery() {
         let str = "x-apple.systempreferences:com.apple.preference.battery"
         if let url = NSURL(string: str) { NSWorkspace.shared.open(url as URL) }
-    }
+    }*/
+     
     @objc func openAboutPanel() {
         NSApp.activate(ignoringOtherApps: true)
         NSApp.orderFrontStandardAboutPanel(nil)
@@ -77,7 +101,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
         }
     }
-    @objc func foreceWeather() { forceWeather = true }
+    //@objc func foreceWeather() { forceWeather = true }
     /*@objc func openLocation() {
         let originalString = "http://maps.apple.com/?ll=\(location)"
         if let encodedString = originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
@@ -86,72 +110,102 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
     }*/
     
-    let dockMenu = NSMenu()
-    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+    //let dockMenu = NSMenu()
+    
+    func getMenu(fromDock: Bool = false) {
         let now = Double(Date().timeIntervalSince1970)
         let ibStatus = getPowerState()
-        dockMenu.removeAllItems()
+        menu.removeAllItems()
         if ibStatus.hasBattery {
             let level = ibStatus.batteryLevel
             let batteryColor = getPowerColor(level, emoji: true)
             var timeText = ""
             if ibStatus.isCharging { timeText = "Time until full: ".local + "\(ibStatus.timeLeft)" } else { timeText = "Remaining time: ".local + "\(ibStatus.timeLeft)" }
+            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(level))\(ibStatus.isCharging ? " ⚡︎ " : "﹪")  \(machineName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timeText)]  \(machineName)", action: nil, keyEquivalent: "")
             alte.isAlternate = true
             alte.keyEquivalentModifierMask = .option
-            dockMenu.addItem(withTitle:"\(batteryColor) \(getMonoNum(level))\(ibStatus.isCharging ? " ⚡︎ " : "﹪")  \(machineName)", action: nil, keyEquivalent: "")
-            dockMenu.addItem(alte)
+            if let image = getMacIcon(machineName) {
+                image.size = getImageResize(image)
+                main.image = image
+                alte.image = image
+            }
+            menu.addItem(main)
+            menu.addItem(alte)
         }
-        dockMenu.addItem(NSMenuItem.separator())
-        /*dockMenu.addItem(withTitle:batteryText, action: nil, keyEquivalent: "")
-        dockMenu.addItem(NSMenuItem.separator())
-        dockMenu.addItem(withTitle:"Battery Settings".local, action: #selector(openBattery), keyEquivalent: ""
+        menu.addItem(NSMenuItem.separator())
+        /*menu.addItem(withTitle:batteryText, action: nil, keyEquivalent: "")
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle:"Battery Settings".local, action: #selector(openBattery), keyEquivalent: ""
         if dockTheme == "multinfo" {
-            dockMenu.addItem(withTitle:"Open Calendar".local, action: #selector(openCalendar), keyEquivalent: "")
-            if weatherMode != "off" { dockMenu.addItem(withTitle:"Refresh Weather Data".local, action: #selector(foreceWeather), keyEquivalent: "") }
+            menu.addItem(withTitle:"Open Calendar".local, action: #selector(openCalendar), keyEquivalent: "")
+            if weatherMode != "off" { menu.addItem(withTitle:"Refresh Weather Data".local, action: #selector(foreceWeather), keyEquivalent: "") }
         }*/
-        //dockMenu.addItem(NSMenuItem.separator())
+        //menu.addItem(NSMenuItem.separator())
         for d in AirBatteryModel.btDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
+            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
             alte.isAlternate = true
             alte.keyEquivalentModifierMask = .option
-            dockMenu.addItem(withTitle:"\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
-            dockMenu.addItem(alte)
+            if let image = getDeviceIcon(d) {
+                image.size = getImageResize(image)
+                main.image = image
+                alte.image = image
+            }
+            menu.addItem(main)
+            menu.addItem(alte)
         }
-        dockMenu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem.separator())
         for d in AirBatteryModel.bleDevices + AirBatteryModel.iDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
+            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
             alte.isAlternate = true
             alte.keyEquivalentModifierMask = .option
-            dockMenu.addItem(withTitle:"\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
-            dockMenu.addItem(alte)
+            if let image = getDeviceIcon(d) {
+                image.size = getImageResize(image)
+                main.image = image
+                alte.image = image
+            }
+            menu.addItem(main)
+            menu.addItem(alte)
             if let subds = d.subDevices {
                 for subd in subds {
                     let timePast = min(Int((now - subd.lastUpdate) / 60), 99)
                     let subBatteryColor = getPowerColor(subd.batteryLevel, emoji: true)
+                    let main = NSMenuItem(title: "\(subBatteryColor) \(getMonoNum(subd.batteryLevel))\(subd.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(subd.deviceName)", action: #selector(blank), keyEquivalent: "")
                     let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(subd.deviceName)", action: nil, keyEquivalent: "")
                     alte.isAlternate = true
                     alte.keyEquivalentModifierMask = .option
-                    dockMenu.addItem(withTitle:"\(subBatteryColor) \(getMonoNum(subd.batteryLevel))\(subd.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(subd.deviceName)", action: nil, keyEquivalent: "")
-                    dockMenu.addItem(alte)
+                    if let image = getDeviceIcon(subd) {
+                        image.size = getImageResize(image)
+                        main.image = image
+                        alte.image = image
+                    }
+                    menu.addItem(main)
+                    menu.addItem(alte)
                 }
             }
-            dockMenu.addItem(NSMenuItem.separator())
+            menu.addItem(NSMenuItem.separator())
         }
-        if dockTheme == "multinfo" { if weatherMode != "off" {
-            dockMenu.addItem(withTitle:"Refresh Weather Data".local, action: #selector(foreceWeather), keyEquivalent: "") }
-            dockMenu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
+        menu.addItem(withTitle:"About DockBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
+        if !fromDock {
+            menu.addItem(NSMenuItem.separator())
+            menu.addItem(withTitle:"Quit DockBattery".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         }
-        dockMenu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
-        dockMenu.addItem(withTitle:"About DockBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
-        return dockMenu
     }
+    
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        getMenu(fromDock: true)
+        return menu
+    }
+    
     public func process(path: String, arguments: [String]) -> String? {
         let task = Process()
         task.launchPath = path
@@ -166,7 +220,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         do {
             try task.run()
         } catch let error {
-            print("system_profiler SPMemoryDataType: \(error.localizedDescription)")
+            print("system_profiler: \(error.localizedDescription)")
             return nil
         }
         

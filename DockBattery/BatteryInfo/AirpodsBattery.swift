@@ -96,7 +96,7 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
-    func startScanning() { scanTimer = Timer.scheduledTimer(timeInterval: 6.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true) }
+    func startScanning() { scanTimer = Timer.scheduledTimer(timeInterval: 8.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true) }
     
     @objc func scanDevices() {
         //print("S \(Date().timeIntervalSince1970)")

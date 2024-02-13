@@ -6,7 +6,7 @@ class LocationManagerSingleton: NSObject, ObservableObject, CLLocationManagerDel
     private var locationManager = CLLocationManager()
     let geocoder = CLGeocoder()
 
-    @Published var userLocation: String = "0.0,0.0"
+    @Published var userLocation: String = "-1"
     @Published var locationName: String = ""
     @Published var locationCity: String = ""
     @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
@@ -45,7 +45,7 @@ class LocationManagerSingleton: NSObject, ObservableObject, CLLocationManagerDel
                     if let name = placemark.name { self.locationName = name }
                     if let city = placemark.locality {
                         self.locationCity = city
-                    } else {/*
+                    } else {
                         //if let url = URL(string: "https://api.kertennet.com/geography/locationInfo?lat=\(location.coordinate.latitude)&lng=\(location.coordinate.longitude)") {
                         if let url = URL(string: "https://api.map.baidu.com/geocoder?location=\(location.coordinate.latitude),\(location.coordinate.longitude)&output=json") {
                             fetchData(from: url, maxRetryCount: 2) { result in
@@ -61,14 +61,14 @@ class LocationManagerSingleton: NSObject, ObservableObject, CLLocationManagerDel
                                                 }
                                             }
                                         } catch {
-                                            print("JSON解析错误: \(error.localizedDescription)")
+                                            print("JSON error: \(error.localizedDescription)")
                                         }
                                     }
                                 case .failure(let error):
                                     print("Error：\(error.localizedDescription)")
                                 }
                             }
-                        }*/
+                        }
                     }
                 }
             }

@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct MultiInfoView: View {
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("weatherMode") var weatherMode = "off"
     @AppStorage("multiInfoMainBattery") var multiInfoMainBattery = "@MacInternalBattery"
-    @AppStorage("forceWeather") var forceWeather = false
+    //@AppStorage("forceWeather") var forceWeather = false
     
     @State private var lineWidth = 6.0
     @State private var darkMode = getDarkMode()
@@ -66,7 +67,7 @@ struct MultiInfoView: View {
                             .scaleEffect(0.5)
                             .offset(x:-0.2, y:1.5)
                     } else {
-                        getDeviceIcon(AirBatteryModel.getByName(multiInfoMainBattery) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))
+                       Image(nsImage: getDeviceIcon(AirBatteryModel.getByName(multiInfoMainBattery) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))!)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .foregroundColor(darkMode ? .white : .black)
@@ -191,14 +192,10 @@ struct MultiInfoView: View {
         .frame(width: 128, height: 128, alignment: .center)
         .onAppear {
             ibStatus = getIbByName(name: multiInfoMainBattery)
-            if fromDock {
-                Thread.detachNewThread {
-                    Thread.sleep(forTimeInterval: 5)
-                    Weathers().updateWeather()
-                }
-            }
+            if fromDock { Thread.detachNewThread { Weathers().updateWeather() } }
         }
         .onReceive(themeTimer) { t in
+            if fromDock { if CLLocationManager().authorizationStatus != .authorizedAlways { Thread.detachNewThread { Weathers().updateWeather() } } }
             darkMode = getDarkMode()
             dateStatus = getDayAndWeek()
             ibStatus = getIbByName(name: multiInfoMainBattery)

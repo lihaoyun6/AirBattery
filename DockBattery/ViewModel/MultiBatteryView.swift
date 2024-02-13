@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
-import CoreLocation
 
 struct MultiBatteryView: View {
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showThisMac") var showThisMac = "icon"
+    @AppStorage("machineName") var machineName = "Mac"
+    @AppStorage("rollingMode") var rollingMode = "off"
     
     @State private var lineWidth = 6.0
     //@State private var started = false
@@ -21,6 +22,8 @@ struct MultiBatteryView: View {
     @State private var battery2 = getIbByID(id: "")
     @State private var battery3 = getIbByID(id: "")
     @State private var battery4 = getIbByID(id: "")
+    @State private var lastTime = Date().timeIntervalSince1970
+    @State private var rollCount = 1
     
     //@ObservedObject var locationManager = LocationManagerSingleton.shared
     
@@ -66,7 +69,7 @@ struct MultiBatteryView: View {
                 if battery1.hasBattery{
                     if batteryList[0] == "@MacInternalBattery" {
                         if showThisMac == "icon"{
-                            Image("macbook")
+                            Image(nsImage: getMacIcon(machineName)!)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .colorScheme(darkMode ? .dark : .light)
@@ -84,7 +87,7 @@ struct MultiBatteryView: View {
                                 .offset(x:-0.2, y:1.5)
                         }
                     } else {
-                        getDeviceIcon(AirBatteryModel.getByID(batteryList[0]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))
+                        Image(nsImage: getDeviceIcon(AirBatteryModel.getByID(batteryList[0]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))!)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .colorScheme(darkMode ? .dark : .light)
@@ -129,7 +132,7 @@ struct MultiBatteryView: View {
                     .rotationEffect(Angle(degrees: 270.0))
                 
                 if battery2.hasBattery{
-                    getDeviceIcon(AirBatteryModel.getByID(batteryList[1]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))
+                    Image(nsImage: getDeviceIcon(AirBatteryModel.getByID(batteryList[1]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))!)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
@@ -173,7 +176,7 @@ struct MultiBatteryView: View {
                     .rotationEffect(Angle(degrees: 270.0))
                 
                 if battery3.hasBattery{
-                    getDeviceIcon(AirBatteryModel.getByID(batteryList[2]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))
+                    Image(nsImage: getDeviceIcon(AirBatteryModel.getByID(batteryList[2]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))!)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
@@ -217,7 +220,7 @@ struct MultiBatteryView: View {
                     .rotationEffect(Angle(degrees: 270.0))
                 
                 if battery4.hasBattery{
-                    getDeviceIcon(AirBatteryModel.getByID(batteryList[3]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))
+                    Image(nsImage: getDeviceIcon(AirBatteryModel.getByID(batteryList[3]) ?? Device(deviceID: "", deviceType: "", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0))!)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
@@ -240,10 +243,22 @@ struct MultiBatteryView: View {
         .frame(width: 128, height: 128, alignment: .center)
         .onReceive(themeTimer) { t in
             darkMode = getDarkMode()
-            var list = AirBatteryModel.getAllID()
-            if ibStatus.hasBattery && showThisMac != "hidden" { list.insert("@MacInternalBattery", at: 0) }
-            while list.count < 4 { list.append("") }
-            batteryList = list
+            let list = AirBatteryModel.getAllID()
+            if rollingMode == "off" { rollCount = 1 }
+            let now = Date().timeIntervalSince1970
+            var length = 4
+            if ibStatus.hasBattery && showThisMac != "hidden" { length = 3 }
+            batteryList = sliceList(data: list, length: length, count: rollCount)
+            if batteryList == []{
+                rollCount = 1
+                batteryList = sliceList(data: list, length: length, count: rollCount)
+            }
+            while batteryList.count < 4 { batteryList.append("") }
+            if Double(now) - lastTime >= 20 && rollingMode == "on" {
+                lastTime = now
+                rollCount = rollCount + 1
+            }
+            if ibStatus.hasBattery && showThisMac != "hidden" { batteryList.insert("@MacInternalBattery", at: 0) }
             battery1 = getIbByID(id: batteryList[0])
             battery2 = getIbByID(id: batteryList[1])
             battery3 = getIbByID(id: batteryList[2])
