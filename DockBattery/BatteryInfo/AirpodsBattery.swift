@@ -81,13 +81,15 @@
 //  21~22: 未知
 //  23~24: 未知
 //  =================================================
-
+import SwiftUI
 import Foundation
 import CoreBluetooth
 
 class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+    @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
     var centralManager: CBCentralManager!
-    //var peripheral: CBPeripheral?
+    var peripherals: [CBPeripheral?] = []
+    var hotspotDevices: [String:UInt8] = [:]
     var scanTimer: Timer?
     //var mfgData: Data!
     
@@ -162,7 +164,25 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        peripheral.delegate = self
+        peripheral.discoverServices(nil)
+    }
+    
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        // 获取个人热点广播数据
+        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, [16, 12].contains(data[2]), let deviceName = peripheral.name, ideviceOverBLE {
+            if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel {
+                if Double(Date().timeIntervalSince1970) - device.lastUpdate > 60 {
+                    self.peripherals.append(peripheral)
+                    self.centralManager.connect(peripheral, options: nil)
+                }
+             } else {
+                 self.peripherals.append(peripheral)
+                 self.centralManager.connect(peripheral, options: nil)
+             }
+        }
+        
         if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count == 25, data[0] == 76, let deviceName = peripheral.name {
             if data[2] == 18 {
                 let deviceID = peripheral.identifier.uuidString
@@ -271,6 +291,108 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         }
     }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard let services = peripheral.services else { return }
+        for service in services {
+            peripheral.discoverCharacteristics(nil, for: service)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+        var clear = true
+        if service.uuid == CBUUID(string: "180F") || service.uuid == CBUUID(string: "180A") {
+            for characteristic in characteristics {
+                if characteristic.uuid == CBUUID(string: "2A19") || characteristic.uuid == CBUUID(string: "2A24") {
+                    clear = false
+                    peripheral.readValue(for: characteristic)
+                }
+            }
+        }
+        if clear { if let index = self.peripherals.firstIndex(of: peripheral) { self.peripherals.remove(at: index) } }
+        
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        if characteristic.uuid == CBUUID(string: "2A19"){
+            if let data = characteristic.value {
+                if let deviceName = peripheral.name{
+                    let now = Date().timeIntervalSince1970
+                    var charging = -1
+                    if let lastLevel = hotspotDevices[deviceName] {
+                        //print(lastLevel, data[0])
+                        if data[0] > lastLevel { charging = 1 }
+                        if data[0] < lastLevel { charging = 0 }
+                    }
+                    hotspotDevices[deviceName] = data[0]
+                    if let device = AirBatteryModel.getByName(deviceName) {
+                        var d = device
+                        //print("\(d.deviceName), \(d.isCharging)")
+                        d.deviceID = peripheral.identifier.uuidString
+                        d.batteryLevel = Int(data[0])
+                        d.lastUpdate = now
+                        if charging != -1 { d.isCharging = charging }
+                        AirBatteryModel.updateIdevices(byName: true, d)
+                    } else {
+                        let d = Device(deviceID: peripheral.identifier.uuidString, deviceType: "general_bt", deviceName: deviceName, batteryLevel: Int(data[0]), isCharging: (charging != -1) ? charging : 0, lastUpdate: now)
+                        AirBatteryModel.updateIdevices(byName: true, d)
+                    }
+                }
+            }
+        }
+        
+        if characteristic.uuid == CBUUID(string: "2A24") {
+            if let data = characteristic.value, let model = data.ascii() {
+                if !model.lowercased().contains("watch") {
+                    if let deviceName = peripheral.name {
+                        let now = Date().timeIntervalSince1970
+                        if let device = AirBatteryModel.getByName(deviceName), device.deviceModel != model{
+                            var d = device
+                            d.deviceType = model.replacingOccurrences(of: ",", with: "").replacingOccurrences(of: "\\d", with: "", options: .regularExpression, range: nil)
+                            d.deviceModel = model
+                            d.lastUpdate = now
+                            AirBatteryModel.updateIdevices(byName: true, d)
+                            //print(d)
+                        }
+                    }
+                }
+            }
+        }
+        //self.centralManager.cancelPeripheralConnection(peripheral)
+    }
+
+    
+    /*func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+        for characteristic in characteristics {
+            if characteristic.uuid == CBUUID(string: "2A19") {
+                peripheral.readValue(for: characteristic)
+            }
+        }
+        if let index = self.peripherals.firstIndex(of: peripheral) { self.peripherals.remove(at: index) }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        print(peripheral.identifier.uuidString)
+        if characteristic.uuid == CBUUID(string: "2A19") { // 电池信息特征的 UUID
+            if let data = characteristic.value {
+                let batteryLevel = data[0]
+                if let deviceName = peripheral.name{
+                    if let device = AirBatteryModel.getByName(deviceName) {
+                        var d = device
+                        d.batteryLevel = Int(batteryLevel)
+                        d.lastUpdate = Date().timeIntervalSince1970
+                        AirBatteryModel.updateIdevices(byName: true, d)
+                    } else {
+                        let d = Device(deviceID: peripheral.identifier.uuidString, deviceType: "iPhone", deviceName: deviceName, batteryLevel: data[0], isCharging: 0, lastUpdate: now)
+                        AirBatteryModel.updateIdevices(byName: true, d)
+                    }
+                }
+            }
+        }
+        self.centralManager.cancelPeripheralConnection(peripheral)
+    }*/
     
     func getLevel(_ name: String,_ side: String) -> UInt8{
         guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return 255 }

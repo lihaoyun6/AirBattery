@@ -2,7 +2,7 @@
 <p align="center">
 <img src="./DockBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
 <h1 align="center">DockBattery</h1>
-<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock栏上!<br><a href="./README_en.md">[English Version]</a></h3> 
+<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock或状态栏上!<br><a href="./README_en.md">[English Version]</a></h3> 
 </p>
 
 ## 运行截图
@@ -35,8 +35,8 @@ brew install lihaoyun6/tap/dockbattery
 **3. 为什么某些设备名称前有一个⚠️符号?**
 > 出现这个符号, 说明此设备已经超过十分钟以上没有更新过电量信息, 可能已离线或关闭.
 
-**4. 可以读取没有连接到 WiFi 的 iPhone吗?**  
-> 理论上可以, 将在后续版本中加入相关功能, 敬请期待.  
+**4. 我的 iPhone 没有连接到 WiFi, 可以读取电池信息吗?**  
+> 请安装 DockBattery v1.1.2 或更高版本, 在设置面板中启用 `使用蓝牙发现iDevice` 选项, 并保持设备蓝牙开启即可 ***(此功能仅支持 iPhone 或插卡版 iPad设备!)***  
 
 **5. 为什么 DockBattery 需要使用蓝牙权限?**  
 > DockBattery 需要使用蓝牙来获取周边设备的数据包以解析其电量信息.

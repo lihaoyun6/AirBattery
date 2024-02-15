@@ -91,7 +91,7 @@ struct MultiBatteryView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .colorScheme(darkMode ? .dark : .light)
-                            .foregroundColor(battery1.isCharging ? Color("dark_green") : (darkMode ? .white : .black))
+                            .foregroundColor(battery1.isCharging ? Color("dark_"+getPowerColor(battery1.batteryLevel)) : (darkMode ? .white : .black))
                             .offset(x:0.6, y:0.6)
                             .frame(width: 44, height: 44, alignment: .center)
                             .scaleEffect(0.5)
@@ -136,7 +136,7 @@ struct MultiBatteryView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
-                        .foregroundColor(battery2.isCharging ? Color("dark_green") : (darkMode ? .white : .black))
+                        .foregroundColor(battery2.isCharging ? Color("dark_"+getPowerColor(battery2.batteryLevel)) : (darkMode ? .white : .black))
                         .offset(x:0.6, y:0.6)
                         .frame(width: 44, height: 44, alignment: .center)
                         .scaleEffect(0.5)
@@ -180,7 +180,7 @@ struct MultiBatteryView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
-                        .foregroundColor(battery3.isCharging ? Color("dark_green") : (darkMode ? .white : .black))
+                        .foregroundColor(battery3.isCharging ? Color("dark_"+getPowerColor(battery3.batteryLevel)) : (darkMode ? .white : .black))
                         .offset(x:0.6, y:0.6)
                         .frame(width: 44, height: 44, alignment: .center)
                         .scaleEffect(0.5)
@@ -224,7 +224,7 @@ struct MultiBatteryView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .colorScheme(darkMode ? .dark : .light)
-                        .foregroundColor(battery4.isCharging ? Color("dark_green") : (darkMode ? .white : .black))
+                        .foregroundColor(battery4.isCharging ? Color("dark_"+getPowerColor(battery4.batteryLevel)) : (darkMode ? .white : .black))
                         .offset(x:0.6, y:0.6)
                         .frame(width: 44, height: 44, alignment: .center)
                         .scaleEffect(0.5)
@@ -254,9 +254,16 @@ struct MultiBatteryView: View {
                 batteryList = sliceList(data: list, length: length, count: rollCount)
             }
             while batteryList.count < 4 { batteryList.append("") }
-            if Double(now) - lastTime >= 20 && rollingMode == "on" {
-                lastTime = now
-                rollCount = rollCount + 1
+            if Double(now) - lastTime >= 20 && (rollingMode == "on" || rollingMode == "auto") {
+                if rollingMode == "auto" {
+                    if list.count > 4 {
+                        lastTime = now
+                        rollCount = rollCount + 1
+                    }
+                } else {
+                    lastTime = now
+                    rollCount = rollCount + 1
+                }
             }
             if ibStatus.hasBattery && showThisMac != "hidden" { batteryList.insert("@MacInternalBattery", at: 0) }
             battery1 = getIbByID(id: batteryList[0])

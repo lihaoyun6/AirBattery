@@ -237,6 +237,8 @@ func getIbByID(id: String = "@MacInternalBattery") -> iBattery {
 
 func getDeviceIcon(_ d: Device) -> NSImage? {
     switch d.deviceType {
+    case "general_bt":
+        return NSImage(named: "bluetooth.fill")
     case "iPhone":
         if let model = d.deviceModel, let m = model.components(separatedBy: ",").first, let id = m.components(separatedBy: "e").last {
             if (Int(id) ?? 0 > 9) && !["iPhone12,8", "iPhone14,6"].contains(model) { return NSImage(systemSymbolName: "iphone" , accessibilityDescription: nil) }

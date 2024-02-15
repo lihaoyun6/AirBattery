@@ -9,7 +9,7 @@
 "Battery" = "仅电量";
 "Dashboard" = "仪表盘";
 "Appearance" = "图标主题";
-"Automatic" = "自动切换";
+"Automatic" = "自动选择";
 "Light" = "浅色";
 "Dark" = "深色";
 "See My Location" = "查看当前定位";
@@ -41,5 +41,6 @@
 "Status Bar" = "状态栏";
 "Both" = "同时";
 "Scrolling Mode" = "轮换显示";
-"Enabled" = "启用轮换";
-"Disabled" = "关闭轮换";
+"On" = "启用";
+"Off" = "关闭";
+"iDevice over BLE (Beta)" = "使用蓝牙发现iDevice (实验性)";

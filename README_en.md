@@ -2,7 +2,7 @@
 <p align="center">
 <img src="./DockBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
 <h1 align="center">DockBattery</h1>
-<h3 align="center">Get battery info of all your devices on Mac and display it on the Dock!<br><a href="./README.md">[中文版本]</a></h3> 
+<h3 align="center">Get battery info of all your devices on Mac and show it on the Dock or StatusBar!<br><a href="./README.md">[中文版本]</a></h3> 
 </p>
 
 ## Screenshots
@@ -34,8 +34,8 @@ brew install lihaoyun6/tap/dockbattery
 **3. Why do some device name have a ⚠️ symbol?**
 > If this symbol appears, it means that the device has not updated its battery information for more than ten minutes, and may be offline or turned off.  
 
-**4. Can it read the battery of an iPhone not connected to Wi-Fi?**
-> In theory, yes. Related functionality will be added in future versions, stay tuned.  
+**4. My iPhone is not connected to WiFi, can I get the battery info?**
+> Please install DockBattery v1.1.2 or higher, enable the `iDevices over BLE` in the preferences, and keep the device's Bluetooth turned on ***(Only supports iPhone or cellular iPad!)***  
 
 **5. Why does DockBattery need Bluetooth permission?**
 > DockBattery needs Bluetooth to capture packets from peripheral devices in order to parse their battery information.  

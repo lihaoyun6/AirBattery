@@ -13,8 +13,9 @@ struct SettingsView: View {
     @AppStorage("weatherMode") var weatherMode = "off"
     @AppStorage("timeLeft") var timeLeft = "false"
     @AppStorage("showOn") var showOn = "dock"
-    @AppStorage("rollingMode") var rollingMode = "off"
     @AppStorage("showThisMac") var showThisMac = "icon"
+    @AppStorage("rollingMode") var rollingMode = "off"
+    @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
     @AppStorage("multiInfoMainBattery") var multiInfoMainBattery:String = "@MacInternalBattery"
     @ObservedObject var locationManager = LocationManagerSingleton.shared
     @State var devices:[String] = []
@@ -99,8 +100,9 @@ struct SettingsView: View {
                     Text("Scrolling Mode")
                         .font(.system(size: 10, weight: .medium))
                     Picker("", selection: $rollingMode) {
-                        Text("Enabled").tag("on")
-                        Text("Disabled").tag("off")
+                        Text("Automatic").tag("auto")
+                        Text("On").tag("on")
+                        Text("Off").tag("off")
                     }
                     .font(.system(size: 10, weight: .medium))
                     .pickerStyle(.radioGroup)
@@ -137,9 +139,19 @@ struct SettingsView: View {
                 .font(.system(size: 10, weight: .medium))
                 .pickerStyle(.radioGroup)
                 .horizontalRadioGroupLayout()
+                Divider()
+                Text("iDevice over BLE (Beta)")
+                    .font(.system(size: 10, weight: .medium))
+                Picker("", selection: $ideviceOverBLE) {
+                    Text("On").tag(true)
+                    Text("Off").tag(false)
+                }
+                .font(.system(size: 10, weight: .medium))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
             }
             .padding(.bottom)
-            .frame(width: 230, height: 230)
+            .frame(width: 230, height: 270)
         }
         .onAppear{ devices = AirBatteryModel.getAllName() }
         .onReceive(themeTimer) { _ in devices = AirBatteryModel.getAllName() }

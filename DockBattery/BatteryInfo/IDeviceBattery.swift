@@ -31,7 +31,7 @@ class IDeviceBattery {
         }
         for id in usbDevices {
             if let d = AirBatteryModel.getByID(id) {
-                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 { writeBatteryInfo(id, "") }
+                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 50 { writeBatteryInfo(id, "") }
             } else {
                 writeBatteryInfo(id, "")
             }
@@ -39,7 +39,7 @@ class IDeviceBattery {
         for id in netDevices {
             //print("[\(id)] \(Date().timeIntervalSince1970)")
             if let d = AirBatteryModel.getByID(id) {
-                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 { writeBatteryInfo(id, "-n") }
+                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 50 { writeBatteryInfo(id, "-n") }
             } else {
                 //print("√[\(id)] \(Date().timeIntervalSince1970)")
                 writeBatteryInfo(id, "-n")
@@ -72,7 +72,7 @@ class IDeviceBattery {
                             }
                         }
                         if !iwatchs.isEmpty { idevice.subDevices = iwatchs }
-                        AirBatteryModel.updateIdevices(idevice)
+                        AirBatteryModel.updateIdevices(byName: true, idevice)
                     }
                 }
             }

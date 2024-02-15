@@ -145,6 +145,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for d in AirBatteryModel.btDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
+            if timePast >= 30 { continue }
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
             let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
@@ -162,6 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for d in AirBatteryModel.bleDevices + AirBatteryModel.iDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
+            if timePast >= 30 { continue }
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
             let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
@@ -197,7 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(withTitle:"About DockBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
         if !fromDock {
             menu.addItem(NSMenuItem.separator())
-            menu.addItem(withTitle:"Quit DockBattery".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+            menu.addItem(withTitle:"Quit DockBattery".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         }
     }
     

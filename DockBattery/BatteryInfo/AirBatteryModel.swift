@@ -24,38 +24,40 @@ class AirBatteryModel {
     static var btDevices: [Device] = []
     static var bleDevices: [Device] = []
     
-    static func updateIdevices(_ device: Device) {
-        if let index = self.iDevices.firstIndex(where: { $0.deviceID == device.deviceID }) {
-            self.iDevices[index] = device
+    static func updateIdevices(byName: Bool = false, _ device: Device) {
+        if byName {
+            if let index = self.iDevices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.iDevices[index] = device } else { self.iDevices.append(device) }
         } else {
-            self.iDevices.append(device)
+            if let index = self.iDevices.firstIndex(where: { $0.deviceID == device.deviceID }) { self.iDevices[index] = device } else { self.iDevices.append(device) }
         }
     }
     
-    static func updateBTdevices(_ device: Device) {
-        if let index = self.btDevices.firstIndex(where: { $0.deviceID == device.deviceID }) {
-            self.btDevices[index] = device
+    static func updateBTdevices(byName: Bool = false, _ device: Device) {
+        if byName {
+            if let index = self.btDevices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.btDevices[index] = device } else { self.btDevices.append(device) }
         } else {
-            self.btDevices.append(device)
+            if let index = self.btDevices.firstIndex(where: { $0.deviceID == device.deviceID }) { self.btDevices[index] = device } else { self.btDevices.append(device) }
         }
     }
     
-    static func updateBLEdevice(by: String = "name", _ device: Device) {
-        if by == "name" {
+    static func updateBLEdevice(byName: Bool = false, _ device: Device) {
+        if byName  {
             if let index = self.bleDevices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.bleDevices[index] = device } else { self.bleDevices.append(device) }
-        }
-        if by == "id" {
+        } else {
             if let index = self.bleDevices.firstIndex(where: { $0.deviceID == device.deviceID }) { self.bleDevices[index] = device } else { self.bleDevices.append(device) }
         }
     }
     
     static func getAll() -> [Device] {
-        return bleDevices + iDevices + btDevices
+        let now = Date().timeIntervalSince1970
+        var list:[Device] = []
+        for d in bleDevices + iDevices + btDevices { if Double(now) - d.lastUpdate < 1800 { list.append(d) } }
+        return list
     }
     
     static func getAllName() -> [String] {
         var list: [String] = []
-        for b in bleDevices + iDevices + btDevices {
+        for b in getAll() {
             list.append(b.deviceName)
             if let sub = b.subDevices {
                 for s in sub {
@@ -68,7 +70,7 @@ class AirBatteryModel {
     
     static func getAllID() -> [String] {
         var list: [String] = []
-        for b in bleDevices + iDevices + btDevices {
+        for b in getAll() {
             list.append(b.deviceID)
             if let sub = b.subDevices {
                 for s in sub {
@@ -80,7 +82,7 @@ class AirBatteryModel {
     }
     
     static func getByName(_ name: String) -> Device? {
-        for d in bleDevices + iDevices + btDevices {
+        for d in getAll() {
             if d.deviceName == name { return d }
             if let sub = d.subDevices { for s in sub { if s.deviceName == name { return s } } }
         }
@@ -88,7 +90,7 @@ class AirBatteryModel {
     }
     
     static func getByID(_ id: String) -> Device? {
-        for d in bleDevices + iDevices + btDevices {
+        for d in getAll() {
             if d.deviceID == id { return d }
             if let sub = d.subDevices { for s in sub { if s.deviceID == id { return s } } }
         }
