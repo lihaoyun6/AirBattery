@@ -47,6 +47,7 @@ struct InitView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         //BatteryView()
+        MultiBatteryView()
         MultiInfoView(fromDock: false)
         SettingsView()
     }

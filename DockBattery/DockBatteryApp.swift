@@ -26,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //@AppStorage("forceWeather") var forceWeather = false
     @AppStorage("machineName") var machineName = "Mac"
     @AppStorage("showOn") var showOn = "dock"
+    @AppStorage("disappearTime") var disappearTime = 20
     
     var statusBarItem: NSStatusItem!
     var menu: NSMenu = NSMenu()
@@ -145,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for d in AirBatteryModel.btDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
-            if timePast >= 30 { continue }
+            if timePast >= disappearTime && disappearTime != 999 { continue }
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
             let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
@@ -163,7 +164,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for d in AirBatteryModel.bleDevices + AirBatteryModel.iDevices {
             //if now - d.lastUpdate > 600 { continue }
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
-            if timePast >= 30 { continue }
+            if timePast >= disappearTime && disappearTime != 999 { continue }
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
             let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: #selector(blank), keyEquivalent: "")
             let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")

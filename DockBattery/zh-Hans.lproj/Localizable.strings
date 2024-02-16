@@ -43,4 +43,9 @@
 "Scrolling Mode" = "轮换显示";
 "On" = "启用";
 "Off" = "关闭";
-"iDevice over BLE (Beta)" = "使用蓝牙发现iDevice (实验性)";
+"(Beta) iDevice over BLE (IOB)" = "(实验性) 通过蓝牙发现 iDevice 设备";
+"(Beta) Charging Status of IOB" = "(实验性) 推测蓝牙 iDevice 充电状态";
+"min" = "分钟";
+"Guess" = "推测";
+"Remove Offline Device" = "移除离线设备";
+"Never" = "永不";

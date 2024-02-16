@@ -87,6 +87,7 @@ import CoreBluetooth
 
 class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
+    @AppStorage("cStatusOfIOB") var cStatusOfIOB = false
     var centralManager: CBCentralManager!
     var peripherals: [CBPeripheral?] = []
     var hotspotDevices: [String:UInt8] = [:]
@@ -320,7 +321,7 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 if let deviceName = peripheral.name{
                     let now = Date().timeIntervalSince1970
                     var charging = -1
-                    if let lastLevel = hotspotDevices[deviceName] {
+                    if let lastLevel = hotspotDevices[deviceName], cStatusOfIOB {
                         //print(lastLevel, data[0])
                         if data[0] > lastLevel { charging = 1 }
                         if data[0] < lastLevel { charging = 0 }

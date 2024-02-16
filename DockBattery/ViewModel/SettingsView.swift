@@ -16,6 +16,8 @@ struct SettingsView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
     @AppStorage("rollingMode") var rollingMode = "off"
     @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
+    @AppStorage("cStatusOfIOB") var cStatusOfIOB = false
+    @AppStorage("disappearTime") var disappearTime = 20
     @AppStorage("multiInfoMainBattery") var multiInfoMainBattery:String = "@MacInternalBattery"
     @ObservedObject var locationManager = LocationManagerSingleton.shared
     @State var devices:[String] = []
@@ -24,101 +26,107 @@ struct SettingsView: View {
     var city: String { locationManager.locationCity }
     
     var body: some View {
-        VStack{
-            Text("Location: ".local + (city != "" ? city : location))
-                .foregroundColor(.gray)
-                .font(.system(size: 8, weight: .medium))
-                .offset(y:12)
-            ZStack{
-                RoundedRectangle(cornerRadius: 8.0)
-                //.stroke(lineWidth: 1)
-                    .fill(.gray)
-                    .opacity(0.05)
-                    .frame(width: 170, height: 110)
-                RoundedRectangle(cornerRadius: 8.0)
-                    .stroke(lineWidth: 1)
-                    .fill(.gray)
-                    .opacity(0.15)
-                    .frame(width: 170, height: 110)
-                VStack{
-                    Text("Display Mode")
-                        .font(.system(size: 20, weight: .medium))
-                        .offset(y: 2)
-                    HStack(spacing: 19){
-                        VStack(spacing: 0){
-                            MultiBatteryView()
-                                .opacity(dockTheme == "battery" ? 1.0 : 0.3)
-                                .onTapGesture { dockTheme = "battery" }
-                            Text("Battery")
-                                .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(dockTheme == "battery" ? .blue : .gray)
-                                .frame(width: 110)
-                        }
-                        Divider()
-                            .frame(height: 150)
-                            .offset(y:4)
-                        VStack(spacing: 0){
-                            MultiInfoView(fromDock: false)
-                                .opacity(dockTheme == "multinfo" ? 1.0 : 0.3)
-                                .onTapGesture { dockTheme = "multinfo" }
-                            Text("Dashboard")
-                                .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(dockTheme == "battery" ? .gray : .blue)
-                                .frame(width: 110)
-                        }
-                    }
-                    .offset(y:-4)
-                }
-                .scaleEffect(0.5)
-                .frame(width: 230, height: 110)
-            }.padding(.top)
+        HStack{
             VStack(spacing: 10){
-                if dockTheme == "multinfo" {
-                    Text("Weather")
-                        .font(.system(size: 10, weight: .medium))
-                    Picker("", selection: $weatherMode) {
-                        Text("Hidden").tag("off")
-                        Text("Use °C").tag("c")
-                        Text("Use °F").tag("f")
-                    }
-                    .font(.system(size: 10, weight: .medium))
-                    .pickerStyle(.radioGroup)
-                    .horizontalRadioGroupLayout()
-                    Text("Battery on Dock")
-                        .font(.system(size: 10, weight: .medium))
-                    Picker("", selection: $multiInfoMainBattery) {
-                        Text("This Mac").tag("@MacInternalBattery")
-                        ForEach(devices.indices, id: \.self) { index in
-                            Text(devices[index]).tag(devices[index])
+                Text("Location: ".local + (city != "" ? city : location))
+                    .foregroundColor(.gray)
+                    .font(.system(size: 8, weight: .medium))
+                    //.offset(y:12)
+                ZStack{
+                    RoundedRectangle(cornerRadius: 8.0)
+                    //.stroke(lineWidth: 1)
+                        .fill(.gray)
+                        .opacity(0.05)
+                        .frame(width: 170, height: 110)
+                    RoundedRectangle(cornerRadius: 8.0)
+                        .stroke(lineWidth: 1)
+                        .fill(.gray)
+                        .opacity(0.15)
+                        .frame(width: 170, height: 110)
+                    VStack{
+                        Text("Display Mode")
+                            .font(.system(size: 20, weight: .medium))
+                            .offset(y: 2)
+                        HStack(spacing: 19){
+                            VStack(spacing: 0){
+                                MultiBatteryView()
+                                    .opacity(dockTheme == "battery" ? 1.0 : 0.3)
+                                    .onTapGesture { dockTheme = "battery" }
+                                Text("Battery")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(dockTheme == "battery" ? .blue : .gray)
+                                    .frame(width: 110)
+                            }
+                            Divider()
+                                .frame(height: 150)
+                                .offset(y:4)
+                            VStack(spacing: 0){
+                                MultiInfoView(fromDock: false)
+                                    .opacity(dockTheme == "multinfo" ? 1.0 : 0.3)
+                                    .onTapGesture { dockTheme = "multinfo" }
+                                Text("Dashboard")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(dockTheme == "battery" ? .gray : .blue)
+                                    .frame(width: 110)
+                            }
                         }
+                        .offset(y:-4)
                     }
-                    .frame(width: 180)
-                    .font(.system(size: 10, weight: .medium))
-                    .pickerStyle(MenuPickerStyle())
-                    //.horizontalRadioGroupLayout()
-                } else if dockTheme == "battery" {
-                    Text("Scrolling Mode")
+                    .scaleEffect(0.5)
+                    .frame(width: 220, height: 110)
+                }//.padding(.top)
+                Spacer().frame(height: 3.4)
+                VStack(spacing: 10){
+                    if dockTheme == "multinfo" {
+                        Text("Weather")
+                            .font(.system(size: 10, weight: .medium))
+                        Picker("", selection: $weatherMode) {
+                            Text("Hidden").tag("off")
+                            Text("Use °C").tag("c")
+                            Text("Use °F").tag("f")
+                        }
                         .font(.system(size: 10, weight: .medium))
-                    Picker("", selection: $rollingMode) {
-                        Text("Automatic").tag("auto")
-                        Text("On").tag("on")
-                        Text("Off").tag("off")
-                    }
-                    .font(.system(size: 10, weight: .medium))
-                    .pickerStyle(.radioGroup)
-                    .horizontalRadioGroupLayout()
-                    Text("Show This Mac")
+                        .pickerStyle(.radioGroup)
+                        .horizontalRadioGroupLayout()
+                        Text("Battery on Dock")
+                            .font(.system(size: 10, weight: .medium))
+                        Picker("", selection: $multiInfoMainBattery) {
+                            Text("This Mac").tag("@MacInternalBattery")
+                            ForEach(devices.indices, id: \.self) { index in
+                                Text(devices[index]).tag(devices[index])
+                            }
+                        }
+                        .frame(width: 180)
                         .font(.system(size: 10, weight: .medium))
-                    Picker("", selection: $showThisMac) {
-                        Text("Icon").tag("icon")
-                        Text("Percent").tag("percent")
-                        Text("Hidden").tag("hidden")
+                        .pickerStyle(MenuPickerStyle())
+                        //.horizontalRadioGroupLayout()
+                    } else if dockTheme == "battery" {
+                        Text("Scrolling Mode")
+                            .font(.system(size: 10, weight: .medium))
+                        Picker("", selection: $rollingMode) {
+                            Text("Automatic").tag("auto")
+                            Text("On").tag("on")
+                            Text("Off").tag("off")
+                        }
+                        .font(.system(size: 10, weight: .medium))
+                        .pickerStyle(.radioGroup)
+                        .horizontalRadioGroupLayout()
+                        Text("Show This Mac")
+                            .font(.system(size: 10, weight: .medium))
+                        Picker("", selection: $showThisMac) {
+                            Text("Icon").tag("icon")
+                            Text("Percent").tag("percent")
+                            Text("Hidden").tag("hidden")
+                        }
+                        .font(.system(size: 10, weight: .medium))
+                        .pickerStyle(.radioGroup)
+                        .horizontalRadioGroupLayout()
                     }
-                    .font(.system(size: 10, weight: .medium))
-                    .pickerStyle(.radioGroup)
-                    .horizontalRadioGroupLayout()
                 }
-                Divider()
+                .frame(width: 220)
+            }.offset(y:-5)
+            Divider()
+            VStack(spacing: 10){
                 Text("Appearance")
                     .font(.system(size: 10, weight: .medium))
                 Picker("", selection: $appearance) {
@@ -139,8 +147,18 @@ struct SettingsView: View {
                 .font(.system(size: 10, weight: .medium))
                 .pickerStyle(.radioGroup)
                 .horizontalRadioGroupLayout()
-                Divider()
-                Text("iDevice over BLE (Beta)")
+                Text("Remove Offline Device")
+                    .font(.system(size: 10, weight: .medium))
+                Picker("", selection: $disappearTime) {
+                    Text("20"+"min".local).tag(20)
+                    Text("40"+"min".local).tag(40)
+                    Text("Never").tag(999)
+                }
+                .font(.system(size: 10, weight: .medium))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
+                //Spacer().frame(height: 4)
+                Text("(Beta) iDevice over BLE (IOB)")
                     .font(.system(size: 10, weight: .medium))
                 Picker("", selection: $ideviceOverBLE) {
                     Text("On").tag(true)
@@ -149,10 +167,22 @@ struct SettingsView: View {
                 .font(.system(size: 10, weight: .medium))
                 .pickerStyle(.radioGroup)
                 .horizontalRadioGroupLayout()
+                Text("(Beta) Charging Status of IOB")
+                    .font(.system(size: 10, weight: .medium))
+                Picker("", selection: $cStatusOfIOB) {
+                    Text("Guess").tag(true)
+                    Text("Off").tag(false)
+                }
+                .disabled(!ideviceOverBLE)
+                .font(.system(size: 10, weight: .medium))
+                .pickerStyle(.radioGroup)
+                .horizontalRadioGroupLayout()
             }
-            .padding(.bottom)
-            .frame(width: 230, height: 270)
+            .frame(width: 220)
+            //.padding(.bottom)
+            
         }
+        .frame(width: 470, height: 270)
         .onAppear{ devices = AirBatteryModel.getAllName() }
         .onReceive(themeTimer) { _ in devices = AirBatteryModel.getAllName() }
     }
