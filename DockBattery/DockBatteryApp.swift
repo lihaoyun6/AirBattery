@@ -48,7 +48,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.delegate = self
         statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
         statusBarItem.menu = menu
-        if let button = statusBarItem.button { button.image = NSImage(named: "menuItem") }
+        if let button = statusBarItem.button {
+            button.image = NSImage(named: "menuItem")
+        }
         if showOn == "dock" { statusBarItem.isVisible = false }
         
         NSApp.dockTile.contentView = NSHostingView(rootView: InitView(statusBarItem: statusBarItem))
@@ -133,6 +135,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             menu.addItem(main)
             menu.addItem(alte)
+        } else {
+            menu.addItem(withTitle: machineName, action: #selector(blank), keyEquivalent: "")
         }
         menu.addItem(NSMenuItem.separator())
         /*menu.addItem(withTitle:batteryText, action: nil, keyEquivalent: "")

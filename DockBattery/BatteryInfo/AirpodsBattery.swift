@@ -213,27 +213,27 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     rightLevel = (rightLevel ^ 128) & rightLevel
                 }else{ rightLevel = getLevel(deviceName, "Right") }
                 
-                if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: "AirPods Pro 2", batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: lastUpdate)) }
-                if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: "AirPods Pro 2", batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: lastUpdate)) }
+                if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: "Airpods Pro 2", batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: lastUpdate)) }
+                if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: "Airpods Pro 2", batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: lastUpdate)) }
                 if leftLevel != 255 && rightLevel != 255 {
                     if (abs(Int(leftLevel) - Int(rightLevel)) < 3) && (leftCharging == rightCharging) {
-                        subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: "AirPods Pro 2", batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: lastUpdate)]
+                        subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: "Airpods Pro 2", batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: lastUpdate)]
                     }
                 }
-                var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: "AirPods Pro 2", batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: lastUpdate)
+                var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: "Airpods Pro 2", batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: lastUpdate)
                 if let d = AirBatteryModel.getByName(deviceName + " (Case)".local) {
                     mainDevice = d
                     mainDevice.deviceID = deviceID
                     mainDevice.deviceType = "ap_case"
                     mainDevice.deviceName = deviceName + " (Case)".local
-                    mainDevice.deviceModel = "AirPods Pro 2"
+                    mainDevice.deviceModel = "Airpods Pro 2"
                     mainDevice.batteryLevel = Int(caseLevel)
                     mainDevice.isCharging = caseCharging
                     mainDevice.lastUpdate = lastUpdate
                 }
                 mainDevice.subDevices = subDevice
-                //print("合盖消息 [\(Date().timeIntervalSince1970)]: \(data.hexEncodedString())")
-                AirBatteryModel.updateBLEdevice(mainDevice)
+                //print("合盖消息 [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
+                AirBatteryModel.updateBLEdevice(byName: true, mainDevice)
             }
         }
         
@@ -253,6 +253,7 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     caseCharging = caseLevel > 100 ? 1 : 0
                     caseLevel = (caseLevel ^ 128) & caseLevel
                 }else{ caseLevel = getLevel(deviceName, "Case") }
+                if caseLevel == 255 { return }
                 
                 var leftLevel = data[14]
                 var leftCharging = 0
@@ -287,8 +288,8 @@ class AirpodsBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     mainDevice.lastUpdate = lastUpdate
                 }
                 mainDevice.subDevices = subDevice
-                //print("开盖消息 [\(Date().timeIntervalSince1970)]: \(data.hexEncodedString())")
-                AirBatteryModel.updateBLEdevice(mainDevice)
+                //print("开盖消息 [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
+                AirBatteryModel.updateBLEdevice(byName: true, mainDevice)
             }
         }
     }

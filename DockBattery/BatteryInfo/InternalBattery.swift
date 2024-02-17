@@ -9,6 +9,9 @@ import Foundation
 import IOKit.ps
 
 func getPowerState() -> iBattery {
+    if !getMachineName().lowercased().contains("book") {
+        return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0)
+    }
     let internalFinder = InternalFinder()
     if let internalBattery = internalFinder.getInternalBattery() {
         let level = internalBattery.currentCapacity ?? 0

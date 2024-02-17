@@ -49,7 +49,7 @@ class AirBatteryModel {
     }
     
     static func getAll() -> [Device] {
-        let disappearTime = UserDefaults.standard.integer(forKey: "disappearTime")
+        let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
         let now = Double(Date().timeIntervalSince1970)
         //var list:[Device] = []
         //for d in bleDevices + iDevices + btDevices { if Double(now) - d.lastUpdate < 1800 { list.append(d) } }
