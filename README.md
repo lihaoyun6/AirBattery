@@ -1,8 +1,8 @@
 # 
 <p align="center">
-<img src="./DockBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
-<h1 align="center">DockBattery</h1>
-<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock或状态栏上!<br><a href="./README_en.md">[English Version]</a></h3> 
+<img src="./AirBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
+<h1 align="center">AirBattery</h1>
+<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock栏、状态栏上或小组件上!<br><a href="./README_en.md">[English Version]</a></h3> 
 </p>
 
 ## 运行截图
@@ -15,34 +15,31 @@
 可[点此前往](../../releases/latest)下载最新版安装文件. 或使用homebrew安装:  
 
 ```bash
-brew install lihaoyun6/tap/dockbattery
+brew install lihaoyun6/tap/airbattery
 ```
 
 ### 使用:
-- DockBattery启动后会常驻Dock栏, 使用过程中不再产生其他窗口.  
-- 无需任何配置, DockBattery启动后会自动搜索所有支持隔空电量获取的设备,  
-- 您可以右键单击Dock图标来显示有线, 附近或同一局域网中您其他设备的电量.  
-- 在偏好设置中, 您还可以切换Dock图标主题, 以显示更多符合您需求的信息.  
-- 展开右键菜单后, 按住 <kbd>Option</kbd> 键可以显示每个设备最后一次更新电量的时间.
+- AirBattery 启动后默认同时显示在 Dock 栏和状态栏上, 也可以只显示其中之一.  
+- 无需任何手动配置, AirBattery 启动后会自动搜索所有支持隔空电量获取的设备. 
+- 右键单击 Dock 图标、左键单击状态栏图标、或添加小组件查看周边设备的电量. 
+- 您还可以在偏好设置中将状态栏图标更改为实时电量显示, 就像系统自带的那样.  
+- 如有需要, 可以在 Dock 栏菜单或状态栏菜单中隐藏某些设备, 亦可随时解除隐藏.  
 
 ## 常见问题
 **1. 为什么我的 iPhone/iPad 并没有显示?**  
-> 请确保 iPhone/iPad 已信任此 Mac ***(且至少在 DockBattery 运行状态下使用数据线连接 Mac 一次以进行配对)***. 之后只需确保其与 Mac 处于同一局域网中即可.  
+> 请确保 iPhone/iPad 已信任此 Mac ***(且至少在 AirBattery 运行状态下使用数据线连接 Mac 一次以进行配对)***. 之后只需确保其与 Mac 处于同一局域网中即可.  
 
 **2. 我的 Apple Watch 也需要进行预连接吗?**  
-> 不需要, 一旦 DockBattery 检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息.
+> 不需要, 一旦 AirBattery 检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息.
 
 **3. 为什么某些设备名称前有一个⚠️符号?**
 > 出现这个符号, 说明此设备已经超过十分钟以上没有更新过电量信息, 可能已离线或关闭.
 
 **4. 我的 iPhone 没有连接到 WiFi, 可以读取电池信息吗?**  
-> 请安装 DockBattery v1.1.2 或更高版本, 在设置面板中启用 `使用蓝牙发现iDevice` 选项, 并保持设备蓝牙开启即可 ***(此功能仅支持 iPhone 或插卡版 iPad设备!)***  
+> 请安装 AirBattery v1.1.2 或更高版本, 在设置面板中启用 `通过蓝牙发现 iPhone / iPad` 选项, 并保持设备蓝牙开启即可 ***(此功能仅支持 iPhone 或插卡版 iPad设备!)***  
 
-**5. 为什么 DockBattery 需要使用蓝牙权限?**  
-> DockBattery 需要使用蓝牙来获取周边设备的数据包以解析其电量信息.
-
-**6. 为什么 DockBattery 需要使用定位权限?**  
-> 在 DockBattery 的"仪表盘"视图模式中支持显示当地天气, 此功能需要获取用户位置以正常工作.  
+**5. 为什么 AirBattery 需要使用蓝牙权限?**  
+> AirBattery 需要使用蓝牙来获取周边设备的数据包以解析其电量信息.  
 
 ## 致谢
 [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) @libimobiledevice  
