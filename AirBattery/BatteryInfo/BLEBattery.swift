@@ -141,143 +141,31 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        //获取非Apple的普通BLE设备数据
-        if let deviceName = peripheral.name, let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, ![16, 12].contains(data[2]), data[0] != 76, readBLEDevice {
-            if let device = AirBatteryModel.getByName(deviceName) {
-                if Double(Date().timeIntervalSince1970) - device.lastUpdate > 60 {
-                    self.peripherals.append(peripheral)
-                    self.centralManager.connect(peripheral, options: nil)
+        var get = false
+        let now = Double(Date().timeIntervalSince1970)
+        if let deviceName = peripheral.name, let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count > 0 {
+            if data[0] != 76 {
+                //获取非Apple的普通BLE设备数据
+                if readBLEDevice {
+                    if let device = AirBatteryModel.getByName(deviceName) {
+                        if now - device.lastUpdate > 60 { get = true } } else { get = true }
                 }
-             } else {
-                 self.peripherals.append(peripheral)
-                 self.centralManager.connect(peripheral, options: nil)
-             }
-        }
-        
-        //获取ios个人热点广播数据
-        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, [16, 12].contains(data[2]), let deviceName = peripheral.name, !otherAppleDevices.contains(deviceName), ideviceOverBLE {
-            if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel {
-                if Double(Date().timeIntervalSince1970) - device.lastUpdate > 60 {
-                    //print("old device \(deviceName)")
-                    self.peripherals.append(peripheral)
-                    self.centralManager.connect(peripheral, options: nil)
-                }
-             } else {
-                 //print("new device \(deviceName)")
-                 self.peripherals.append(peripheral)
-                 self.centralManager.connect(peripheral, options: nil)
-             }
-        }
-        
-        //获取Airpods合盖状态消息
-        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count == 25, data[0] == 76, let deviceName = peripheral.name, readAirpods{
-            if data[2] == 18 {
-                let deviceID = peripheral.identifier.uuidString
-                let lastUpdate = Date().timeIntervalSince1970
-                var subDevice:[Device] = []
-                
-                if let d = AirBatteryModel.getByName(deviceName + " (Case)"), (Double(lastUpdate) - d.lastUpdate) < 1 { return }
-                
-                var caseLevel = data[12]
-                var caseCharging = 0
-                if caseLevel != 255 {
-                    caseCharging = caseLevel > 100 ? 1 : 0
-                    caseLevel = (caseLevel ^ 128) & caseLevel
-                }else{ caseLevel = getLevel(deviceName, "Case") }
-                
-                var leftLevel = data[13]
-                var leftCharging = 0
-                if leftLevel != 255 {
-                    leftCharging = leftLevel > 100 ? 1 : 0
-                    leftLevel = (leftLevel ^ 128) & leftLevel
-                }else{ leftLevel = getLevel(deviceName, "Left") }
-                
-                var rightLevel = data[14]
-                var rightCharging = 0
-                if rightLevel != 255 {
-                    rightCharging = rightLevel > 100 ? 1 : 0
-                    rightLevel = (rightLevel ^ 128) & rightLevel
-                }else{ rightLevel = getLevel(deviceName, "Right") }
-                
-                if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: "Airpods Pro 2", batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: lastUpdate)) }
-                if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: "Airpods Pro 2", batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: lastUpdate)) }
-                if leftLevel != 255 && rightLevel != 255 {
-                    if (abs(Int(leftLevel) - Int(rightLevel)) < 3) && (leftCharging == rightCharging) {
-                        subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: "Airpods Pro 2", batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: lastUpdate)]
+            } else {
+                if data.count > 2 {
+                    //获取ios个人热点广播数据
+                    if [16, 12].contains(data[2]) && !otherAppleDevices.contains(deviceName) && ideviceOverBLE {
+                        if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 { get = true } } else { get = true }
                     }
+                    //获取Airpods合盖状态消息
+                    if data.count == 25 && data[2] == 18 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "close") }
+                    //获取Airpods开盖状态消息
+                    if data.count == 29 && data[2] == 7 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "open") }
                 }
-                var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: "Airpods Pro 2", batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: lastUpdate)
-                if let d = AirBatteryModel.getByName(deviceName + " (Case)".local) {
-                    mainDevice = d
-                    mainDevice.deviceID = deviceID
-                    mainDevice.deviceType = "ap_case"
-                    mainDevice.deviceName = deviceName + " (Case)".local
-                    mainDevice.deviceModel = "Airpods Pro 2"
-                    mainDevice.batteryLevel = Int(caseLevel)
-                    mainDevice.isCharging = caseCharging
-                    mainDevice.lastUpdate = lastUpdate
-                }
-                mainDevice.subDevices = subDevice
-                //print("合盖消息 [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
-                AirBatteryModel.updateDevices(mainDevice)
             }
         }
-        
-        //获取Airpods开盖状态消息
-        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count == 29, data[0] == 76, let deviceName = peripheral.name, readAirpods{
-            if data[2] == 7 {
-                let deviceID = peripheral.identifier.uuidString
-                let lastUpdate = Date().timeIntervalSince1970
-                var subDevice:[Device] = []
-                
-                if let d = AirBatteryModel.getByName(deviceName + " (Case)"), (Double(lastUpdate) - d.lastUpdate) < 1 { return }
-                
-                let model = getHeadphoneModel(String(format: "%02x%02x", data[5], data[6]))
-                
-                var caseLevel = data[16]
-                var caseCharging = 0
-                if caseLevel != 255 {
-                    caseCharging = caseLevel > 100 ? 1 : 0
-                    caseLevel = (caseLevel ^ 128) & caseLevel
-                }else{ caseLevel = getLevel(deviceName, "Case") }
-                if caseLevel == 255 { return }
-                
-                var leftLevel = data[14]
-                var leftCharging = 0
-                if leftLevel != 255 {
-                    leftCharging = leftLevel > 100 ? 1 : 0
-                    leftLevel = (leftLevel ^ 128) & leftLevel
-                }else{ leftLevel = getLevel(deviceName, "Left") }
-                
-                var rightLevel = data[15]
-                var rightCharging = 0
-                if rightLevel != 255 {
-                    rightCharging = rightLevel > 100 ? 1 : 0
-                    rightLevel = (rightLevel ^ 128) & rightLevel
-                }else{ rightLevel = getLevel(deviceName, "Right") }
-                
-                if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: model, batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: lastUpdate)) }
-                if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: lastUpdate)) }
-                if leftLevel != 255 && rightLevel != 255 {
-                    if (abs(Int(leftLevel) - Int(rightLevel)) < 3) && (leftCharging == rightCharging) {
-                        subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: model, batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: lastUpdate)]
-                    }
-                }
-                var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: lastUpdate)
-                if let d = AirBatteryModel.getByName(deviceName + " (Case)".local) {
-                    mainDevice = d
-                    mainDevice.deviceID = deviceID
-                    mainDevice.deviceType = "ap_case"
-                    mainDevice.deviceName = deviceName + " (Case)".local
-                    mainDevice.deviceModel = model
-                    mainDevice.batteryLevel = Int(caseLevel)
-                    mainDevice.isCharging = caseCharging
-                    mainDevice.lastUpdate = lastUpdate
-                }
-                mainDevice.subDevices = subDevice
-                //print("开盖消息 [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
-                AirBatteryModel.updateDevices(mainDevice)
-            }
+        if get {
+            self.peripherals.append(peripheral)
+            self.centralManager.connect(peripheral, options: nil)
         }
     }
     
@@ -390,6 +278,63 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         }
         return "general_bt"
+    }
+    
+    func getAirpods(peripheral: CBPeripheral, data: Data, messageType: String) {
+        if let deviceName = peripheral.name{
+            let now = Date().timeIntervalSince1970
+            if let d = AirBatteryModel.getByName(deviceName + " (Case)"), (Double(now) - d.lastUpdate) < 1 { return }
+            
+            var subDevice:[Device] = []
+            let deviceID = peripheral.identifier.uuidString
+            let model = (messageType == "open" ? getHeadphoneModel(String(format: "%02x%02x", data[5], data[6])) : "Airpods Pro 2")
+            
+            var caseLevel = data[messageType == "open" ? 16 : 12]
+            var caseCharging = 0
+            if caseLevel != 255 {
+                caseCharging = caseLevel > 100 ? 1 : 0
+                caseLevel = (caseLevel ^ 128) & caseLevel
+            }else{ caseLevel = getLevel(deviceName, "Case") }
+            if caseLevel == 255 { return }
+            
+            var leftLevel = data[messageType == "open" ? 14 : 13]
+            var leftCharging = 0
+            if leftLevel != 255 {
+                leftCharging = leftLevel > 100 ? 1 : 0
+                leftLevel = (leftLevel ^ 128) & leftLevel
+            }else{ leftLevel = getLevel(deviceName, "Left") }
+            
+            var rightLevel = data[messageType == "open" ? 15 : 14]
+            var rightCharging = 0
+            if rightLevel != 255 {
+                rightCharging = rightLevel > 100 ? 1 : 0
+                rightLevel = (rightLevel ^ 128) & rightLevel
+            }else{ rightLevel = getLevel(deviceName, "Right") }
+            
+            if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: model, batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: now)) }
+            if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: now)) }
+            if leftLevel != 255 && rightLevel != 255 {
+                if (abs(Int(leftLevel) - Int(rightLevel)) < 3) && (leftCharging == rightCharging) {
+                    subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: model, batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: now)]
+                }
+            }
+            
+            var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: now)
+            if let d = AirBatteryModel.getByName(deviceName + " (Case)".local) {
+                mainDevice = d
+                mainDevice.deviceID = deviceID
+                mainDevice.deviceType = "ap_case"
+                mainDevice.deviceName = deviceName + " (Case)".local
+                mainDevice.deviceModel = model
+                mainDevice.batteryLevel = Int(caseLevel)
+                mainDevice.isCharging = caseCharging
+                mainDevice.lastUpdate = now
+            }
+            
+            mainDevice.subDevices = subDevice
+            AirBatteryModel.updateDevices(mainDevice)
+            //print("\(type): [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
+        }
     }
     
     func getPaired() -> [String]{

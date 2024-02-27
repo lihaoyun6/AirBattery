@@ -56,7 +56,7 @@ class AirBatteryModel {
         return devices.filter({ blackList.contains($0.deviceName) })
     }
     
-    static func getAll(reverse: Bool = true, flat: Bool = false, noFilter: Bool = false) -> [Device] {
+    static func getAll(reverse: Bool = false, flat: Bool = false, noFilter: Bool = false) -> [Device] {
         let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
         var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
         if noFilter { blackList = [] }
@@ -145,9 +145,12 @@ class AirBatteryModel {
     }
     
     static func writeData(){
-        var devices = getAll(flat: true)
+        let showMac = UserDefaults.standard.object(forKey: "showMacOnWidget") as? Bool ?? true
+        let revList = UserDefaults.standard.object(forKey: "revListOnWidget") as? Bool ?? false
+        
+        var devices = getAll(reverse: revList, flat: true)
         let ibStatus = InternalBattery.status
-        if ibStatus.hasBattery { devices.insert(ibToAb(ibStatus), at: 0) }
+        if ibStatus.hasBattery && showMac { devices.insert(ibToAb(ibStatus), at: 0) }
         do {
             let jsonData = try JSONEncoder().encode(devices)
             try jsonData.write(to: getJsonURL())

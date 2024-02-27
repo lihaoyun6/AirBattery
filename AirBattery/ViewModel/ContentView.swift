@@ -268,6 +268,24 @@ struct popover: View {
             .padding(.horizontal, 5)
             .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
             VStack(alignment:.leading,spacing: 0) {
+                if allDevices.count < 1 {
+                    HStack{
+                        Image(systemName: "exclamationmark.circle")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Color("black_white"))
+                            .frame(width: 20, height: 20, alignment: .center)
+                        Text("No Device Found!")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color("black_white"))
+                            .frame(height: 24, alignment: .center)
+                            .padding(.horizontal, 8)
+                        Spacer()
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 11)
+                    if hiddenDevices.count > 0 { Divider() }
+                }
                 ForEach(allDevices.indices, id: \.self) { index in
                     VStack(spacing: 0){
                         if hidden.contains(index) {
@@ -342,7 +360,7 @@ struct popover: View {
                     }
                 }
                 if hiddenDevices.count > 0 {
-                    Divider()//.frame(width: 314, alignment: .center).offset(x:9)
+                    if allDevices.count > 0 { Divider() }
                     HStack(spacing: 5){
                         Image("sunglasses.fill")
                             .resizable()

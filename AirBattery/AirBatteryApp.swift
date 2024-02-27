@@ -120,14 +120,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func menuWillOpen(_ menu: NSMenu) {
-        var allDevices = AirBatteryModel.getAll(reverse: false, flat: true)
+        var allDevices = AirBatteryModel.getAll(flat: true)
         let ibStatus = InternalBattery.status
         if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
         let contentViewSwiftUI = popover(allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         var hiddenRow = 0
         if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
-        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (allDevices.count+hiddenRow)*37+15)
+        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count,1)+hiddenRow)*37+15)
         let menuItem = NSMenuItem()
         menuItem.view = contentView
         statusMenu.removeAllItems()
@@ -169,7 +169,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(withTitle: machineName, action: #selector(blank), keyEquivalent: "")
         }
         menu.addItem(NSMenuItem.separator())
-        for d in AirBatteryModel.getAll(reverse: false) {
+        for d in AirBatteryModel.getAll() {
             let timePast = min(Int((now - d.lastUpdate) / 60), 99)
             let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
             let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")

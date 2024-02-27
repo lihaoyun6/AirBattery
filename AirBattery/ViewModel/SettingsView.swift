@@ -12,6 +12,8 @@ struct SettingsView: View {
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showThisMac") var showThisMac = "icon"
+    @AppStorage("showMacOnWidget") var showMacOnWidget = true
+    @AppStorage("revListOnWidget") var revListOnWidget = false
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
     @AppStorage("cStatusOfBLE") var cStatusOfBLE = false
@@ -62,34 +64,36 @@ struct SettingsView: View {
                 HStack{
                     Spacer()
                     VStack(alignment:.trailing, spacing: 15){
-                        Toggle(isOn: $readIDevice) {
+                        HStack{
+                            Toggle(isOn: $readIDevice) {}.toggleStyle(.switch)
                             Text("iPhone / iPad / Watch over WiFi")
-                        }.toggleStyle(.switch)
-                        Toggle(isOn: $ideviceOverBLE) {
+                        }
+                        HStack{
+                            Toggle(isOn: $ideviceOverBLE) {}.toggleStyle(.switch)
                             Text("iPhone / iPad(Cellular) over BT")
-                        }.toggleStyle(.switch)
+                        }
                     }
                     Spacer()
                     VStack(alignment:.leading, spacing: 15){
-                        Toggle(isOn: $readAirpods) {
+                        HStack{
+                            Toggle(isOn: $readAirpods) {}.toggleStyle(.switch)
                             Text("AirPods / Beats")
-                        }.toggleStyle(.switch)
-                        Toggle(isOn: $readBTDevice) {
+                        }
+                        HStack{
+                            Toggle(isOn: $readBTDevice) {}.toggleStyle(.switch)
                             Text("Other BT Device")
-                        }.toggleStyle(.switch)
+                        }
                     }
                     Spacer()
                 }
                 Divider().frame(width: 440)
-                HStack(spacing: 10){
-                    Toggle(isOn: $cStatusOfBLE) {
-                        Text("Guess charging status of iDevices or BLE devices over BT")
-                    }.toggleStyle(.switch)
+                HStack{
+                    Toggle(isOn: $cStatusOfBLE) {}.toggleStyle(.switch)
+                    Text("Guess charging status of iDevices or BLE devices over BT")
                 }
-                HStack(spacing: 10){
-                    Toggle(isOn: $readBLEDevice) {
-                        Text("Try to get battery info from all BLE devices (Beta)")
-                    }.toggleStyle(.switch)
+                HStack{
+                    Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
+                    Text("Try to get battery info from all BLE devices (Beta)")
                 }
             }
             .navigationTitle("AirBattery Settings")
@@ -131,23 +135,42 @@ struct SettingsView: View {
             }
             
             HStack(spacing: 0){
-                VStack(alignment:.trailing, spacing: 22){
-                    Text("Show Mac Battery:")
-                    Text("Show percentage:")
-                }.frame(width: 300, alignment: .trailing)
                 VStack(alignment:.leading, spacing: 15){
                     HStack{
                         Toggle(isOn: $intBattOnStatusBar) {}.toggleStyle(.switch)
-                        Text("(relaunch needed)")
+                        Text("Show Mac Battery (relaunch needed)")
                     }
-                    Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
-                }.frame(width: 300, alignment: .leading)
-                    .offset(x: 10)
+                    HStack{
+                        Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
+                        Text("Show Battery Percentage")
+                    }
+                }
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem { Label("StatusBar", systemImage: "menubar.dock.rectangle") }
+            .tabItem {
+                Image("statusbar")
+                Text("StatusBar")
+            }
+            
+            HStack(spacing: 0){
+                VStack(alignment:.leading, spacing: 15){
+                    HStack{
+                        Toggle(isOn: $showMacOnWidget) {}.toggleStyle(.switch)
+                        Text("Show Mac Battery")
+                    }
+                    HStack{
+                        Toggle(isOn: $revListOnWidget) {}.toggleStyle(.switch)
+                        Text("Reverse device list")
+                    }
+                }
+            }
+            .navigationTitle("AirBattery Settings")
+            .tabItem {
+                Image("widget")
+                Text("Widget")
+            }
         }
-        .frame(width: 480, height: 160)
+        .frame(width: 490, height: 170)
     }
 }
 
