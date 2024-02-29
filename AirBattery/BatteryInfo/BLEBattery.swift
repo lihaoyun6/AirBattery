@@ -209,10 +209,10 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     device.batteryLevel = level
                     device.lastUpdate = now
                     if charging != -1 { device.isCharging = charging }
-                    AirBatteryModel.updateDevices(device)
+                    AirBatteryModel.updateDevice(device)
                 } else {
                     let device = Device(deviceID: peripheral.identifier.uuidString, deviceType: getType(deviceName), deviceName: deviceName, batteryLevel: level, isCharging: (charging != -1) ? charging : 0, lastUpdate: now)
-                    AirBatteryModel.updateDevices(device)
+                    AirBatteryModel.updateDevice(device)
                 }
             }
         }
@@ -229,7 +229,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                         device.deviceType = getType(deviceName)
                     }
                     device.lastUpdate = Date().timeIntervalSince1970
-                    AirBatteryModel.updateDevices(device)
+                    AirBatteryModel.updateDevice(device)
                 }
             }
         }
@@ -283,11 +283,12 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func getAirpods(peripheral: CBPeripheral, data: Data, messageType: String) {
         if let deviceName = peripheral.name{
             let now = Date().timeIntervalSince1970
-            if let d = AirBatteryModel.getByName(deviceName + " (Case)"), (Double(now) - d.lastUpdate) < 1 { return }
-            
-            var subDevice:[Device] = []
+            let dataHex = data.hexEncodedString()
+            let index = dataHex.index(dataHex.startIndex, offsetBy: 14)
+            let flip = (strtoul(String(dataHex[index]), nil, 16) & 0x02) == 0
             let deviceID = peripheral.identifier.uuidString
-            let model = (messageType == "open" ? getHeadphoneModel(String(format: "%02x%02x", data[5], data[6])) : "Airpods Pro 2")
+            let model = (messageType == "open" ? getHeadphoneModel(String(format: "%02x%02x", data[6], data[5])) : "Airpods Pro 2")
+            //if let d = AirBatteryModel.getByName(deviceName + " (Case)".local), (Double(now) - d.lastUpdate) < 1 { return }
             
             var caseLevel = data[messageType == "open" ? 16 : 12]
             var caseCharging = 0
@@ -295,45 +296,35 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 caseCharging = caseLevel > 100 ? 1 : 0
                 caseLevel = (caseLevel ^ 128) & caseLevel
             }else{ caseLevel = getLevel(deviceName, "Case") }
-            if caseLevel == 255 { return }
             
-            var leftLevel = data[messageType == "open" ? 14 : 13]
+            var leftLevel = data[messageType == "open" ? (flip ? 15 : 14) : 13]
             var leftCharging = 0
             if leftLevel != 255 {
                 leftCharging = leftLevel > 100 ? 1 : 0
                 leftLevel = (leftLevel ^ 128) & leftLevel
             }else{ leftLevel = getLevel(deviceName, "Left") }
             
-            var rightLevel = data[messageType == "open" ? 15 : 14]
+            var rightLevel = data[messageType == "open" ? (flip ? 14 : 15) : 14]
             var rightCharging = 0
             if rightLevel != 255 {
                 rightCharging = rightLevel > 100 ? 1 : 0
                 rightLevel = (rightLevel ^ 128) & rightLevel
             }else{ rightLevel = getLevel(deviceName, "Right") }
             
-            if leftLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: model, batteryLevel: Int(leftLevel), isCharging: leftCharging, lastUpdate: now)) }
-            if rightLevel != 255 { subDevice.append(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: now)) }
-            if leftLevel != 255 && rightLevel != 255 {
-                if (abs(Int(leftLevel) - Int(rightLevel)) < 3) && (leftCharging == rightCharging) {
-                    subDevice = [Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: model, batteryLevel: Int(max(leftLevel, rightLevel)), isCharging: leftCharging, lastUpdate: now)]
-                }
+            if caseLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: now)) }
+            
+            if leftLevel != 255 && rightLevel != 255 && (abs(Int(leftLevel) - Int(rightLevel)) < 3) && leftCharging == rightCharging {
+                AirBatteryModel.hideDevice(deviceName + " 🄻")
+                AirBatteryModel.hideDevice(deviceName + " 🅁")
+                AirBatteryModel.updateDevice(Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: model, batteryLevel: Int(min(leftLevel, rightLevel)), isCharging: leftCharging, isHidden: false, parentName: deviceName + " (Case)".local, lastUpdate: now))
+            } else {
+                AirBatteryModel.hideDevice(deviceName + " 🄻🅁")
+                if leftLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID + "_Left", deviceType: "ap_pod_left", deviceName: deviceName + " 🄻", deviceModel: model, batteryLevel: Int(leftLevel), isCharging: leftCharging, isHidden: false, parentName: deviceName + " (Case)".local ,lastUpdate: now)) }
+                if rightLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, isHidden: false, parentName: deviceName + " (Case)".local, lastUpdate: now)) }
             }
             
-            var mainDevice = Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: now)
-            if let d = AirBatteryModel.getByName(deviceName + " (Case)".local) {
-                mainDevice = d
-                mainDevice.deviceID = deviceID
-                mainDevice.deviceType = "ap_case"
-                mainDevice.deviceName = deviceName + " (Case)".local
-                mainDevice.deviceModel = model
-                mainDevice.batteryLevel = Int(caseLevel)
-                mainDevice.isCharging = caseCharging
-                mainDevice.lastUpdate = now
-            }
-            
-            mainDevice.subDevices = subDevice
-            AirBatteryModel.updateDevices(mainDevice)
-            //print("\(type): [\(deviceName)@\(deviceID)]: \(data.hexEncodedString())")
+            //print("Type: \(messageType), C:\(caseLevel), L:\(leftLevel), R:\(rightLevel), Flip:\(messageType == "open" ? "\(flip)" : "none")")
+            //print("Raw Data: \(data.hexEncodedString())")
         }
     }
     
@@ -377,46 +368,5 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         }
         return connected
-    }
-    
-    func getHeadphoneModel(_ model: String) -> String {
-        switch model {
-        case "0220":
-            return "Airpods"
-        case "0e20":
-            return "Airpods Pro"
-        case "0a20":
-            return "Airpods Max"
-        case "0f20":
-            return "Airpods 2"
-        case "1320":
-            return "Airpods 3"
-        case "1420":
-            return "Airpods Pro 2"
-        case "0320":
-            return "PowerBeats"
-        case "0b20":
-            return "PowerBeats Pro"
-        case "0c20":
-            return "Beats Solo Pro"
-        case "1120":
-            return "Beats Studio Buds"
-        case "1020":
-            return "Beats Flex"
-        case "0520":
-            return "BeatsX"
-        case "0620":
-            return "Beats Solo3"
-        case "0920":
-            return "Beats Studio3"
-        case "1720":
-            return "Beats Studio Pro"
-        case "1220":
-            return "Beats Fit Pro"
-        case "1620":
-            return "Beats Studio Buds+"
-        default:
-            return "Headphones"
-        }
     }
 }

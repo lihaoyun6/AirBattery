@@ -120,7 +120,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func menuWillOpen(_ menu: NSMenu) {
-        var allDevices = AirBatteryModel.getAll(flat: true)
+        var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
         if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
         let contentViewSwiftUI = popover(allDevices: allDevices)
@@ -184,7 +184,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             main.submenu = submenu
             menu.addItem(main)
             menu.addItem(alte)
-            if let subds = d.subDevices {
+            menu.addItem(NSMenuItem.separator())
+            /*if let subds = d.subDevices {
                 for subd in subds {
                     let timePast = min(Int((now - subd.lastUpdate) / 60), 99)
                     let subBatteryColor = getPowerColor(subd.batteryLevel, emoji: true)
@@ -202,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     menu.addItem(alte)
                 }
             }
-            menu.addItem(NSMenuItem.separator())
+            menu.addItem(NSMenuItem.separator())*/
         }
         let submenu = NSMenu()
         let hidden = NSMenuItem(title: "Hidden Device...".local, action: #selector(blank), keyEquivalent: "")

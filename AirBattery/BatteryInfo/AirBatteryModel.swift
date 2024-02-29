@@ -18,8 +18,9 @@ struct Device: Hashable, Codable {
     var isCharged: Bool = false
     var isPaused: Bool = false
     var acPowered: Bool = false
+    var isHidden: Bool = false
+    var parentName: String = ""
     var lastUpdate: Double
-    var subDevices: [Device]?
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(hasBattery)
@@ -32,8 +33,9 @@ struct Device: Hashable, Codable {
         hasher.combine(isCharged)
         hasher.combine(isPaused)
         hasher.combine(acPowered)
+        hasher.combine(isHidden)
         hasher.combine(lastUpdate)
-        hasher.combine(subDevices)
+        hasher.combine(parentName)
     }
 }
 
@@ -43,93 +45,61 @@ class AirBatteryModel {
     static let machineName = UserDefaults.standard.string(forKey: "machineName") ?? "Mac"
     static let key = "com.lihaoyun6.AirBattery.widget"
     
-    static func updateDevices(byName: Bool = false, _ device: Device) {
+    static func updateDevice(_ device: Device) {
         if lock { return }
         lock = true
         if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.Devices[index] = device } else { self.Devices.append(device) }
         lock = false
     }
     
+    static func hideDevice(_ name: String) {
+        for index in Devices.indices {
+            if Devices[index].deviceName == name {
+                Devices[index].isHidden = true
+            }
+        }
+    }
+    
+    static func unhideDevice(_ name: String) {
+        for index in Devices.indices {
+            if Devices[index].deviceName == name {
+                Devices[index].isHidden = false
+            }
+        }
+    }
+    
     static func getBlackList() -> [Device] {
         let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-        let devices = getAll(flat: true, noFilter: true)
+        let devices = getAll(noFilter: true)
         return devices.filter({ blackList.contains($0.deviceName) })
     }
     
-    static func getAll(reverse: Bool = false, flat: Bool = false, noFilter: Bool = false) -> [Device] {
+    static func getAll(reverse: Bool = false, noFilter: Bool = false) -> [Device] {
         let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
-        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-        if noFilter { blackList = [] }
+        let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
         let now = Double(Date().timeIntervalSince1970)
-        let list = reverse ? Array(Devices.reversed()) : Devices
-        var devices: [Device] = []
+        var list = (reverse ? Array(Devices.reversed()) : Devices).filter { (now - $0.lastUpdate < Double(disappearTime * 60)) }
+        if !noFilter { list = list.filter { !blackList.contains($0.deviceName) && !$0.isHidden } }
+        var newList: [Device] = []
         for d in list {
-            if let sub = d.subDevices {
-                var subdev: [Device] = []
-                for subd in sub { if !blackList.contains(subd.deviceName) && (now - subd.lastUpdate < Double(disappearTime * 60)) { subdev.append(subd) } }
-                if !blackList.contains(d.deviceName){
-                    if (now - d.lastUpdate < Double(disappearTime * 60)){
-                        var newd = d
-                        newd.subDevices = subdev
-                        devices.append(newd)
-                    }
-                } else {
-                    devices = devices + subdev
-                }
-            } else {
-                if !blackList.contains(d.deviceName) && (now - d.lastUpdate < Double(disappearTime * 60)){ devices.append(d) }
-            }
-        }
-        if flat {
-            var flatDevices: [Device] = []
-            for d in devices {
-                flatDevices.append(d)
-                if let sub = d.subDevices { for s in sub { flatDevices.append(s) } }
-            }
-            return flatDevices
-        }
-        return devices
-    }
-    
-    static func getAllName() -> [String] {
-        var list: [String] = []
-        for b in getAll() {
-            list.append(b.deviceName)
-            if let sub = b.subDevices {
-                for s in sub {
-                    list.append(s.deviceName)
+            if d.parentName == "" {
+                newList.append(d)
+                for sd in list.filter({ $0.parentName == d.deviceName }) {
+                    newList.append(sd)
                 }
             }
         }
-        return list
-    }
-    
-    static func getAllID() -> [String] {
-        var list: [String] = []
-        for b in getAll() {
-            list.append(b.deviceID)
-            if let sub = b.subDevices {
-                for s in sub {
-                    list.append(s.deviceID)
-                }
-            }
-        }
-        return list
+        for dd in list.filter({ !newList.contains($0) }) { newList.append(dd) }
+        return newList
     }
     
     static func getByName(_ name: String) -> Device? {
-        for d in getAll(flat: true, noFilter: true) {
-            if d.deviceName == name { return d }
-            //if let sub = d.subDevices { for s in sub { if s.deviceName == name { return s } } }
-        }
+        for d in getAll(noFilter: true) { if d.deviceName == name { return d } }
         return nil
     }
     
     static func getByID(_ id: String) -> Device? {
-        for d in getAll(flat: true, noFilter: true) {
-            if d.deviceID == id { return d }
-            //if let sub = d.subDevices { for s in sub { if s.deviceID == id { return s } } }
-        }
+        for d in getAll(noFilter: true) { if d.deviceID == id { return d } }
         return nil
     }
     
@@ -148,14 +118,14 @@ class AirBatteryModel {
         let showMac = UserDefaults.standard.object(forKey: "showMacOnWidget") as? Bool ?? true
         let revList = UserDefaults.standard.object(forKey: "revListOnWidget") as? Bool ?? false
         
-        var devices = getAll(reverse: revList, flat: true)
+        var devices = getAll(reverse: revList)
         let ibStatus = InternalBattery.status
         if ibStatus.hasBattery && showMac { devices.insert(ibToAb(ibStatus), at: 0) }
         do {
             let jsonData = try JSONEncoder().encode(devices)
             try jsonData.write(to: getJsonURL())
         } catch {
-            print("JSON error：\(error)")
+            print("Write JSON error：\(error)")
         }
     }
     
@@ -165,7 +135,7 @@ class AirBatteryModel {
             let list = try JSONDecoder().decode([Device].self, from: jsonData)
             return list
         } catch {
-            print("JSON error：\(error)")
+            print("Read JSON error：\(error)")
         }
         return []
     }

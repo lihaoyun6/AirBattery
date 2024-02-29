@@ -228,6 +228,47 @@ func getMachineName() -> String {
     return "Mac"
 }
 
+func getHeadphoneModel(_ model: String) -> String {
+    switch model {
+    case "2002":
+        return "Airpods"
+    case "200e":
+        return "Airpods Pro"
+    case "200a":
+        return "Airpods Max"
+    case "200f":
+        return "Airpods 2"
+    case "2013":
+        return "Airpods 3"
+    case "2014":
+        return "Airpods Pro 2"
+    case "2003":
+        return "PowerBeats"
+    case "200b":
+        return "PowerBeats Pro"
+    case "200c":
+        return "Beats Solo Pro"
+    case "2011":
+        return "Beats Studio Buds"
+    case "2010":
+        return "Beats Flex"
+    case "2005":
+        return "BeatsX"
+    case "2006":
+        return "Beats Solo3"
+    case "2009":
+        return "Beats Studio3"
+    case "2017":
+        return "Beats Studio Pro"
+    case "2012":
+        return "Beats Fit Pro"
+    case "2016":
+        return "Beats Studio Buds+"
+    default:
+        return "Headphones"
+    }
+}
+
 func getDeviceIcon(_ d: Device) -> String {
     switch d.deviceType {
     case "blank":

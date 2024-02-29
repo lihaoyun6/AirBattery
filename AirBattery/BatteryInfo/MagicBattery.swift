@@ -14,21 +14,26 @@ class SPBluetoothDataModel {
 class MagicBattery {
     var scanTimer: Timer?
     @AppStorage("readBTDevice") var readBTDevice = true
+    @AppStorage("readAirpods") var readAirpods = true
     
     func startScan() {
         scanTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         Thread.detachNewThread {
-            if !self.readBTDevice { return }
-            self.getMagicBattery()
-            self.getOtherBTBattery()
+            if self.readBTDevice {
+                self.getMagicBattery()
+                self.getOtherBTBattery()
+            }
+            //if self.readAirpods { self.getAirpods() }
         }
     }
     
     @objc func scanDevices() { Thread.detachNewThread {
-        if !self.readBTDevice { return }
-        self.getMagicBattery()
-        self.getOtherBTBattery()
-    } }
+        if self.readBTDevice {
+            self.getMagicBattery()
+            self.getOtherBTBattery()
+        }
+        //if self.readAirpods { self.getAirpods() }
+    }}
     
     func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
         for (key, subJson) in json {
@@ -101,13 +106,89 @@ class MagicBattery {
                         productName = getDeviceName(mac, productName)
                     }
                     if !productName.contains("Internal"){
-                        AirBatteryModel.updateDevices(Device(deviceID: mac, deviceType: type, deviceName: productName, batteryLevel: percent, isCharging: status, lastUpdate: lastUpdate))
+                        AirBatteryModel.updateDevice(Device(deviceID: mac, deviceType: type, deviceName: productName, batteryLevel: percent, isCharging: status, lastUpdate: lastUpdate))
                     }
                 }
             } while object != 0
             IOObjectRelease(object)
         }
         IOObjectRelease(serialPortIterator)
+    }
+    
+    func getAirpods() {
+        let now = Date().timeIntervalSince1970
+        //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return }
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
+        let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
+            if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
+                for device in device_connected{
+                    let d = device as! [String: Any]
+                    if let n = d.keys.first, let info = d[n] as? [String: Any] {
+                        var productID = "200e"
+                        var mainDevice: Device?
+                        var subDevices: [Device] = []
+                        if let level = info["device_batteryLevelCase"] as? String {
+                            var id = n
+                            if let mac = info["device_address"] as? String { id = mac }
+                            if let pid = info["device_productID"] as? String { productID = pid.replacingOccurrences(of: "0x", with: "") }
+                            if let level = Int(level.replacingOccurrences(of: "%", with: "")) {
+                                if var apCase = AirBatteryModel.getByName(n + " (Case)".local) {
+                                    apCase.batteryLevel = level
+                                    apCase.lastUpdate = now
+                                    mainDevice = apCase
+                                } else {
+                                    mainDevice = Device(deviceID: id, deviceType: "ap_case", deviceName: n + " (Case)".local, deviceModel: getHeadphoneModel(productID), batteryLevel: level, isCharging: 0, lastUpdate: now)
+                                }
+                            }
+                        }
+                        if let level = info["device_batteryLevelLeft"] as? String {
+                            var id = n
+                            if let mac = info["device_address"] as? String { id = mac }
+                            if let pid = info["device_productID"] as? String { productID = pid.replacingOccurrences(of: "0x", with: "") }
+                            if let level = Int(level.replacingOccurrences(of: "%", with: "")) {
+                                if var apLeft = AirBatteryModel.getByName(n + " 🄻") {
+                                    apLeft.batteryLevel = level
+                                    apLeft.lastUpdate = now
+                                    subDevices.append(apLeft)
+                                } else {
+                                    subDevices.append(Device(deviceID: id, deviceType: "ap_pod_left", deviceName: n + " 🄻", deviceModel: getHeadphoneModel(productID), batteryLevel: level, isCharging: 0, parentName: n + " (Case)".local, lastUpdate: now))
+                                }
+                            }
+                            mainDevice?.deviceModel = getHeadphoneModel(productID)
+                        }
+                        if let level = info["device_batteryLevelRight"] as? String {
+                            var id = n
+                            if let mac = info["device_address"] as? String { id = mac }
+                            if let pid = info["device_productID"] as? String { productID = pid.replacingOccurrences(of: "0x", with: "") }
+                            if let level = Int(level.replacingOccurrences(of: "%", with: "")) {
+                                if var apRight = AirBatteryModel.getByName(n + " 🅁") {
+                                    apRight.batteryLevel = level
+                                    apRight.lastUpdate = now
+                                    subDevices.append(apRight)
+                                } else {
+                                    subDevices.append(Device(deviceID: id, deviceType: "ap_pod_right", deviceName: n + " 🅁", deviceModel: getHeadphoneModel(productID), batteryLevel: level, isCharging: 0, parentName: n + " (Case)".local, lastUpdate: now))
+                                }
+                            }
+                            mainDevice?.deviceModel = getHeadphoneModel(productID)
+                        }
+                        if let apCase = mainDevice { AirBatteryModel.updateDevice(apCase) }
+                        if subDevices.count != 0 {
+                            if subDevices.count == 2 {
+                                if abs(Int(subDevices[0].batteryLevel) - Int(subDevices[1].batteryLevel)) < 3 {
+                                    AirBatteryModel.hideDevice(n + " 🄻")
+                                    AirBatteryModel.hideDevice(n + " 🅁")
+                                    AirBatteryModel.updateDevice(Device(deviceID: n + "_All", deviceType: "ap_pod_all", deviceName: n + " 🄻🅁", deviceModel: getHeadphoneModel(productID), batteryLevel: Int(min(subDevices[0].batteryLevel, subDevices[1].batteryLevel)), isCharging: 0, parentName: n + " (Case)".local, lastUpdate: now))
+                                }
+                            } else {
+                                AirBatteryModel.hideDevice(n + " 🄻🅁")
+                                for pod in subDevices { AirBatteryModel.updateDevice(pod) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func getOtherBTBattery() {
@@ -124,7 +205,7 @@ class MagicBattery {
                            let type = info["device_minorType"] as? String,
                            (info["device_vendorID"] as? String) != "0x004C" {
                             let batLevel = Int(level.replacingOccurrences(of: "%", with: "")) ?? 255
-                            AirBatteryModel.updateDevices(Device(deviceID: id, deviceType: type, deviceName: n, batteryLevel: batLevel, isCharging: 0, lastUpdate: Date().timeIntervalSince1970))
+                            AirBatteryModel.updateDevice(Device(deviceID: id, deviceType: type, deviceName: n, batteryLevel: batLevel, isCharging: 0, lastUpdate: Date().timeIntervalSince1970))
                         }
                     }
                 }

@@ -18,7 +18,7 @@ struct MultiBatteryView: View {
     @State private var rollCount = 1
     @State private var darkMode = getDarkMode()
     @State private var lastTime = Double(Date().timeIntervalSince1970)
-    @State private var batteryList = AirBatteryModel.getAll(flat: true)
+    @State private var batteryList = AirBatteryModel.getAll()
     
     var body: some View {
         ZStack {
@@ -179,7 +179,7 @@ struct MultiBatteryView: View {
             if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
             
             darkMode = getDarkMode()
-            var list = AirBatteryModel.getAll(flat: true)
+            var list = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
             let now = Double(t.timeIntervalSince1970)
             

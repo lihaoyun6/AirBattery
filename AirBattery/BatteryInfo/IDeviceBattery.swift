@@ -64,8 +64,7 @@ class IDeviceBattery {
                     let b = batteryInfo.components(separatedBy: .newlines)
                     if let level = b.filter({ $0.contains("BatteryCurrentCapacity") }).first?.components(separatedBy: ": ").last,
                        let charging = b.filter({ $0.contains("BatteryIsCharging") }).first!.components(separatedBy: ": ").last {
-                        var idevice = Device(deviceID: id, deviceType: type, deviceName: deviceName, deviceModel: model, batteryLevel: Int(level)!, isCharging: Bool(charging)! ? 1 : 0, lastUpdate: lastUpdate)
-                        var iwatchs: [Device] = []
+                        AirBatteryModel.updateDevice(Device(deviceID: id, deviceType: type, deviceName: deviceName, deviceModel: model, batteryLevel: Int(level)!, isCharging: Bool(charging)! ? 1 : 0, lastUpdate: lastUpdate))
                         if let watchInfo = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/comptest", arguments: [id]) {
                             let w = watchInfo.components(separatedBy: .newlines)
                             if let watchID = w.filter({ $0.contains("Checking watch") }).first?.components(separatedBy: " ").last,
@@ -73,11 +72,9 @@ class IDeviceBattery {
                                let watchModel = w.filter({ $0.contains("ProductType") }).first?.components(separatedBy: ": ").last,
                                let watchLevel = w.filter({ $0.contains("BatteryCurrentCapacity") }).first?.components(separatedBy: ": ").last,
                                let watchCharging = w.filter({ $0.contains("BatteryIsCharging") }).first?.components(separatedBy: ": ").last {
-                                iwatchs.append(Device(deviceID: watchID, deviceType: "Watch", deviceName: watchName, deviceModel: watchModel, batteryLevel: Int(watchLevel)!, isCharging: Bool(watchCharging)! ? 1 : 0, lastUpdate: lastUpdate))
+                                AirBatteryModel.updateDevice(Device(deviceID: watchID, deviceType: "Watch", deviceName: watchName, deviceModel: watchModel, batteryLevel: Int(watchLevel)!, isCharging: Bool(watchCharging)! ? 1 : 0, parentName: deviceName ,lastUpdate: lastUpdate))
                             }
                         }
-                        if !iwatchs.isEmpty { idevice.subDevices = iwatchs }
-                        AirBatteryModel.updateDevices(idevice)
                     }
                 }
             }
