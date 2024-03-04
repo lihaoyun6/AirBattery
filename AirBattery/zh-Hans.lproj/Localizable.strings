@@ -68,3 +68,4 @@
 "\"%@\" remaining battery %d%%" = "\"%@\" 还剩 %d%% 电量";
 "Notification Sound:" = "播放通知音效:";
 "Battery Level Threshold:" = "低电量警告阈值:";
+" Alert ": "低电量通知";

@@ -188,7 +188,7 @@ struct SettingsView: View {
                 }.frame(width: 240, alignment: .leading)
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem { Label("Alert", systemImage: "bell") }
+            .tabItem { Label(" Alert ", systemImage: "bell") }
         }
         .frame(width: 490, height: 170)
     }
