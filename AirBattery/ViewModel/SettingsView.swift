@@ -25,6 +25,8 @@ struct SettingsView: View {
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("launchAtLogin") var launchAtLogin = false
+    @AppStorage("alertLevel") var alertLevel = 10
+    @AppStorage("alertSound") var alertSound = true
     
     var body: some View {
         TabView {
@@ -169,6 +171,24 @@ struct SettingsView: View {
                 Image("widget")
                 Text("Widget")
             }
+            HStack(spacing: 0){
+                VStack(alignment:.trailing, spacing: 22){
+                    Text("Notification Sound:")
+                    Text("Battery Level Threshold:")
+                }
+                VStack(alignment:.leading, spacing: 15){
+                    Toggle(isOn: $alertSound) {}
+                        .offset(x: 10)
+                        .toggleStyle(.switch)
+                    Picker("", selection: $alertLevel) {
+                        Text("10%").tag(10)
+                        Text("15%").tag(15)
+                        Text("20%").tag(20)
+                    }.pickerStyle(.segmented)
+                }.frame(width: 240, alignment: .leading)
+            }
+            .navigationTitle("AirBattery Settings")
+            .tabItem { Label("Alert", systemImage: "bell") }
         }
         .frame(width: 490, height: 170)
     }

@@ -6,6 +6,7 @@
 //
 import AppKit
 import SwiftUI
+import UserNotifications
 
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"

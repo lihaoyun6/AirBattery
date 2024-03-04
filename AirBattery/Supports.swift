@@ -220,13 +220,14 @@ func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
 }
 
 func batteryAlert() {
-    @AppStorage("alertLevel") var alertLevel = 20
+    @AppStorage("alertLevel") var alertLevel = 10
+    @AppStorage("alertSound") var alertSound = true
     let alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
     for device in AirBatteryModel.getAll().filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
         let content = UNMutableNotificationContent()
         content.title = "Low Battery".local
         content.body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
-        content.sound = UNNotificationSound.default
+        content.sound = alertSound ? UNNotificationSound.default : nil
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
         let request = UNNotificationRequest(identifier: device.deviceName, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
