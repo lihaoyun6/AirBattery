@@ -7,7 +7,7 @@
 import AppKit
 import SwiftUI
 import WidgetKit
-//import UserNotifications
+import UserNotifications
 
 @main
 struct AirBatteryApp: App {
@@ -45,14 +45,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         AirBatteryModel.writeData()
         WidgetCenter.shared.reloadAllTimelines()
         
-        /*let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("Notification authorization granted.")
-            } else {
-                print("Notification authorization denied.")
-            }
-        }*/
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error { print("Notification authorization denied: \(error.localizedDescription)") }
+        }
         
         bleBattery.startScan()
         magicBattery.startScan()

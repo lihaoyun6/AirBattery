@@ -5,8 +5,10 @@
 //  Created by apple on 2024/2/9.
 //
 import SwiftUI
+import UserNotifications
 
 let dockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
 struct dayAndWeek {
@@ -215,6 +217,22 @@ func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
     }
     if list != [] { while list.count < length { list.append(Device(deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0)) } }
     return list
+}
+
+func batteryAlert() {
+    @AppStorage("alertLevel") var alertLevel = 20
+    let alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+    for device in AirBatteryModel.getAll().filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
+        let content = UNMutableNotificationContent()
+        content.title = "Low Battery".local
+        content.body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
+        content.sound = UNNotificationSound.default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: device.deviceName, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
+        }
+    }
 }
 
 func getMachineName() -> String {

@@ -64,3 +64,5 @@
 "Reverse device list" = "倒序排列设备";
 "Widget" = "小组件";
 "No Device Found!" = "未发现任何设备!";
+"Low Battery" = "电池电量不足";
+"\"%@\" remaining battery %d%%" = "\"%@\" 还剩 %d%% 电量";
