@@ -165,7 +165,7 @@ struct MultiBatteryView: View {
             //WidgetCenter.shared.reloadAllTimelines()
         }
         .onReceive(dockTimer) { t in
-            NSApp.dockTile.display()
+            //NSApp.dockTile.display()
             InternalBattery.status = getPowerState()
             let windows = NSApplication.shared.windows
             for w in windows { if w.level.rawValue == 0 || w.level.rawValue == 3 { w.level = .floating } }
@@ -173,9 +173,11 @@ struct MultiBatteryView: View {
                 if statusBarItem.isVisible == false { statusBarItem.isVisible.toggle() }
                 if NSApp.activationPolicy() != .accessory { NSApp.setActivationPolicy(.accessory) }
             } else if showOn == "both" {
+                NSApp.dockTile.display()
                 if statusBarItem.isVisible == false { statusBarItem.isVisible.toggle() }
                 if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
             } else {
+                NSApp.dockTile.display()
                 if statusBarItem.isVisible == true { statusBarItem.isVisible.toggle() }
                 if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
             }
