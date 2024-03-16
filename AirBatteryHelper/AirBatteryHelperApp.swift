@@ -7,7 +7,6 @@
 
 import Cocoa
 
-@main
 class HelperAppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let runningApps = NSWorkspace.shared.runningApplications
