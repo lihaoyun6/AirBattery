@@ -58,6 +58,7 @@
 "StatusBar" = "状态栏图标";
 "Show Mac Battery (relaunch needed)" = "显示 Mac 电池状态 (下次运行时生效)";
 "Show Battery Percentage" = "显示电池百分比";
+"Hidden Percentage above 90%" = "电量低于 90% 才显示百分比";
 "Try to get battery info from all BLE devices (Beta)" = "尝试读取周边所有 BLE 设备的电量信息 (实验性, 谨慎开启)";
 "AirPods / Beats" = "AirPods / Beats 耳机";
 "Show Mac Battery" = "显示本机电量";

@@ -10,7 +10,6 @@ import SwiftUI
 
 extension View {
     func widgetBackground(_ backgroundView: some View) -> some View {
-        // 如果是 iOS 17，则使用 containerBackground
         if #available(macOS 14.0, *) {
             return containerBackground(for: .widget) {
                 backgroundView

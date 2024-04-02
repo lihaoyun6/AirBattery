@@ -26,19 +26,53 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
+    @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
     
     var statusBarItem: NSStatusItem!
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
+    var dockWindow = NSWindow()
     let bleBattery = BLEBattery()
     let magicBattery = MagicBattery()
     let ideviceBattery = IDeviceBattery()
     
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        // 用户点击 Dock 图标时会调用这个方法
+        if dockWindow.isVisible {
+            dockWindow.orderOut(nil)
+        } else {
+            var allDevices = AirBatteryModel.getAll()
+            let ibStatus = InternalBattery.status
+            if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
+            let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
+            let contentView = NSHostingView(rootView: contentViewSwiftUI)
+            var hiddenRow = 0
+            if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
+            var mouse = NSEvent.mouseLocation
+            if let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) {
+                mouse = CGPoint(x: mouse.x, y: max(mouse.y, screen.visibleFrame.origin.y))
+            }
+            contentView.frame = NSRect(x: mouse.x-176, y: mouse.y+20, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+25))
+            dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
+            dockWindow.title = "AirBattery Dock Window"
+            dockWindow.level = .popUpMenu
+            dockWindow.contentView = contentView
+            dockWindow.isOpaque = false
+            dockWindow.backgroundColor = NSColor.clear
+            dockWindow.contentView?.wantsLayer = true
+            dockWindow.contentView?.layer?.cornerRadius = 6
+            dockWindow.contentView?.layer?.masksToBounds = true
+            dockWindow.orderFront(nil)
+        }
+        return true
+    }
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if showOn == "sbar" { NSApp.setActivationPolicy(.accessory) }
-        if let window = NSApplication.shared.windows.first { window.close() }
+        //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
+        print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
         
         machineName = getMachineName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
@@ -46,7 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         WidgetCenter.shared.reloadAllTimelines()
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error { print("Notification authorization denied: \(error.localizedDescription)") }
+            if let error = error { print("⚠️ Notification authorization denied: \(error.localizedDescription)") }
         }
         
         bleBattery.startScan()
@@ -66,6 +100,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if ib.hasBattery && intBattOnStatusBar {
                 let iconView = NSHostingView(rootView: mainBatteryView(statusBarItem: statusBarItem))
                 iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
+                if hidePercentWhenFull && ib.batteryLevel >= 90 {
+                    iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
+                }
                 button.addSubview(iconView)
                 button.frame = iconView.frame
             } else {
@@ -74,7 +111,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         }
         if showOn == "dock" { statusBarItem.isVisible = false }
-        
+        print("⚙️ Icon mode = \(showOn)")
         NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView(statusBarItem: statusBarItem))
         NSApp.dockTile.display()
     }
@@ -115,10 +152,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func menuWillOpen(_ menu: NSMenu) {
+        dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
         if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
-        let contentViewSwiftUI = popover(allDevices: allDevices)
+        let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         var hiddenRow = 0
         if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
@@ -144,7 +182,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
         }
     }
-    
     func getMenu(fromDock: Bool = false) {
         let now = Double(Date().timeIntervalSince1970)
         let ibStatus = InternalBattery.status
@@ -180,25 +217,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(main)
             menu.addItem(alte)
             menu.addItem(NSMenuItem.separator())
-            /*if let subds = d.subDevices {
-                for subd in subds {
-                    let timePast = min(Int((now - subd.lastUpdate) / 60), 99)
-                    let subBatteryColor = getPowerColor(subd.batteryLevel, emoji: true)
-                    let main = NSMenuItem(title: "\(subBatteryColor) \(getMonoNum(subd.batteryLevel))\(subd.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(subd.deviceName)", action: nil, keyEquivalent: "")
-                    let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(subd.deviceName)", action: nil, keyEquivalent: "")
-                    alte.isAlternate = true
-                    alte.keyEquivalentModifierMask = .option
-                    
-                    let submenu = NSMenu()
-                    let subm = NSMenuItem(title: "Hide This".local, action: #selector(addToBlackList(_ :)), keyEquivalent: "")
-                    subm.representedObject = subd.deviceName
-                    submenu.addItem(subm)
-                    main.submenu = submenu
-                    menu.addItem(main)
-                    menu.addItem(alte)
-                }
-            }
-            menu.addItem(NSMenuItem.separator())*/
         }
         let submenu = NSMenu()
         let hidden = NSMenuItem(title: "Hidden Device...".local, action: #selector(blank), keyEquivalent: "")
@@ -221,6 +239,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        dockWindow.orderOut(nil)
         getMenu(fromDock: true)
         return menu
     }

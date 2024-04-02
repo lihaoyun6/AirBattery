@@ -6,7 +6,28 @@
 //
 import AppKit
 import SwiftUI
-import UserNotifications
+//import UserNotifications
+
+/*let test_data: [CGFloat] = [99,80,80,73,70,60,59,51,30,30,25,25,19,18,17,15,12,10,10,9] // 示例数据
+struct BarChartView: View {
+    let data: [CGFloat] // 电量数据，取值范围 0 到 1
+    let barSpacing: CGFloat // 柱子之间的间距
+    let barWidth: CGFloat // 柱子宽度
+
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .bottom, spacing: barSpacing) { // 设置底部对齐
+                ForEach(0..<data.count, id: \.self) { index in
+                    let height = (data[index] * geometry.size.height)/100
+                    Capsule()
+                        .fill(Color(getPowerColor(Int(data[index]))))
+                        .frame(width: barWidth, height: height)
+                        .padding(.bottom, -barWidth / 2) // 设置底部平坦
+                }
+            }
+        }
+    }
+}*/
 
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
@@ -214,7 +235,29 @@ struct MultiBatteryView: View {
     }
 }
 
+struct BlurView: NSViewRepresentable {
+    
+    private let material: NSVisualEffectView.Material
+    
+    init(material: NSVisualEffectView.Material) {
+        self.material = material
+    }
+    
+    func makeNSView(context: Context) -> some NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = .behindWindow
+        view.state = .active
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSViewType, context: Context) {
+        nsView.material = material
+    }
+}
+
 struct popover: View {
+    var fromDock: Bool = false
     var allDevices: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
     @State private var overHideButton = false
@@ -229,222 +272,240 @@ struct popover: View {
     @State private var alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
     
     var body: some View {
-        VStack(spacing: 0){
-            HStack(spacing: 4){
-                Button(action: {
-                    NSApp.terminate(self)
-                }, label: {
-                    Image(systemName: "xmark.circle")
-                        .font(.system(size: 9.6, weight: .semibold))
-                        .frame(width: 10, height: 20, alignment: .center)
-                        .foregroundColor(overQuitButton ? .red : .secondary)
-                })
-                .buttonStyle(PlainButtonStyle())
-                .onHover{ hovering in overQuitButton = hovering }
-                
-                Button(action: {
-                    NSApp.orderFrontStandardAboutPanel(nil)
-                }, label: {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 9.6, weight: .semibold))
-                        .frame(width: 10, height: 20, alignment: .center)
-                        .foregroundColor(overInfoButton ? .accentColor : .secondary)
-                })
-                .buttonStyle(PlainButtonStyle())
-                .onHover{ hovering in overInfoButton = hovering }
-                
-                Button(action: {
-                    if #available(macOS 14, *) {
-                        NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
-                    }else if #available(macOS 13, *) {
-                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        ZStack{
+            if fromDock { Color.clear.background(BlurView(material: .menu)) }
+            VStack(spacing: 0){
+                HStack(spacing: 4){
+                    if !fromDock {
+                        Button(action: {
+                            NSApp.terminate(self)
+                        }, label: {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 9.6, weight: .semibold))
+                                .frame(width: 10, height: 20, alignment: .center)
+                                .foregroundColor(overQuitButton ? .red : .secondary)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .onHover{ hovering in overQuitButton = hovering }
                     } else {
-                        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                        Button(action: {
+                            if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        }, label: {
+                            Image(systemName: "minus.circle")
+                                .font(.system(size: 9.6, weight: .semibold))
+                                .frame(width: 10, height: 20, alignment: .center)
+                                .foregroundColor(overQuitButton ? Color("my_yellow") : .secondary)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .onHover{ hovering in overQuitButton = hovering }
                     }
-                    NSApp.activate(ignoringOtherApps: true)
-                }, label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 9.6, weight: .semibold))
-                        .frame(width: 10, height: 20, alignment: .center)
-                        .foregroundColor(overSettButton ? .accentColor : .secondary)
-                })
-                .buttonStyle(PlainButtonStyle())
-                .onHover{ hovering in overSettButton = hovering }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 5)
-            .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
-            VStack(alignment:.leading,spacing: 0) {
-                if allDevices.count < 1 {
-                    HStack{
-                        Image(systemName: "exclamationmark.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundColor(Color("black_white"))
-                            .frame(width: 20, height: 20, alignment: .center)
-                        Text("No Device Found!")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("black_white"))
-                            .frame(height: 24, alignment: .center)
-                            .padding(.horizontal, 8)
-                        Spacer()
-                    }
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 11)
-                    if hiddenDevices.count > 0 { Divider() }
-                }
-                ForEach(allDevices.indices, id: \.self) { index in
-                    VStack(spacing: 0){
-                        if hidden.contains(index) {
-                            HStack{
-                                Image("blank")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(height: 24, alignment: .center)
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 10)
-                                Spacer()
-                            }
-                        }else{
-                            HStack {
-                                Image(getDeviceIcon(allDevices[index]))
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .foregroundColor(Color("black_white"))
-                                    .frame(width: 22, height: 22, alignment: .center)
-                                Text("\(((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(allDevices[index].deviceName)")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Color("black_white"))
-                                    .frame(height: 24, alignment: .center)
-                                    .padding(.horizontal, 7)
-                                Spacer()
-                                
-                                if overStack == index {
-                                    if allDevices[index].deviceID == "@MacInternalBattery" {
-                                        //Image(systemName: "clock").font(.system(size: 10))
-                                        Text(allDevices[index].isCharging != 0 ? "Until full:" : "Until empty:")
-                                            .font(.system(size: 11))
-                                            .foregroundColor(.secondary)
-                                        Text(InternalBattery.status.timeLeft)
-                                            .font(.system(size: 11))
-                                            .foregroundColor(.secondary)
-                                    }else{
-                                        //Image(systemName: "arrow.clockwise").font(.system(size: 10))
-                                        Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                            .font(.system(size: 11))
-                                            .foregroundColor(.secondary)
-                                        if !alertList.contains(allDevices[index].deviceName) {
-                                            Button(action: {
-                                                alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                alertList.append(allDevices[index].deviceName)
-                                                UserDefaults.standard.set(alertList, forKey: "alertList")
-                                            }, label: {
-                                                Image(systemName: "bell.fill")
-                                                    .frame(width: 20, height: 20, alignment: .center)
-                                                    .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                            })
-                                            .buttonStyle(PlainButtonStyle())
-                                            .onHover{ hovering in overAlertButton = hovering }
-                                        } else {
-                                            Button(action: {
-                                                alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                UserDefaults.standard.set(alertList, forKey: "alertList")
-                                            }, label: {
-                                                Image(systemName: "bell.slash.fill")
-                                                    .frame(width: 20, height: 20, alignment: .center)
-                                                    .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                            })
-                                            .buttonStyle(PlainButtonStyle())
-                                            .onHover{ hovering in overAlertButton = hovering }
-                                        }
-                                        Button(action: {
-                                            hidden.append(index)
-                                            var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-                                            blackList.append(allDevices[index].deviceName)
-                                            UserDefaults.standard.set(blackList, forKey: "blackList")
-                                        }, label: {
-                                            Image(systemName: "eye.slash.fill")
-                                                .frame(width: 20, height: 20, alignment: .center)
-                                                .foregroundColor(overHideButton ? .accentColor : .secondary)
-                                        })
-                                        .buttonStyle(PlainButtonStyle())
-                                        .onHover{ hovering in overHideButton = hovering }
-                                    }
-                                } else {
-                                    Text("\(allDevices[index].batteryLevel)%")
-                                            .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .secondary)
-                                            .font(.system(size: 11))
-                                    BatteryView(item: allDevices[index])
-                                        .scaleEffect(0.8)
-                                }
-                            }
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 10)
-                            .background(overStack == index ? Color("black_white").opacity(0.15) : .clear)//.cornerRadius(4)
-                            .clipShape(RoundedCornersShape(radius: 1.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
-                            .onHover{ hovering in
-                                overStack2 = -1
-                                if overStack != index { overStack = index }
-                            }
+                    
+                    Button(action: {
+                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        NSApp.orderFrontStandardAboutPanel(nil)
+                    }, label: {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 9.6, weight: .semibold))
+                            .frame(width: 10, height: 20, alignment: .center)
+                            .foregroundColor(overInfoButton ? .accentColor : .secondary)
+                    })
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover{ hovering in overInfoButton = hovering }
+                    
+                    Button(action: {
+                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        if #available(macOS 14, *) {
+                            NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
+                        }else if #available(macOS 13, *) {
+                            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                        } else {
+                            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
                         }
-                        if index != allDevices.count-1 { Divider() }
-                    }
+                        NSApp.activate(ignoringOtherApps: true)
+                    }, label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 9.6, weight: .semibold))
+                            .frame(width: 10, height: 20, alignment: .center)
+                            .foregroundColor(overSettButton ? .accentColor : .secondary)
+                    })
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover{ hovering in overSettButton = hovering }
+                    
+                    Spacer()
                 }
-                if hiddenDevices.count > 0 {
-                    if allDevices.count > 0 { Divider() }
-                    HStack(spacing: 5){
-                        Image("sunglasses.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundColor(Color("black_white"))
-                            .frame(width: 22, height: 22, alignment: .center)
-                            .padding(.vertical, 6)
-                        Text("Hidden Device:")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("black_white"))
-                            .frame(height: 24, alignment: .center)
-                            .padding(.horizontal, 10)
-                        Spacer()
-                        ForEach(hiddenDevices.indices, id: \.self) { index in
-                            if !hidden2.contains(index){
-                                Button(action: {
-                                    hidden2.append(index)
-                                    var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-                                    blackList.removeAll { $0 == hiddenDevices[index].deviceName }
-                                    UserDefaults.standard.set(blackList, forKey: "blackList")
-                                }, label: {
-                                    Image(getDeviceIcon(hiddenDevices[index]))
+                .padding(.horizontal, 5)
+                .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
+                VStack(alignment:.leading,spacing: 0) {
+                    if allDevices.count < 1 {
+                        HStack{
+                            Image(systemName: "exclamationmark.circle")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(Color("black_white"))
+                                .frame(width: 20, height: 20, alignment: .center)
+                            Text("No Device Found!")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("black_white"))
+                                .frame(height: 24, alignment: .center)
+                                .padding(.horizontal, 8)
+                            Spacer()
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 11)
+                        if hiddenDevices.count > 0 { Divider() }
+                    }
+                    ForEach(allDevices.indices, id: \.self) { index in
+                        VStack(spacing: 0){
+                            if hidden.contains(index) {
+                                HStack{
+                                    Image("blank")
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        .frame(width: 20, height: 20, alignment: .center)
-                                        .padding(.vertical, 4)
-                                        .padding(.horizontal, 4)
-                                        .background(overStack2 == index ? Color("black_white").opacity(0.15) : .clear).cornerRadius(2.5)
-                                        .onHover{ hovering in
-                                            overStack = -1
-                                            if overStack2 != index { overStack2 = index }
+                                        .frame(height: 24, alignment: .center)
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 10)
+                                    Spacer()
+                                }
+                            }else{
+                                HStack {
+                                    Image(getDeviceIcon(allDevices[index]))
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .foregroundColor(Color("black_white"))
+                                        .frame(width: 22, height: 22, alignment: .center)
+                                    Text("\(((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(allDevices[index].deviceName)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color("black_white"))
+                                        .frame(height: 24, alignment: .center)
+                                        .padding(.horizontal, 7)
+                                    Spacer()
+                                    
+                                    if overStack == index {
+                                        if allDevices[index].deviceID == "@MacInternalBattery" {
+                                            //Image(systemName: "clock").font(.system(size: 10))
+                                            Text(allDevices[index].isCharging != 0 ? "Until full:" : "Until empty:")
+                                                .font(.system(size: 11))
+                                                .foregroundColor(.secondary)
+                                            Text(InternalBattery.status.timeLeft)
+                                                .font(.system(size: 11))
+                                                .foregroundColor(.secondary)
+                                        }else{
+                                            //Image(systemName: "arrow.clockwise").font(.system(size: 10))
+                                            Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
+                                                .font(.system(size: 11))
+                                                .foregroundColor(.secondary)
+                                            if !alertList.contains(allDevices[index].deviceName) {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.append(allDevices[index].deviceName)
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            } else {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.removeAll { $0 == allDevices[index].deviceName }
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell.slash.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            }
+                                            Button(action: {
+                                                hidden.append(index)
+                                                var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                                blackList.append(allDevices[index].deviceName)
+                                                UserDefaults.standard.set(blackList, forKey: "blackList")
+                                            }, label: {
+                                                Image(systemName: "eye.slash.fill")
+                                                    .frame(width: 20, height: 20, alignment: .center)
+                                                    .foregroundColor(overHideButton ? .accentColor : .secondary)
+                                            })
+                                            .buttonStyle(PlainButtonStyle())
+                                            .onHover{ hovering in overHideButton = hovering }
                                         }
-                                })
-                                .buttonStyle(PlainButtonStyle())
-                                .help(hiddenDevices[index].deviceName)
+                                    } else {
+                                        Text("\(allDevices[index].batteryLevel)%")
+                                            .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .secondary)
+                                            .font(.system(size: 11))
+                                        BatteryView(item: allDevices[index])
+                                            .scaleEffect(0.8)
+                                    }
+                                }
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 10)
+                                .background(overStack == index ? Color("black_white").opacity(0.15) : .clear)//.cornerRadius(4)
+                                .clipShape(RoundedCornersShape(radius: 1.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
+                                .onHover{ hovering in
+                                    overStack2 = -1
+                                    if overStack != index { overStack = index }
+                                }
                             }
+                            if index != allDevices.count-1 { Divider() }
                         }
                     }
-                    .padding(.vertical, 1)
-                    .padding(.horizontal, 10)
-                    .onHover{ hovering in overStack = -1 }
+                    if hiddenDevices.count > 0 {
+                        if allDevices.count > 0 { Divider() }
+                        HStack(spacing: 5){
+                            Image("sunglasses.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(Color("black_white"))
+                                .frame(width: 22, height: 22, alignment: .center)
+                                .padding(.vertical, 6)
+                            Text("Hidden Device:")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("black_white"))
+                                .frame(height: 24, alignment: .center)
+                                .padding(.horizontal, 10)
+                            Spacer()
+                            ForEach(hiddenDevices.indices, id: \.self) { index in
+                                if !hidden2.contains(index){
+                                    Button(action: {
+                                        hidden2.append(index)
+                                        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                        blackList.removeAll { $0 == hiddenDevices[index].deviceName }
+                                        UserDefaults.standard.set(blackList, forKey: "blackList")
+                                    }, label: {
+                                        Image(getDeviceIcon(hiddenDevices[index]))
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 20, height: 20, alignment: .center)
+                                            .padding(.vertical, 4)
+                                            .padding(.horizontal, 4)
+                                            .background(overStack2 == index ? Color("black_white").opacity(0.15) : .clear).cornerRadius(2.5)
+                                            .onHover{ hovering in
+                                                overStack = -1
+                                                if overStack2 != index { overStack2 = index }
+                                            }
+                                    })
+                                    .buttonStyle(PlainButtonStyle())
+                                    .help(hiddenDevices[index].deviceName)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 1)
+                        .padding(.horizontal, 10)
+                        .onHover{ hovering in overStack = -1 }
+                    }
                 }
-            }
-            .padding(.horizontal, 6)
-            .overlay(
-                RoundedRectangle(cornerRadius: 3)
-                    .strokeBorder(Color.secondary, lineWidth: 1)
-                    .padding(.vertical, -1)
-                    .padding(.horizontal, 5)
-                    .opacity(0.23)
-            )
-        }.offset(y:-3)
+                .padding(.horizontal, 6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 3)
+                        .strokeBorder(Color.secondary, lineWidth: 1)
+                        .padding(.vertical, -1)
+                        .padding(.horizontal, 5)
+                        .opacity(0.23)
+                )
+            }.offset(y:-3)
+        }
     }
 }

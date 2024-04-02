@@ -18,6 +18,7 @@ class MagicBattery {
     
     func startScan() {
         scanTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
+        print("ℹ️ Start scanning Magic devices...")
         Thread.detachNewThread {
             if self.readBTDevice {
                 self.getMagicBattery()

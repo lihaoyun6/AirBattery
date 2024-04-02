@@ -49,11 +49,12 @@ struct mainBatteryView: View {
     @State var statusBarItem: NSStatusItem
     @State var item: iBattery = InternalBattery.status
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
+    @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     
     var body: some View {
         let width = round(max(2, min(19, Double(item.batteryLevel)/100*19)))
         HStack(alignment: .center, spacing:4){
-            if statusBarBattPercent {
+            if statusBarBattPercent && !(hidePercentWhenFull && item.batteryLevel >= 90) {
                 ZStack{
                     Text("\(item.batteryLevel)%").font(.system(size: 11))
                 }
@@ -82,6 +83,7 @@ struct mainBatteryView: View {
                 item = InternalBattery.status
                 let width = statusBarItem.button?.frame.size.width
                 if (statusBarBattPercent && width != 76) || (!statusBarBattPercent && width != 42){
+                    if hidePercentWhenFull && item.batteryLevel >= 90 { return }
                     let iconView = NSHostingView(rootView: mainBatteryView(statusBarItem: statusBarItem))
                     iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
                     statusBarItem.button?.subviews.removeAll()

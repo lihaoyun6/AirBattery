@@ -24,6 +24,7 @@ struct SettingsView: View {
     @AppStorage("readAirpods") var readAirpods = true
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
+    @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("alertLevel") var alertLevel = 10
     @AppStorage("alertSound") var alertSound = true
@@ -146,6 +147,10 @@ struct SettingsView: View {
                         Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
                         Text("Show Battery Percentage")
                     }
+                    HStack{
+                        Toggle(isOn: $hidePercentWhenFull) {}.toggleStyle(.switch)
+                        Text("Hidden Percentage above 90%")
+                    }.disabled(!statusBarBattPercent)
                 }
             }
             .navigationTitle("AirBattery Settings")
@@ -191,11 +196,5 @@ struct SettingsView: View {
             .tabItem { Label(" Alert ", systemImage: "bell") }
         }
         .frame(width: 490, height: 170)
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView()
     }
 }

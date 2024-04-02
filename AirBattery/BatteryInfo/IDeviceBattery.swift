@@ -14,6 +14,7 @@ class IDeviceBattery {
     
     func startScan() {
         scanTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
+        print("ℹ️ Start scanning iDevice devices...")
         Thread.detachNewThread {
             if !self.readIDevice { return }
             self.getIDeviceBattery()
