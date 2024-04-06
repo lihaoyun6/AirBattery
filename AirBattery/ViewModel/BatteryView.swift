@@ -80,15 +80,25 @@ struct mainBatteryView: View {
             }
             .compositingGroup()
             .onReceive(dockTimer) { t in
-                item = InternalBattery.status
-                let width = statusBarItem.button?.frame.size.width
-                if (statusBarBattPercent && width != 76) || (!statusBarBattPercent && width != 42){
-                    if hidePercentWhenFull && item.batteryLevel >= 90 { return }
+                func setStatusBar(width: Double) {
                     let iconView = NSHostingView(rootView: mainBatteryView(statusBarItem: statusBarItem))
-                    iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
+                    iconView.frame = NSRect(x: 0, y: 0, width: width, height: 21.5)
                     statusBarItem.button?.subviews.removeAll()
                     statusBarItem.button?.addSubview(iconView)
                     statusBarItem.button?.frame = iconView.frame
+                }
+                
+                item = InternalBattery.status
+                let width = statusBarItem.button?.frame.size.width
+                
+                if statusBarBattPercent {
+                    if hidePercentWhenFull && item.batteryLevel >= 90 {
+                        if width != 42 { setStatusBar(width: 42) }
+                    } else {
+                        if width != 76 { setStatusBar(width: 76) }
+                    }
+                } else {
+                    if width != 42 { setStatusBar(width: 42) }
                 }
             }
         }
