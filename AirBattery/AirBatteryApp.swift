@@ -39,6 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
+        if showOn == "sbar" { return false }
         if dockWindow.isVisible {
             dockWindow.orderOut(nil)
         } else {
@@ -47,13 +48,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
             let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
             let contentView = NSHostingView(rootView: contentViewSwiftUI)
-            var hiddenRow = 0
-            if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
-            var mouse = NSEvent.mouseLocation
+            let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
+            let mouse = NSEvent.mouseLocation
+            var menuX = mouse.x
+            var menuY = mouse.y
             if let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) {
-                mouse = CGPoint(x: mouse.x, y: max(mouse.y, screen.visibleFrame.origin.y))
+                let visibleFrame = screen.visibleFrame
+                var dockOrientation = "bottom"
+                if let defaults = UserDefaults(suiteName: "com.apple.dock"), let orientation = defaults.string(forKey: "orientation") { dockOrientation = orientation }
+                switch dockOrientation {
+                case "bottom":
+                    // Dock 位于屏幕底部
+                    menuX = menuX + 372 > visibleFrame.maxX ? visibleFrame.maxX : menuX - 176
+                    menuY = max(menuY, visibleFrame.origin.y) + 20
+                case "right":
+                    // Dock 位于屏幕右侧
+                    menuX = menuX + 352 > visibleFrame.maxX ? visibleFrame.maxX - 372 : menuX + 10
+                    menuY = max(menuY - CGFloat((max(allDevices.count,1)+hiddenRow)*37+25)/2, visibleFrame.origin.y)
+                case "left":
+                    // Dock 位于屏幕左侧
+                    menuX = menuX + 352 > visibleFrame.maxX ? visibleFrame.maxX - 372 : menuX
+                    menuX = menuX < visibleFrame.origin.x ? visibleFrame.origin.x + 20 : menuX + 10
+                    menuY = max(menuY - CGFloat((max(allDevices.count,1)+hiddenRow)*37+25)/2, visibleFrame.origin.y)
+                default:
+                    print("⚠️ Failed to get Dock orientation!")
+                }
             }
-            contentView.frame = NSRect(x: mouse.x-176, y: mouse.y+20, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+25))
+            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+25))
             dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
             dockWindow.title = "AirBattery Dock Window"
             dockWindow.level = .popUpMenu
