@@ -2,7 +2,7 @@
 <p align="center">
 <img src="./AirBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
 <h1 align="center">AirBattery</h1>
-<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock栏、状态栏上或小组件上!<br><a href="./README_en.md">[English Version]</a></h3> 
+<h3 align="center">在 Mac 上获取你所有设备的电量信息并显示在Dock栏、状态栏上或小组件上!<br><a href="./README_en.md">[English Version]</a> / <a href="https://lihaoyun6.github.io/airbattery/">[软件主页]</a></h3> 
 </p>
 
 ## 运行截图
@@ -21,8 +21,8 @@ brew install lihaoyun6/tap/airbattery
 ### 使用:
 - AirBattery 启动后默认同时显示在 Dock 栏和状态栏上, 也可以只显示其中之一.  
 - 无需任何手动配置, AirBattery 启动后会自动搜索所有支持隔空电量获取的设备. 
-- 右键单击 Dock 图标、左键单击状态栏图标、或添加小组件查看周边设备的电量. 
-- 您还可以在偏好设置中将状态栏图标更改为实时电量显示, 就像系统自带的那样.  
+- 左/右键单击 Dock 图标、左键单击状态栏图标、或添加小组件查看周边设备的电量. 
+- 您还可以在偏好设置中将状态栏图标更改为实时电量显示, 就像系统自带图标的那样.  
 - 如有需要, 可以在 Dock 栏菜单或状态栏菜单中隐藏某些设备, 亦可随时解除隐藏.  
 
 ## 常见问题
