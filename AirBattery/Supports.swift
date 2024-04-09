@@ -307,8 +307,12 @@ func getDeviceIcon(_ d: Device) -> String {
             if ["iPad8", "iPad13", "iPad14"].contains(m) { return "ipad" }
             return "ipad.gen1" }
         return  "ipad"
+    case "iPod":
+        return "ipodtouch"
     case "Watch":
         return "applewatch"
+    case "RealityDevice":
+        return "visionpro"
     case "Trackpad":
         return "trackpad.fill"
     case "Keyboard":
