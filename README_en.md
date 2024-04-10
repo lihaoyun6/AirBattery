@@ -2,7 +2,7 @@
 <p align="center">
 <img src="./AirBattery/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png" width="200" height="200" />
 <h1 align="center">AirBattery</h1>
-<h3 align="center">Get battery info of all your devices on Mac and show them on the Dock or StatusBar even Widgets!<br><a href="./README.md">[中文版本]</a></h3> 
+<h3 align="center">Get battery info of all your devices on Mac and show them on the Dock / StatusBar / Widgets!<br><a href="./README.md">[中文版本]</a></h3> 
 </p>
 
 ## Screenshots
@@ -11,6 +11,9 @@
 </p>
 
 ## Installation and Usage
+### System Requirements:
+- macOS 11.0 and Later  
+
 ### Installation:
 Download the latest installation file [here](../../releases/latest) or install via Homebrew:  
 
