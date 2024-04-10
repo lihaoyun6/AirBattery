@@ -7,7 +7,7 @@
 
 ## Screenshots
 <p align="center">
-<img src="./img/Preview.png" width="699"/> 
+<img src="./img/preview.png" width="699"/> 
 </p>
 
 ## Installation and Usage
@@ -20,6 +20,7 @@ brew install lihaoyun6/tap/airbattery
 
 ### Usage: 
 - After AirBattery is started, it will be displayed on both the Dock and the status bar by default, or only one of them (can be configured)  
+
 - AirBattery will automatically search for all devices supported by the **"Nearbility Engine"** without manual configuration.  
 - Left/Right-click the Dock icon/left-click the status bar icon, or add a widget to view the battery level of your devices.  
 - You can also change the status bar icon to a real-time battery icon in preferences, just like the one that comes with the system.  
@@ -30,7 +31,7 @@ brew install lihaoyun6/tap/airbattery
 > Please make sure the iPhone/iPad has trusted this Mac ***(and connected the Mac with a data cable at least once while AirBattery is running to pair)***. Then just make sure it is on the same LAN as the Mac.  
 
 **2. Does my Apple Watch need to be pre-connected?**
-> No, once AirBattery detects your iPhone, it will automatically read the battery information of the Apple Watch paired with it.  
+> No, when AirBattery detects your iPhone via WiFi or cable, it will automatically read the battery information of the Apple Watch paired with it **(iPhone discovered via Bluetooth does not support reading the watch battery!)** 
 
 **3. Why do some device name have a ⚠️ symbol?**
 > If this symbol appears, it means that the device has not updated its battery information for more than ten minutes, and may be offline or turned off.  

@@ -7,7 +7,7 @@
 
 ## 运行截图
 <p align="center">
-<img src="./img/Preview.png" width="699"/> 
+<img src="./img/preview.png" width="699"/> 
 </p>
 
 ## 安装与使用
@@ -20,6 +20,7 @@ brew install lihaoyun6/tap/airbattery
 
 ### 使用:
 - AirBattery 启动后默认同时显示在 Dock 栏和状态栏上, 也可以只显示其中之一.  
+
 - 无需任何手动配置, AirBattery 启动后会自动搜索所有支持隔空电量获取的设备. 
 - 左/右键单击 Dock 图标、左键单击状态栏图标、或添加小组件查看周边设备的电量. 
 - 您还可以在偏好设置中将状态栏图标更改为实时电量显示, 就像系统自带图标的那样.  
@@ -30,7 +31,7 @@ brew install lihaoyun6/tap/airbattery
 > 请确保 iPhone/iPad 已信任此 Mac ***(且至少在 AirBattery 运行状态下使用数据线连接 Mac 一次以进行配对)***. 之后只需确保其与 Mac 处于同一局域网中即可.  
 
 **2. 我的 Apple Watch 也需要进行预连接吗?**  
-> 不需要, 一旦 AirBattery 检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息.
+> 不需要, 一旦 AirBattery 通过 WiFi 或数据线检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息 **(通过蓝牙发现的 iPhone 不支持读取手表电量!)**
 
 **3. 为什么某些设备名称前有一个⚠️符号?**
 > 出现这个符号, 说明此设备已经超过十分钟以上没有更新过电量信息, 可能已离线或关闭.
