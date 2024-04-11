@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showThisMac") var showThisMac = "icon"
+    //@AppStorage("useDeviceName") var useDeviceName = true
     @AppStorage("showMacOnWidget") var showMacOnWidget = true
     @AppStorage("revListOnWidget") var revListOnWidget = false
     @AppStorage("rollingMode") var rollingMode = "auto"

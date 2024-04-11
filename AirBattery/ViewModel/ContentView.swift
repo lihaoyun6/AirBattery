@@ -31,7 +31,7 @@ struct BarChartView: View {
 
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
-    @AppStorage("machineName") var machineName = "Mac"
+    //@AppStorage("machineType") var machineType = "Mac"
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("showOn") var showOn = "both"
     
@@ -212,7 +212,7 @@ struct MultiBatteryView: View {
             
             
             if rollingMode == "off" { rollCount = 1 }
-            if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ibToAb(ibStatus), at: 0) }
+            if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ib2ab(ibStatus), at: 0) }
 
             batteryList = sliceList(data: list, length: 4, count: rollCount)
             if batteryList == []{

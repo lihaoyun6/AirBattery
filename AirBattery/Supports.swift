@@ -5,11 +5,15 @@
 //  Created by apple on 2024/2/9.
 //
 import SwiftUI
+import SystemConfiguration
 import UserNotifications
 
 let dockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+let macList = ["MacBookPro1,1":"macbook.gen1", "MacBookPro1,2":"macbook.gen1", "MacBookPro2,1":"macbook.gen1", "MacBookPro2,2":"macbook.gen1", "MacBookPro3,1":"macbook.gen1", "MacBookPro4,1":"macbook.gen1", "MacBookPro5,1":"macbook.gen1", "MacBookPro5,2":"macbook.gen1", "MacBookPro5,3":"macbook.gen1", "MacBookPro5,4":"macbook.gen1", "MacBookPro5,5":"macbook.gen1", "MacBookPro6,1":"macbook.gen1", "MacBookPro6,2":"macbook.gen1", "MacBookPro7,1":"macbook.gen1", "MacBookPro8,1":"macbook.gen1", "MacBookPro8,2":"macbook.gen1", "MacBookPro8,3":"macbook.gen1", "MacBookPro9,1":"macbook.gen1", "MacBookPro9,2":"macbook.gen1", "MacBookPro10,1":"macbook.gen1", "MacBookPro10,2":"macbook.gen1", "MacBookPro11,1":"macbook.gen1", "MacBookPro11,2":"macbook.gen1", "MacBookPro11,3":"macbook.gen1", "MacBookPro11,4":"macbook.gen1", "MacBookPro11,5":"macbook.gen1", "MacBookPro12,1":"macbook.gen1", "MacBookPro13,1":"macbook.gen1", "MacBookPro13,2":"macbook.gen1", "MacBookPro13,3":"macbook.gen1", "MacBookPro14,1":"macbook.gen1", "MacBookPro14,2":"macbook.gen1", "MacBookPro14,3":"macbook.gen1", "MacBookPro15,1":"macbook.gen1", "MacBookPro15,2":"macbook.gen1", "MacBookPro15,3":"macbook.gen1", "MacBookPro15,4":"macbook.gen1", "MacBookPro16,1":"macbook.gen1", "MacBookPro16,2":"macbook.gen1", "MacBookPro16,3":"macbook.gen1", "MacBookPro16,4":"macbook.gen1", "MacBookPro17,1":"macbook.gen1", "MacBookPro18,1":"macbook", "MacBookPro18,2":"macbook", "MacBookPro18,3":"macbook", "MacBookPro18,4":"macbook", "Mac14,5":"macbook", "Mac14,6":"macbook", "Mac14,7":"macbook.gen1", "Mac14,9":"macbook", "Mac14,10":"macbook", "Mac15,3":"macbook", "Mac15,6":"macbook", "Mac15,7":"macbook", "Mac15,8":"macbook", "Mac15,9":"macbook", "Mac15,10":"macbook", "Mac15,11":"macbook"]
+let macID = getMacModelIdentifier()
+
 
 struct dayAndWeek {
     var day: String
@@ -165,8 +169,8 @@ func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
 }
 
 func getPowerState() -> iBattery {
-    @AppStorage("machineName") var machineName = "Mac"
-    if !machineName.lowercased().contains("book") { return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0) }
+    @AppStorage("machineType") var machineType = "Mac"
+    if !machineType.lowercased().contains("book") { return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0) }
     let internalFinder = InternalFinder()
     if let internalBattery = internalFinder.getInternalBattery() {
         if let level = internalBattery.charge {
@@ -202,9 +206,10 @@ func getMonoNum(_ num: Int, count: Int = 3, bold: Bool = false) -> String {
     return String(repeating: "  ", count: (count - output.count)) + output.joined()
 }
 
-func ibToAb(_ ib: iBattery) -> Device {
-    @AppStorage("machineName") var machineName = "Mac"
-    return Device(deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: machineName, deviceModel: machineName, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged,acPowered: ib.acPowered, lastUpdate: Double(Date().timeIntervalSince1970))
+func ib2ab(_ ib: iBattery) -> Device {
+    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("deviceName") var deviceName = "Mac"
+    return Device(deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: deviceName, deviceModel: machineType, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged,acPowered: ib.acPowered, lastUpdate: Double(Date().timeIntervalSince1970))
 }
 
 func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
@@ -237,7 +242,7 @@ func batteryAlert() {
     }
 }
 
-func getMachineName() -> String {
+func getMacDeviceType() -> String {
     guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPHardwareDataType", "-json"]) else { return "Mac" }
     if let json = try? JSONSerialization.jsonObject(with: Data(result.utf8), options: []) as? [String: Any],
        let SPHardwareDataTypeRaw = json["SPHardwareDataType"] as? [Any],
@@ -246,6 +251,28 @@ func getMachineName() -> String {
         return model
     }
     return "Mac"
+}
+
+func getMacModelIdentifier() -> String {
+    var size = 0
+    sysctlbyname("hw.model", nil, &size, nil, 0)
+    var model = [CChar](repeating: 0,  count: Int(size))
+    sysctlbyname("hw.model", &model, &size, nil, 0)
+    if let modelString = String(validatingUTF8: model) {
+        return modelString
+    } else {
+        return "unknow"
+    }
+}
+
+func getMacDeviceName() -> String {
+    @AppStorage("machineType") var machineType = "Mac"
+    var computerName: CFString?
+    if let dynamicStore = SCDynamicStoreCreate(nil, "GetComputerName" as CFString, nil, nil) {
+        computerName = SCDynamicStoreCopyComputerName(dynamicStore, nil) as CFString?
+    }
+    if let name = computerName as String? { return name }
+    return machineType
 }
 
 func getHeadphoneModel(_ model: String) -> String {
@@ -451,7 +478,10 @@ func getDeviceIcon(_ d: Device) -> String {
         return "airpodspro.case.fill"
     case "Mac":
         let m = (d.deviceModel ?? "").lowercased().replacingOccurrences(of: " ", with: "")
-        if m.contains("macbook") { return "macbook" }
+        if m.contains("macbook") {
+            if let icon = macList[macID] { return icon }
+            return "macbook"
+        }
         if m.contains("macmini") { return "macmini.fill" }
         if m.contains("macstudio") { return "macstudio.fill" }
         if m.contains("macpro") { return "macpro.gen3.fill" }

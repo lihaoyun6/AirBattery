@@ -42,7 +42,7 @@ struct Device: Hashable, Codable {
 class AirBatteryModel {
     static var lock = false
     static var Devices: [Device] = []
-    static let machineName = UserDefaults.standard.string(forKey: "machineName") ?? "Mac"
+    static let machineType = UserDefaults.standard.string(forKey: "machineType") ?? "Mac"
     static let key = "com.lihaoyun6.AirBattery.widget"
     
     static func updateDevice(_ device: Device) {
@@ -120,7 +120,7 @@ class AirBatteryModel {
         
         var devices = getAll(reverse: revList)
         let ibStatus = InternalBattery.status
-        if ibStatus.hasBattery && showMac { devices.insert(ibToAb(ibStatus), at: 0) }
+        if ibStatus.hasBattery && showMac { devices.insert(ib2ab(ibStatus), at: 0) }
         do {
             let jsonData = try JSONEncoder().encode(devices)
             try jsonData.write(to: getJsonURL())

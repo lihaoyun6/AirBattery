@@ -22,7 +22,8 @@ struct AirBatteryApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("showOn") var showOn = "both"
-    @AppStorage("machineName") var machineName = "Mac"
+    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
@@ -45,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             var allDevices = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
-            if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
+            if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
             let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
             let contentView = NSHostingView(rootView: contentViewSwiftUI)
             let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
@@ -95,7 +96,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
         
-        machineName = getMachineName()
+        machineType = getMacDeviceType()
+        deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
         AirBatteryModel.writeData()
         WidgetCenter.shared.reloadAllTimelines()
@@ -176,7 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
-        if ibStatus.hasBattery { allDevices.insert(ibToAb(ibStatus), at: 0) }
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
         let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         var hiddenRow = 0
@@ -212,14 +214,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let batteryColor = getPowerColor(level, emoji: true)
             var timeText = ""
             if ibStatus.isCharging { timeText = "Time until full: ".local + "\(ibStatus.timeLeft)" } else { timeText = "Time until empty: ".local + "\(ibStatus.timeLeft)" }
-            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(level))\(ibStatus.isCharging ? " ⚡︎ " : "﹪")  \(machineName)", action: #selector(blank), keyEquivalent: "")
-            let alte = NSMenuItem(title: "[\(timeText)]  \(machineName)", action: nil, keyEquivalent: "")
+            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(level))\(ibStatus.isCharging ? " ⚡︎ " : "﹪")  \(machineType)", action: #selector(blank), keyEquivalent: "")
+            let alte = NSMenuItem(title: "[\(timeText)]  \(machineType)", action: nil, keyEquivalent: "")
             alte.isAlternate = true
             alte.keyEquivalentModifierMask = .option
             menu.addItem(main)
             menu.addItem(alte)
         } else {
-            menu.addItem(withTitle: machineName, action: #selector(blank), keyEquivalent: "")
+            menu.addItem(withTitle: machineType, action: #selector(blank), keyEquivalent: "")
         }
         menu.addItem(NSMenuItem.separator())
         for d in AirBatteryModel.getAll() {
