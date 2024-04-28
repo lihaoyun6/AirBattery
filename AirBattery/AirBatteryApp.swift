@@ -133,7 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 button.image = image
             }
         }
-        if showOn == "dock" { statusBarItem.isVisible = false }
+        if showOn == "dock" || showOn == "none" { statusBarItem.isVisible = false }
         print("⚙️ Icon mode = \(showOn)")
         NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView(statusBarItem: statusBarItem))
         NSApp.dockTile.display()

@@ -197,10 +197,13 @@ struct MultiBatteryView: View {
                 NSApp.dockTile.display()
                 if statusBarItem.isVisible == false { statusBarItem.isVisible.toggle() }
                 if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
-            } else {
+            } else if showOn == "dock" {
                 NSApp.dockTile.display()
                 if statusBarItem.isVisible == true { statusBarItem.isVisible.toggle() }
                 if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
+            } else {
+                if statusBarItem.isVisible == true { statusBarItem.isVisible.toggle() }
+                if NSApp.activationPolicy() != .accessory { NSApp.setActivationPolicy(.accessory) }
             }
             
             if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }

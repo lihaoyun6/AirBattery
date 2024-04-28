@@ -49,6 +49,7 @@ struct SettingsView: View {
                         Text("Dock").tag("dock")
                         Text("Status Bar").tag("sbar")
                         Text("Both").tag("both")
+                        Text("None").tag("none")
                     }.pickerStyle(.segmented)
                     
                     Picker("", selection: $disappearTime) {
