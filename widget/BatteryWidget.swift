@@ -80,7 +80,7 @@ struct LargeWidgetView : View {
     
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make the widget work.".local)
+            Text("AirBattery is not running\nLaunch the app to make the widget work.")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -94,12 +94,12 @@ struct LargeWidgetView : View {
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 20, height: 20, alignment: .center)
-                                Text("Device Name Placeholder")
+                                Text("                       ")
                                     .font(.system(size: 11))
                                     .frame(height: 31, alignment: .center)
                                     .padding(.horizontal, 7)
                                 Spacer()
-                                Text("100%")
+                                Text("     ")
                                     .font(.system(size: 11))
                                 Image("blank")
                                     .resizable()
@@ -161,7 +161,7 @@ struct SmallWidgetView : View {
     
     var body: some View {
         if !entry.mainApp {
-            Text("AirBattery is not running\nLaunch the app to make\nthe widget work.".local)
+            Text("AirBattery is not running\nLaunch the app to make\nthe widget work.")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -300,7 +300,7 @@ struct MediumWidgetView : View {
 
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make the widget work.".local)
+            Text("AirBattery is not running\nLaunch the app to make the widget work.")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -313,14 +313,13 @@ struct MediumWidgetView : View {
                                 .stroke(lineWidth: lineWidth)
                                 .frame(width: 58, alignment: .center)
                                 .opacity(0.15)
-                            Text("100%")
+                            Text("     ")
                                 .font(.system(size: 17))
                                 .frame(width: 58, alignment: .center)
                         }
                     }
                 }
             } else {
-                
                 HStack(spacing: 23) {
                     ForEach(entry.data[0..<4], id: \.self) { item in
                         VStack(spacing: 17){
@@ -381,6 +380,44 @@ struct MediumWidgetView : View {
                 .offset(y:3)
             }
         }
+    }
+}
+
+struct BatteryView: View {
+    var item: Device
+    var body: some View {
+        let width = round(max(1, min(19, Double(item.batteryLevel)/100*19)))
+        ZStack{
+            ZStack(alignment: .leading) {
+                Image("batt_outline_bold")
+                Group{
+                    Rectangle()
+                        .fill(Color(getPowerColor(item.batteryLevel)))
+                        .frame(width: width, height: 8, alignment: .leading)
+                        .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
+                }.offset(x:2)
+            }
+            //.frame(width: 25.5, height: 12, alignment: .leading)
+            if item.deviceID == "@MacInternalBattery" {
+                if item.acPowered {
+                    Image("batt_" + ((item.isCharging != 0 || item.isCharged) ? "bolt" : "plug") + "_mask")
+                        .blendMode(.destinationOut)
+                        .offset(x:-1.5)
+                    Image("batt_" + ((item.isCharging != 0 || item.isCharged) ? "bolt" : "plug"))
+                        .offset(x:-1.5)
+                        .foregroundColor(Color("black_white"))
+                }
+            }else{
+                if item.isCharging != 0 {
+                    Image("batt_" + ((item.isCharging == 5) ? "plug" : "bolt") + "_mask")
+                        .blendMode(.destinationOut)
+                        .offset(x:-1.5)
+                    Image("batt_" + ((item.isCharging == 5) ? "plug" : "bolt"))
+                        .offset(x:-1.5)
+                        .foregroundColor(Color("black_white"))
+                }
+            }
+        }.compositingGroup()
     }
 }
 

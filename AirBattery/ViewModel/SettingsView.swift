@@ -29,6 +29,10 @@ struct SettingsView: View {
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("alertLevel") var alertLevel = 10
     @AppStorage("alertSound") var alertSound = true
+    @AppStorage("deviceOnWidget") var deviceOnWidget = ""
+    @AppStorage("deviceName") var deviceName = "Mac"
+    @AppStorage("updateInterval") var updateInterval = 1.0
+    @State var devices = [String]()
     
     var body: some View {
         TabView {
@@ -36,6 +40,7 @@ struct SettingsView: View {
                 VStack(alignment:.trailing, spacing: 22){
                     Text("Launch at Login")
                     Text("Show AirBattery on:")
+                    Text("Update Interval:")
                     Text("Remove Offline Device:")
                 }
                 VStack(alignment:.leading, spacing: 15){
@@ -50,8 +55,33 @@ struct SettingsView: View {
                         Text("Status Bar").tag("sbar")
                         Text("Both").tag("both")
                         Text("None").tag("none")
-                    }.pickerStyle(.segmented)
-                    
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: showOn) { newValue in
+                        switch newValue {
+                        case "sbar":
+                            statusBarItem.isVisible = true
+                            NSApp.setActivationPolicy(.accessory)
+                        case "both":
+                            statusBarItem.isVisible = true
+                            NSApp.setActivationPolicy(.regular)
+                        case "dock":
+                            statusBarItem.isVisible = false
+                            NSApp.setActivationPolicy(.regular)
+                        default:
+                            statusBarItem.isVisible = false
+                            NSApp.setActivationPolicy(.accessory)
+                        }
+                    }
+                    Picker("", selection: $updateInterval) {
+                        Text("Short").tag(1.0)
+                        Text("Medium").tag(2.0)
+                        Text("Long").tag(3.0)
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: updateInterval) { _ in
+                        _ = AppDelegate.shared.createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
+                    }
                     Picker("", selection: $disappearTime) {
                         Text("after 20min").tag(20)
                         Text("after 40min").tag(40)
@@ -142,8 +172,12 @@ struct SettingsView: View {
             HStack(spacing: 0){
                 VStack(alignment:.leading, spacing: 15){
                     HStack{
-                        Toggle(isOn: $intBattOnStatusBar) {}.toggleStyle(.switch)
-                        Text("Show Mac Battery (relaunch needed)")
+                        Toggle(isOn: $intBattOnStatusBar) {}
+                            .toggleStyle(.switch)
+                            .onChange(of: intBattOnStatusBar) { _ in
+                                _ = AppDelegate.shared.createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
+                            }
+                        Text("Show Built-in Battery")
                     }
                     HStack{
                         Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
@@ -162,17 +196,29 @@ struct SettingsView: View {
             }
             
             HStack(spacing: 0){
-                VStack(alignment:.leading, spacing: 15){
+                VStack(alignment:.center, spacing: 15){
                     HStack{
                         Toggle(isOn: $showMacOnWidget) {}.toggleStyle(.switch)
-                        Text("Show Mac Battery")
-                    }
-                    HStack{
+                        Text("Show Built-in Battery")
+                        Spacer()
                         Toggle(isOn: $revListOnWidget) {}.toggleStyle(.switch)
-                        Text("Reverse device list")
+                        Text("Reverse Device List")
+                    }.frame(width: 340)
+                    Picker("Single Device Widget", selection: $deviceOnWidget) {
+                        Text(deviceName).tag(deviceName)
+                        ForEach(devices, id: \.self) { device in
+                            Text(device).tag(device)
+                        }
+                        if !devices.contains(deviceOnWidget) {
+                            Text(deviceOnWidget).tag(deviceOnWidget)
+                        }
                     }
+                    .frame(width: 340)
+                    .onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
                 }
             }
+            .onAppear { devices = AirBatteryModel.getAll(noFilter: true).map({ $0.deviceName }) }
+            .onReceive(dockTimer) { _ in devices = AirBatteryModel.getAll(noFilter: true).map({ $0.deviceName }) }
             .navigationTitle("AirBattery Settings")
             .tabItem {
                 Image("widget")

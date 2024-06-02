@@ -15,9 +15,11 @@ class MagicBattery {
     var scanTimer: Timer?
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readAirpods") var readAirpods = true
+    @AppStorage("updateInterval") var updateInterval = 1.0
     
     func startScan() {
-        scanTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
+        let interval = TimeInterval(10.0 * updateInterval)
+        scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning Magic devices...")
         Thread.detachNewThread {
             if self.readBTDevice {

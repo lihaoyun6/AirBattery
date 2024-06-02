@@ -46,7 +46,7 @@ struct BatteryView: View {
 }
 
 struct mainBatteryView: View {
-    @State var statusBarItem: NSStatusItem
+    //@State var statusBarItem: NSStatusItem
     @State var item: iBattery = InternalBattery.status
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
@@ -81,7 +81,7 @@ struct mainBatteryView: View {
             .compositingGroup()
             .onReceive(dockTimer) { t in
                 func setStatusBar(width: Double) {
-                    let iconView = NSHostingView(rootView: mainBatteryView(statusBarItem: statusBarItem))
+                    let iconView = NSHostingView(rootView: mainBatteryView())
                     iconView.frame = NSRect(x: 0, y: 0, width: width, height: 21.5)
                     statusBarItem.button?.subviews.removeAll()
                     statusBarItem.button?.addSubview(iconView)

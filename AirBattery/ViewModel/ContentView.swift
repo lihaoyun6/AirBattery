@@ -35,7 +35,7 @@ struct MultiBatteryView: View {
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("showOn") var showOn = "both"
     
-    @State var statusBarItem: NSStatusItem
+    //@State var statusBarItem: NSStatusItem
 
     @State private var rollCount = 1
     @State private var darkMode = getDarkMode()
@@ -186,25 +186,10 @@ struct MultiBatteryView: View {
             //WidgetCenter.shared.reloadAllTimelines()
         }
         .onReceive(dockTimer) { t in
-            //NSApp.dockTile.display()
+            if showOn == "both" || showOn == "dock" { NSApp.dockTile.display() }
             InternalBattery.status = getPowerState()
             let windows = NSApplication.shared.windows
             for w in windows { if w.level.rawValue == 0 || w.level.rawValue == 3 { w.level = .floating } }
-            if showOn == "sbar"{
-                if statusBarItem.isVisible == false { statusBarItem.isVisible.toggle() }
-                if NSApp.activationPolicy() != .accessory { NSApp.setActivationPolicy(.accessory) }
-            } else if showOn == "both" {
-                NSApp.dockTile.display()
-                if statusBarItem.isVisible == false { statusBarItem.isVisible.toggle() }
-                if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
-            } else if showOn == "dock" {
-                NSApp.dockTile.display()
-                if statusBarItem.isVisible == true { statusBarItem.isVisible.toggle() }
-                if NSApp.activationPolicy() != .regular { NSApp.setActivationPolicy(.regular) }
-            } else {
-                if statusBarItem.isVisible == true { statusBarItem.isVisible.toggle() }
-                if NSApp.activationPolicy() != .accessory { NSApp.setActivationPolicy(.accessory) }
-            }
             
             if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
             
@@ -212,7 +197,6 @@ struct MultiBatteryView: View {
             var list = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
             let now = Double(t.timeIntervalSince1970)
-            
             
             if rollingMode == "off" { rollCount = 1 }
             if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ib2ab(ibStatus), at: 0) }

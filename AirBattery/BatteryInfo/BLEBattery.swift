@@ -91,6 +91,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
     @AppStorage("readAirpods") var readAirpods = true
+    @AppStorage("updateInterval") var updateInterval = 1.0
     var centralManager: CBCentralManager!
     var peripherals: [CBPeripheral?] = []
     var otherAppleDevices: [String] = []
@@ -117,7 +118,8 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func startScan() {
         // 每隔一段时间启动一次扫描
-        scanTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(scan), userInfo: nil, repeats: true)
+        let interval = TimeInterval(10.0 * updateInterval)
+        scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scan), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning BLE devices...")
         // 立即启动一次扫描
         //scan(longScan: true)
@@ -149,13 +151,13 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 //获取非Apple的普通BLE设备数据
                 if readBLEDevice {
                     if let device = AirBatteryModel.getByName(deviceName) {
-                        if now - device.lastUpdate > 60 { get = true } } else { get = true }
+                        if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
                 }
             } else {
                 if data.count > 2 {
                     //获取ios个人热点广播数据
                     if [16, 12].contains(data[2]) && !otherAppleDevices.contains(deviceName) && ideviceOverBLE {
-                        if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 { get = true } } else { get = true }
+                        if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
                     }
                     //获取Airpods合盖状态消息
                     if data.count == 25 && data[2] == 18 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "close") }

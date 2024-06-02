@@ -8,10 +8,20 @@ import AppKit
 import SwiftUI
 import WidgetKit
 import UserNotifications
+import Sparkle
+
+var updaterController: SPUStandardUpdaterController!
+var statusBarItem: NSStatusItem!
 
 @main
 struct AirBatteryApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    init() {
+        // If you want to start the updater manually, pass false to startingUpdater and call .startUpdater() later
+        // This is where you can also pass an updater delegate if you need one
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    }
     
     var body: some Scene {
         Settings {
@@ -21,6 +31,7 @@ struct AirBatteryApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    static let shared = AppDelegate()
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -30,7 +41,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
     
-    var statusBarItem: NSStatusItem!
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
     var dockWindow = NSWindow()
@@ -90,6 +100,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return true
     }
     
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        UserDefaults.standard.register( // default defaults (used if not set)
+            defaults: [
+                "showOn": "both",
+                "machineType": "Mac",
+                "deviceName": "Mac",
+                "launchAtLogin": false,
+                "intBattOnStatusBar": true,
+                "statusBarBattPercent": false,
+                "hidePercentWhenFull": false,
+                "deviceOnWidget": "@@@@@@@@@@@@@@@@@@@@"
+            ]
+        )
+    }
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if showOn == "sbar" { NSApp.setActivationPolicy(.accessory) }
         //if let window = NSApplication.shared.windows.first { window.close() }
@@ -100,6 +125,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
         AirBatteryModel.writeData()
+        _ = AirBatteryModel.singleDeviceName()
         WidgetCenter.shared.reloadAllTimelines()
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
@@ -121,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let ib = getPowerState()
             
             if ib.hasBattery && intBattOnStatusBar {
-                let iconView = NSHostingView(rootView: mainBatteryView(statusBarItem: statusBarItem))
+                let iconView = NSHostingView(rootView: mainBatteryView())
                 iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
                 if hidePercentWhenFull && ib.batteryLevel >= 90 {
                     iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
@@ -133,9 +159,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 button.image = image
             }
         }
-        if showOn == "dock" || showOn == "none" { statusBarItem.isVisible = false }
+        statusBarItem.isVisible = !(showOn == "dock" || showOn == "none")
         print("⚙️ Icon mode = \(showOn)")
-        NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView(statusBarItem: statusBarItem))
+        NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView())
         NSApp.dockTile.display()
     }
     
@@ -205,6 +231,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
         }
     }
+    
     func getMenu(fromDock: Bool = false) {
         let now = Double(Date().timeIntervalSince1970)
         let ibStatus = InternalBattery.status
@@ -265,5 +292,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         dockWindow.orderOut(nil)
         getMenu(fromDock: true)
         return menu
+    }
+    
+    func createAlert(level: NSAlert.Style = .warning, title: String, message: String, button1: String, button2: String = "") -> NSAlert {
+        let alert = NSAlert()
+        alert.messageText = title.local
+        alert.informativeText = message.local
+        alert.addButton(withTitle: button1.local)
+        if button2 != "" { alert.addButton(withTitle: button2.local) }
+        alert.alertStyle = level
+        return alert
     }
 }
