@@ -242,6 +242,18 @@ struct SettingsView: View {
             }
             .navigationTitle("AirBattery Settings")
             .tabItem { Label(" Alert ", systemImage: "bell") }
+            VStack(alignment:.center, spacing: 15) {
+                Form(){
+                    UpdaterSettingsView(updater: updaterController.updater)
+                }
+                Button(action: {
+                    updaterController.updater.checkForUpdates()
+                }, label: {
+                    Text("Check for Updates…")
+                })
+            }
+            .navigationTitle("AirBattery Settings")
+            .tabItem { Label("Update", systemImage: "chevron.up.circle") }
         }
         .frame(width: 490, height: 170)
     }

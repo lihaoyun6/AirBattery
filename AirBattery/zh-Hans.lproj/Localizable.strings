@@ -80,3 +80,7 @@
 "Restart AirBattery to apply this change." = "请手动重启 AirBattery 以应用此修改.";
 "OK" = "好";
 "Searching for " = "正在搜寻: ";
+"Update" = "更新设置";
+"Check for Updates…" = "检查程序更新…";
+"Automatically check for updates" = "自动检查程序更新";
+"Automatically download updates" = "自动下载程序更新";
