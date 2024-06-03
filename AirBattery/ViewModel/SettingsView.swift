@@ -141,7 +141,7 @@ struct SettingsView: View {
                 VStack(alignment:.trailing, spacing: 22){
                     Text("Appearance:")
                     Text("Show This Mac:")
-                    Text("Loop mode:")
+                    Text("Carousel mode:")
                 }
                 VStack(alignment:.leading, spacing: 15){
                     Picker("", selection: $appearance) {
