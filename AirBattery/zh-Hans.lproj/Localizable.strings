@@ -57,7 +57,7 @@
 "Hidden Device:" = "已隐藏的设备:";
 "Data Source:" = "数据来源:";
 "StatusBar" = "状态栏图标";
-"Show Built-in Battery" = "显示内建电池";
+"Show Built-in Battery" = "显示内建电池用量";
 "Show Battery Percentage" = "显示电池百分比";
 "Hidden Percentage above 90%" = "高于 90% 时不显示";
 "Try to get battery info from all BLE devices (Beta)" = "尝试读取周边所有 BLE 设备的电量信息 (实验性, 谨慎开启)";

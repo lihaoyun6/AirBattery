@@ -50,7 +50,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
-        if showOn == "sbar" { return false }
+        if showOn == "sbar" {
+            openSettingPanel()
+            return false
+        }
         if dockWindow.isVisible {
             dockWindow.orderOut(nil)
         } else {
@@ -101,6 +104,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationWillFinishLaunching(_ notification: Notification) {
+        if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
         UserDefaults.standard.register( // default defaults (used if not set)
             defaults: [
                 "showOn": "both",
@@ -116,7 +120,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        if showOn == "sbar" { NSApp.setActivationPolicy(.accessory) }
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")

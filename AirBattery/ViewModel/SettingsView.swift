@@ -203,7 +203,7 @@ struct SettingsView: View {
                         Spacer()
                         Toggle(isOn: $revListOnWidget) {}.toggleStyle(.switch)
                         Text("Reverse Device List")
-                    }.frame(width: 340)
+                    }.frame(width: 360)
                     Picker("Single Device Widget", selection: $deviceOnWidget) {
                         Text(deviceName).tag(deviceName)
                         ForEach(devices, id: \.self) { device in
@@ -213,7 +213,7 @@ struct SettingsView: View {
                             Text(deviceOnWidget).tag(deviceOnWidget)
                         }
                     }
-                    .frame(width: 340)
+                    .frame(width: 360)
                     .onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
                 }
             }
