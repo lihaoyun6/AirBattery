@@ -3,6 +3,21 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.3.3</title>
+            <pubDate>Mon, 03 Jun 2024 15:57:08 +0800</pubDate>
+            <sparkle:version>133</sparkle:version>
+            <sparkle:shortVersionString>1.3.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 5;padding-left: 18;}</style><ul>
+                  <li>更换了新的 App 图标, 更正了部分字符串</li>
+                  </ul><ul>
+                  <li>Updated the new App icon and corrected some strings</li>
+                  </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="350"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.3/AirBattery_v1.3.3.dmg" length="7266273" type="application/octet-stream" sparkle:edSignature="l/ALXQPAaukdZQBqGBaf5zA47Y+2CpGlHX/rvI8KckG4QmvIcsHAZZEzCL1WzMcCo3iC0joIi54fYH8iqGo7DQ=="/>
+        </item>
+        <item>
             <title>v1.3.2</title>
             <pubDate>Mon, 03 Jun 2024 09:13:34 +0800</pubDate>
             <sparkle:version>132</sparkle:version>
