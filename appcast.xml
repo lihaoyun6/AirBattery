@@ -3,6 +3,21 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.3.2</title>
+            <pubDate>Mon, 03 Jun 2024 09:13:34 +0800</pubDate>
+            <sparkle:version>132</sparkle:version>
+            <sparkle:shortVersionString>1.3.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 5;padding-left: 18;}</style><ul>
+                  <li>修复了当显示模式设为"仅菜单栏"时 Dock 图标隐藏不彻底的问题</li>
+                  </ul><ul>
+                  <li>Fixed: Dock icon not hiding completely when use "Status Bar" mode.</li>
+                  </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="350"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.2/AirBattery_v1.3.2.dmg" length="7189532" type="application/octet-stream" sparkle:edSignature="7D6wvN0CXYsHblF48OnzomiY61a99SUeB7b4yF1VQO11kNymCzb9g2rKlYT2lOSiYE9j9zLTw3RJTZSOGsQWAA=="/>
+        </item>
+        <item>
             <title>1.3.1</title>
             <pubDate>Mon, 03 Jun 2024 02:04:46 +0800</pubDate>
             <sparkle:version>131</sparkle:version>
