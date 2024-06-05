@@ -43,27 +43,27 @@ struct doubleBatteryWidgetEntryView : View {
                             VStack(spacing: 17){
                                 ZStack{
                                     Group {
-                                        Circle()
-                                            .stroke(lineWidth: lineWidth)
-                                            .opacity(0.15)
-                                        Circle()
-                                            .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .rotationEffect(Angle(degrees: 270.0))
-                                        Circle()
-                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
-                                            .rotationEffect(Angle(degrees: 270.0))
-                                            .clipShape( Circle().stroke(lineWidth: lineWidth) )
-                                        Circle()
-                                            .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .rotationEffect(Angle(degrees: 270.0))
-                                        
+                                        Group {
+                                            Circle()
+                                                .trim(from: 0.0, to: 0.78)
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .opacity(0.15)
+                                            Circle()
+                                                .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                                .clipShape(
+                                                    Circle()
+                                                        .trim(from: 0.0, to: 0.78)
+                                                        .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                )
+                                                .opacity(item.batteryLevel == 100 ? 0 : 1)
+                                            Circle()
+                                                .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                        }.rotationEffect(Angle(degrees: 129.6))
                                         Image(getDeviceIcon(item))
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
@@ -84,9 +84,10 @@ struct doubleBatteryWidgetEntryView : View {
                                                 .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
                                                 .offset(y:-29.5)
                                         }
-                                    }
-                                    .frame(width: 58, height: 58, alignment: .center)
-                                    //if item.isCharging != 0 { Image("charging").offset(y:-29.2) }
+                                    }.frame(width: 58, height: 58, alignment: .center)
+                                    Text(item.hasBattery ? "\(item.batteryLevel)%" : "")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .offset(x: 1, y: 24)
                                 }.compositingGroup()
                             }
                         }
@@ -96,26 +97,27 @@ struct doubleBatteryWidgetEntryView : View {
                             VStack(spacing: 17){
                                 ZStack{
                                     Group {
-                                        Circle()
-                                            .stroke(lineWidth: lineWidth)
-                                            .opacity(0.15)
-                                        Circle()
-                                            .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .rotationEffect(Angle(degrees: 270.0))
-                                        Circle()
-                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
-                                            .rotationEffect(Angle(degrees: 270.0))
-                                            .clipShape( Circle().stroke(lineWidth: lineWidth) )
-                                        Circle()
-                                            .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                            .rotationEffect(Angle(degrees: 270.0))
+                                        Group {
+                                            Circle()
+                                                .trim(from: 0.0, to: 0.78)
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .opacity(0.15)
+                                            Circle()
+                                                .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                                .clipShape(
+                                                    Circle()
+                                                        .trim(from: 0.0, to: 0.78)
+                                                        .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                )
+                                                .opacity(item.batteryLevel == 100 ? 0 : 1)
+                                            Circle()
+                                                .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                        }.rotationEffect(Angle(degrees: 129.6))
                                         
                                         Image(getDeviceIcon(item))
                                             .resizable()
@@ -137,9 +139,10 @@ struct doubleBatteryWidgetEntryView : View {
                                                 .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
                                                 .offset(y:-29.5)
                                         }
-                                    }
-                                    .frame(width: 58, height: 58, alignment: .center)
-                                    //if item.isCharging != 0 { Image("charging").offset(y:-29.2) }
+                                    }.frame(width: 58, height: 58, alignment: .center)
+                                    Text(item.hasBattery ? "\(item.batteryLevel)%" : "")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .offset(x: 1, y: 25)
                                 }.compositingGroup()
                             }
                         }
@@ -163,61 +166,61 @@ struct singleBatteryWidgetEntryView : View {
                 .foregroundColor(Color.gray)
         } else {
             if let item = item {
-                VStack(spacing: 14) {
+                VStack(spacing: 10) {
                     ZStack{
                         Group {
-                            Circle()
-                                .stroke(lineWidth: lineWidth)
-                                .opacity(0.15)
-                            Circle()
-                                .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                .rotationEffect(Angle(degrees: 270.0))
-                            Circle()
-                                .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
-                                .rotationEffect(Angle(degrees: 270.0))
-                                .clipShape( Circle().stroke(lineWidth: lineWidth) )
-                            Circle()
-                                .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                .rotationEffect(Angle(degrees: 270.0))
-                            HStack(spacing: 2) {
-                                Image(getDeviceIcon(item))
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 20, height: 20, alignment: .center)
-                                Text(item.hasBattery ? "\(item.batteryLevel)%" : "")
-                                    .font(.system(size: 24))
-                            }.offset(y: 0.5)
-                            
-                            if item.isCharging != 0 {
+                            Group {
+                                Circle()
+                                    .trim(from: 0.0, to: 0.8)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .opacity(0.15)
+                                Circle()
+                                    .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.8, 0.8))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.8, 0.8))-0.0005)))
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                    .clipShape(
+                                        Circle()
+                                            .trim(from: 0.0, to: 0.8)
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    )
+                                    .opacity(item.batteryLevel == 100 ? 0 : 1)
+                                Circle()
+                                    .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.8)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                            }.rotationEffect(Angle(degrees: 126))
+                            Image(getDeviceIcon(item))
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 50, height: 50, alignment: .center)
+                            if item.isCharging != 0 || item.acPowered {
                                 Image("batt_bolt_mask")
+                                    .interpolation(.high)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 18, alignment: .center)
                                     .blendMode(.destinationOut)
-                                    .offset(x: -1, y: -52.5)
+                                    .offset(y: -55.5)
                                 Image("batt_bolt")
+                                    .interpolation(.high)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 16, alignment: .center)
                                     .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
-                                    .offset(x: -1, y: -52.5)
+                                    .offset(y: -55.5)
                             }
-                        }
-                        .frame(width: 104, height: 104, alignment: .center)
-                        //if item.isCharging != 0 { Image("charging").offset(y:-29.2) }
+                        }.frame(width: 110, height: 110, alignment: .center)
+                        Text(item.hasBattery ? "\(item.batteryLevel)%" : "")
+                            .font(.system(size: 17))
+                            .offset(x: 1, y: 47)
                     }.compositingGroup()
                     Text(item.deviceName)
+                        .font(.system(size: 12))
                         .frame(width: 144, alignment: .center)
                         .lineLimit(1)
                         .truncationMode(.middle)
-                }.offset(y: item.isCharging != 0 ? 3.5 : 2.5)
+                }.offset(y: item.isCharging != 0 ? 5 : 3.5)
             } else {
                 VStack(spacing: 14) {
                     ZStack {
@@ -242,6 +245,7 @@ struct singleBatteryWidgetEntryView : View {
                         .frame(width: 154, alignment: .center)
                         .lineLimit(1)
                         .truncationMode(.middle)
+                        .opacity(0.15)
                 }
                 .offset(y: 2)
             }
@@ -277,6 +281,7 @@ struct doubleBatteryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ViewSizeTimelineProvider()) { entry in
             batteryWidgetEntryView2(entry: entry)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
                 .widgetBackground(Color("WidgetBackground"))
         }

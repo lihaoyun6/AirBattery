@@ -46,8 +46,11 @@ class AirBatteryModel {
     static let key = "com.lihaoyun6.AirBattery.widget"
     
     static func updateDevice(_ device: Device) {
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if blockedItems.contains(device.deviceName) { return }
         if lock { return }
         lock = true
+        self.Devices.removeAll(where: {blockedItems.contains($0.deviceName)})
         if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.Devices[index] = device } else { self.Devices.append(device) }
         lock = false
     }
@@ -75,14 +78,15 @@ class AirBatteryModel {
     }
     
     static func getAll(reverse: Bool = false, noFilter: Bool = false) -> [Device] {
+        let thisMac = UserDefaults.standard.string(forKey: "deviceName")
         let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
         let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
         let now = Double(Date().timeIntervalSince1970)
         var list = (reverse ? Array(Devices.reversed()) : Devices).filter { (now - $0.lastUpdate < Double(disappearTime * 60)) }
         if !noFilter { list = list.filter { !blackList.contains($0.deviceName) && !$0.isHidden } }
-        var newList: [Device] = []
+        var newList: [Device] = list.filter({ $0.parentName == thisMac })
         for d in list {
-            if d.parentName == "" {
+            if d.parentName == "" && d.parentName != thisMac {
                 newList.append(d)
                 for sd in list.filter({ $0.parentName == d.deviceName }) {
                     newList.append(sd)

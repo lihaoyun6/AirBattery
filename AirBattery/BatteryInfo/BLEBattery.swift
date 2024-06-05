@@ -92,6 +92,8 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @AppStorage("readBLEDevice") var readBLEDevice = false
     @AppStorage("readAirpods") var readAirpods = true
     @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("twsMerge") var twsMerge = 5
+    
     var centralManager: CBCentralManager!
     var peripherals: [CBPeripheral?] = []
     var otherAppleDevices: [String] = []
@@ -146,23 +148,27 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         var get = false
         let now = Double(Date().timeIntervalSince1970)
-        if let deviceName = peripheral.name, let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count > 0 {
-            if data[0] != 76 {
-                //获取非Apple的普通BLE设备数据
-                if readBLEDevice {
-                    if let device = AirBatteryModel.getByName(deviceName) {
-                        if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
-                }
-            } else {
-                if data.count > 2 {
-                    //获取ios个人热点广播数据
-                    if [16, 12].contains(data[2]) && !otherAppleDevices.contains(deviceName) && ideviceOverBLE {
-                        if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if let deviceName = peripheral.name{
+            if blockedItems.contains(deviceName) { return }
+            if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count > 0 {
+                if data[0] != 76 {
+                    //获取非Apple的普通BLE设备数据
+                    if readBLEDevice {
+                        if let device = AirBatteryModel.getByName(deviceName) {
+                            if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
                     }
-                    //获取Airpods合盖状态消息
-                    if data.count == 25 && data[2] == 18 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "close") }
-                    //获取Airpods开盖状态消息
-                    if data.count == 29 && data[2] == 7 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "open") }
+                } else {
+                    if data.count > 2 {
+                        //获取ios个人热点广播数据
+                        if [16, 12].contains(data[2]) && !otherAppleDevices.contains(deviceName) && ideviceOverBLE {
+                            if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
+                        }
+                        //获取Airpods合盖状态消息
+                        if data.count == 25 && data[2] == 18 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "close") }
+                        //获取Airpods开盖状态消息
+                        if data.count == 29 && data[2] == 7 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "open") }
+                    }
                 }
             }
         }
@@ -317,7 +323,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             if !["Airpods Max", "Beats Solo Pro", "Beats Solo3"].contains(model) {
                 if caseLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: now)) }
                 
-                if leftLevel != 255 && rightLevel != 255 && (abs(Int(leftLevel) - Int(rightLevel)) < 3) && leftCharging == rightCharging {
+                if leftLevel != 255 && rightLevel != 255 && (abs(Int(leftLevel) - Int(rightLevel)) < twsMerge) && leftCharging == rightCharging {
                     AirBatteryModel.hideDevice(deviceName + " 🄻")
                     AirBatteryModel.hideDevice(deviceName + " 🅁")
                     AirBatteryModel.updateDevice(Device(deviceID: deviceID + "_All", deviceType: "ap_pod_all", deviceName: deviceName + " 🄻🅁", deviceModel: model, batteryLevel: Int(min(leftLevel, rightLevel)), isCharging: leftCharging, isHidden: false, parentName: deviceName + " (Case)".local, lastUpdate: now))

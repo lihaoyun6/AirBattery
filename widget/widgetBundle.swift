@@ -11,9 +11,7 @@ import SwiftUI
 extension View {
     func widgetBackground(_ backgroundView: some View) -> some View {
         if #available(macOS 14.0, *) {
-            return containerBackground(for: .widget) {
-                backgroundView
-            }
+            return containerBackground(for: .widget) { backgroundView }
         } else {
             return background(backgroundView)
         }

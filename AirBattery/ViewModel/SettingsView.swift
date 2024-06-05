@@ -8,7 +8,31 @@
 import SwiftUI
 import ServiceManagement
 
+struct Tooltip: NSViewRepresentable {
+    let tooltip: String
+    
+    func makeNSView(context: NSViewRepresentableContext<Tooltip>) -> NSView {
+        let view = NSView()
+        view.toolTip = tooltip
+
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: NSViewRepresentableContext<Tooltip>) {
+    }
+}
+
+public extension View {
+    func toolTip(_ toolTip: String) -> some View {
+        self.overlay(Tooltip(tooltip: toolTip))
+    }
+}
+
 struct SettingsView: View {
+    @State private var blockedItems = [String]()
+    @State private var editingIndex: Int?
+    @State private var ib = getPowerState()
+    
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showThisMac") var showThisMac = "icon"
@@ -28,66 +52,71 @@ struct SettingsView: View {
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("alertLevel") var alertLevel = 10
+    @AppStorage("fullyLevel") var fullyLevel = 100
     @AppStorage("alertSound") var alertSound = true
     @AppStorage("deviceOnWidget") var deviceOnWidget = ""
     @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("twsMerge") var twsMerge = 5
     @State var devices = [String]()
     
     var body: some View {
         TabView {
-            HStack(spacing: 0){
-                VStack(alignment:.trailing, spacing: 22){
-                    Text("Launch at Login")
-                    Text("Show AirBattery on:")
-                    Text("Update Interval:")
-                    Text("Remove Offline Device:")
+            VStack(spacing: 14) {
+                HStack(spacing: 0){
+                    VStack(alignment:.trailing, spacing: 16){
+                        Text("Launch at Login")
+                        Text("Show AirBattery on:")
+                        //Text("Update Interval:")
+                        Text("Remove Offline Device:")
+                    }
+                    VStack(alignment:.leading, spacing: 10){
+                        HStack {
+                            Toggle(isOn: $launchAtLogin) {}
+                                .offset(x: 10)
+                                .toggleStyle(.switch)
+                                .onChange(of: launchAtLogin) { newValue in
+                                    SMLoginItemSetEnabled("com.lihaoyun6.AirBatteryHelper" as CFString, newValue)
+                                }
+                            Spacer()
+                            Button(action: {
+                                updaterController.updater.checkForUpdates()
+                            }, label: {
+                                Text("Check for Updates…")
+                            })
+                        }
+                        Picker("", selection: $showOn) {
+                            Text("Dock").tag("dock")
+                            Text("Menu Bar").tag("sbar")
+                            Text("Both").tag("both")
+                            Text("None").tag("none")
+                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: showOn) { newValue in
+                            switch newValue {
+                            case "sbar":
+                                statusBarItem.isVisible = true
+                                NSApp.setActivationPolicy(.accessory)
+                            case "both":
+                                statusBarItem.isVisible = true
+                                NSApp.setActivationPolicy(.regular)
+                            case "dock":
+                                statusBarItem.isVisible = false
+                                NSApp.setActivationPolicy(.regular)
+                            default:
+                                statusBarItem.isVisible = false
+                                NSApp.setActivationPolicy(.accessory)
+                            }
+                        }
+                        
+                        Picker("", selection: $disappearTime) {
+                            Text("after 20min").tag(20)
+                            Text("after 40min").tag(40)
+                            Text("Never").tag(92233720368547758)
+                        }.pickerStyle(.segmented)
+                    }.frame(width: 300, alignment: .leading)
                 }
-                VStack(alignment:.leading, spacing: 15){
-                    Toggle(isOn: $launchAtLogin) {}
-                        .offset(x: 10)
-                        .toggleStyle(.switch)
-                        .onChange(of: launchAtLogin) { newValue in
-                            SMLoginItemSetEnabled("com.lihaoyun6.AirBatteryHelper" as CFString, newValue)
-                        }
-                    Picker("", selection: $showOn) {
-                        Text("Dock").tag("dock")
-                        Text("Status Bar").tag("sbar")
-                        Text("Both").tag("both")
-                        Text("None").tag("none")
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: showOn) { newValue in
-                        switch newValue {
-                        case "sbar":
-                            statusBarItem.isVisible = true
-                            NSApp.setActivationPolicy(.accessory)
-                        case "both":
-                            statusBarItem.isVisible = true
-                            NSApp.setActivationPolicy(.regular)
-                        case "dock":
-                            statusBarItem.isVisible = false
-                            NSApp.setActivationPolicy(.regular)
-                        default:
-                            statusBarItem.isVisible = false
-                            NSApp.setActivationPolicy(.accessory)
-                        }
-                    }
-                    Picker("", selection: $updateInterval) {
-                        Text("Short").tag(1.0)
-                        Text("Medium").tag(2.0)
-                        Text("Long").tag(3.0)
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: updateInterval) { _ in
-                        _ = AppDelegate.shared.createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
-                    }
-                    Picker("", selection: $disappearTime) {
-                        Text("after 20min").tag(20)
-                        Text("after 40min").tag(40)
-                        Text("Never").tag(92233720368547758)
-                    }.pickerStyle(.segmented)
-                }.frame(width: 300, alignment: .leading)
+                UpdaterSettingsView(updater: updaterController.updater)
             }
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("General", systemImage: "gearshape") }
@@ -96,39 +125,87 @@ struct SettingsView: View {
                 /*Text("Data Source:")
                     .font(.system(size: 14, weight: .bold))
                     .offset(y:-2)*/
-                HStack{
+                HStack(spacing:0){
                     Spacer()
-                    VStack(alignment:.trailing, spacing: 15){
+                    Form(){
                         HStack{
                             Toggle(isOn: $readIDevice) {}.toggleStyle(.switch)
-                            Text("iPhone / iPad / Watch over WiFi")
+                            HStack(spacing: 2) {
+                                Text("WiFi / LAN Scanner")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Scan your iPhone / iPad / Apple Watch / VisionPro and other iDevices under the same router".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
                         }
                         HStack{
                             Toggle(isOn: $ideviceOverBLE) {}.toggleStyle(.switch)
-                            Text("iPhone / iPad(Cellular) over BT")
+                            HStack(spacing: 2) {
+                                Text("Bluetooth Scanner")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Scan your iPhone and iPad(Cellular) via Bluetooth".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
+                        }
+                        HStack{
+                            Toggle(isOn: $cStatusOfBLE) {}.toggleStyle(.switch)
+                            HStack(spacing: 2) {
+                                Text("Guess Power Status")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Guess if the iPhone / iPad or BLE device found by Bluetooth is charging".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
                         }
                     }
                     Spacer()
-                    VStack(alignment:.leading, spacing: 15){
+                    Form(){
                         HStack{
                             Toggle(isOn: $readAirpods) {}.toggleStyle(.switch)
-                            Text("AirPods / Beats")
+                            Text("Find AirPods / Beats")
                         }
                         HStack{
                             Toggle(isOn: $readBTDevice) {}.toggleStyle(.switch)
-                            Text("Other BT Device")
+                            HStack(spacing: 2) {
+                                Text("Non-Apple Devices")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Only some of non-Apple peripherals are supported!".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
+                        }
+                        HStack{
+                            Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
+                            HStack(spacing: 2) {
+                                Text("Get All BLE Devices")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!".local, primaryColor: NSColor(named: "my_yellow") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
                         }
                     }
                     Spacer()
                 }
-                Divider().frame(width: 440)
-                HStack{
-                    Toggle(isOn: $cStatusOfBLE) {}.toggleStyle(.switch)
-                    Text("Guess charging status of iDevices or BLE devices over BT")
-                }
-                HStack{
-                    Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
-                    Text("Try to get battery info from all BLE devices (Beta)")
+                //Divider().frame(width: 440)
+                HStack {
+                    Spacer()
+                    Picker("Update Interval", selection: $updateInterval) {
+                        Text("Short").tag(1.0)
+                        Text("Medium").tag(2.0)
+                        Text("Long").tag(3.0)
+                    }.frame(width: 270)
+                        .pickerStyle(.segmented)
+                        .onChange(of: updateInterval) { _ in
+                            _ = AppDelegate.shared.createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
+                        }
+                    Spacer()
+                    HStack(spacing: 2) {
+                        Text("Merge Threshold".local).padding(.trailing, 5)
+                        TextField("", value: $twsMerge, formatter: NumberFormatter())
+                            .textFieldStyle(.squareBorder)
+                            .frame(width: 26)
+                            .onChange(of: twsMerge) { newValue in
+                                if newValue > 99 { twsMerge = 99 }
+                                if newValue < 1 { twsMerge = 1 }
+                            }
+                        Stepper("", value: $twsMerge)
+                            .padding(.leading, -10)
+                        SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "If the difference in battery usage between the left and right earbuds is less than this value, AirBattery will show them as one device".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                            .frame(width: 19, height: 19)
+                    }.fixedSize()
+                    Spacer()
                 }
             }
             .navigationTitle("AirBattery Settings")
@@ -138,10 +215,18 @@ struct SettingsView: View {
             }
             
             HStack(spacing: 0){
-                VStack(alignment:.trailing, spacing: 22){
+                VStack(alignment:.trailing, spacing: 18){
                     Text("Appearance:")
-                    Text("Show This Mac:")
-                    Text("Carousel mode:")
+                    HStack(spacing: 2) {
+                        SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Show or hide this Mac's built-in battery in the Dock icon".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                            .frame(width: 19, height: 19)
+                        Text("Built-in Battery:")
+                    }.disabled(!ib.hasBattery)
+                    HStack(spacing: 2) {
+                        SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Cycle through all found devices in the Dock icon".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                            .frame(width: 19, height: 19)
+                        Text("Carousel Mode:")
+                    }.offset(y: 2)
                 }
                 VStack(alignment:.leading, spacing: 15){
                     Picker("", selection: $appearance) {
@@ -154,8 +239,9 @@ struct SettingsView: View {
                         Text("Icon").tag("icon")
                         Text("Percent").tag("percent")
                         Text("Hidden").tag("hidden")
-                    }.pickerStyle(.segmented)
-                    
+                    }
+                    .pickerStyle(.segmented)
+                    .disabled(!getPowerState().hasBattery)
                     Picker("", selection: $rollingMode) {
                         Text("Automatic").tag("auto")
                         Text("On").tag("on")
@@ -164,10 +250,7 @@ struct SettingsView: View {
                 }.frame(width: 300, alignment: .leading)
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem {
-                Image("dockTile")
-                Text("DockTile")
-            }
+            .tabItem { Label("Dock Icon", systemImage: "menubar.dock.rectangle") }
             
             HStack(spacing: 0){
                 VStack(alignment:.leading, spacing: 15){
@@ -177,7 +260,7 @@ struct SettingsView: View {
                             .onChange(of: intBattOnStatusBar) { _ in
                                 _ = AppDelegate.shared.createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
                             }
-                        Text("Show Built-in Battery")
+                        Text("Dynamic Battery Icon")
                     }
                     HStack{
                         Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
@@ -187,29 +270,27 @@ struct SettingsView: View {
                         Toggle(isOn: $hidePercentWhenFull) {}.toggleStyle(.switch)
                         Text("Hidden Percentage above 90%")
                     }.disabled(!statusBarBattPercent)
-                }
+                }.disabled(!ib.hasBattery)
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem {
-                Image("statusbar")
-                Text("StatusBar")
-            }
+            .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
             
             HStack(spacing: 0){
                 VStack(alignment:.center, spacing: 15){
                     HStack{
                         Toggle(isOn: $showMacOnWidget) {}.toggleStyle(.switch)
-                        Text("Show Built-in Battery")
+                        Text("Show Mac Built-in Battery")
                         Spacer()
                         Toggle(isOn: $revListOnWidget) {}.toggleStyle(.switch)
-                        Text("Reverse Device List")
+                        Text("Reverse the Device List")
                     }.frame(width: 360)
                     Picker("Single Device Widget", selection: $deviceOnWidget) {
+                        Text("Not Set").tag("@@@@@@@@@@@@@@@@@@@@")
                         Text(deviceName).tag(deviceName)
                         ForEach(devices, id: \.self) { device in
                             Text(device).tag(device)
                         }
-                        if !devices.contains(deviceOnWidget) {
+                        if !devices.contains(deviceOnWidget) && deviceOnWidget != deviceName && deviceOnWidget != "@@@@@@@@@@@@@@@@@@@@" {
                             Text(deviceOnWidget).tag(deviceOnWidget)
                         }
                     }
@@ -220,41 +301,75 @@ struct SettingsView: View {
             .onAppear { devices = AirBatteryModel.getAll(noFilter: true).map({ $0.deviceName }) }
             .onReceive(dockTimer) { _ in devices = AirBatteryModel.getAll(noFilter: true).map({ $0.deviceName }) }
             .navigationTitle("AirBattery Settings")
-            .tabItem {
-                Image("widget")
-                Text("Widget")
-            }
+            .tabItem { Label("Widget", systemImage: "square.grid.2x2") }
             HStack(spacing: 0){
                 VStack(alignment:.trailing, spacing: 22){
                     Text("Notification Sound:")
-                    Text("Battery Level Threshold:")
+                    Text("Low Battery Threshold:")
+                    Text("Fully Charged Threshold:")
                 }
                 VStack(alignment:.leading, spacing: 15){
                     Toggle(isOn: $alertSound) {}
                         .offset(x: 10)
                         .toggleStyle(.switch)
                     Picker("", selection: $alertLevel) {
-                        Text("10%").tag(10)
-                        Text("15%").tag(15)
                         Text("20%").tag(20)
+                        Text("15%").tag(15)
+                        Text("10%").tag(10)
+                    }.pickerStyle(.segmented)
+                    Picker("", selection: $fullyLevel) {
+                        Text("100%").tag(100)
+                        Text("90%").tag(90)
+                        Text("80%").tag(80)
                     }.pickerStyle(.segmented)
                 }.frame(width: 240, alignment: .leading)
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem { Label(" Alert ", systemImage: "bell") }
+            .tabItem { Label("Notification", systemImage: "bell") }
             VStack(alignment:.center, spacing: 15) {
-                Form(){
-                    UpdaterSettingsView(updater: updaterController.updater)
+                ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
+                    List {
+                        ForEach(0..<blockedItems.count, id: \.self) { index in
+                            HStack {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.red)
+                                    .onTapGesture { if editingIndex == nil { blockedItems.remove(at: index) } }
+                                if editingIndex == index {
+                                    TextField("Enter text", text: Binding(
+                                        get: { blockedItems[index] },
+                                        set: { blockedItems[index] = $0 }
+                                    ), onCommit: {
+                                        editingIndex = nil
+                                    })
+                                } else {
+                                    Text(blockedItems[index])
+                                        .onTapGesture {
+                                            editingIndex = index
+                                        }
+                                }
+                            }
+                        }
+                    }.padding(10)
+                    Button(action: {
+                        blockedItems.append("Click to enter the device name".local)
+                        //editingIndex = blockedItems.count - 1
+                    }) {
+                        Image(systemName: "plus.square.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.secondary)
+                    }.buttonStyle(.plain).padding([.trailing, .bottom], 10)
                 }
-                Button(action: {
-                    updaterController.updater.checkForUpdates()
-                }, label: {
-                    Text("Check for Updates…")
-                })
+                .onAppear {
+                    blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+                }
+                .onChange(of: blockedItems) { b in
+                    UserDefaults.standard.setValue(b, forKey: "blockedDevices")
+                }
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem { Label("Update", systemImage: "chevron.up.circle") }
+            .tabItem { Label("Blacklist", systemImage: "eye.slash") }
         }
-        .frame(width: 490, height: 170)
+        .frame(width: 500, height: 160)
     }
 }

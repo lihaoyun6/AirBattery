@@ -41,6 +41,7 @@ struct MultiBatteryView: View {
     @State private var darkMode = getDarkMode()
     @State private var lastTime = Double(Date().timeIntervalSince1970)
     @State private var batteryList = AirBatteryModel.getAll()
+    @State private var lineWidth = 6.0
     
     var body: some View {
         ZStack {
@@ -87,27 +88,28 @@ struct MultiBatteryView: View {
                         ForEach(batteryList[0..<2], id: \.self) { item in
                             ZStack {
                                 Group {
-                                    Circle()
-                                        .stroke(lineWidth: 6.0*1.2)
-                                        .opacity(darkMode ? 0.2 : 0.13)
-                                        .foregroundColor(darkMode ? .white : .black)
-                                    Circle()
-                                        .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                    Circle()
-                                        .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .shadow(color: .black, radius: 6.0*0.76, x: 0, y: 0)
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                        .clipShape( Circle().stroke(lineWidth: 6.0) )
-                                    Circle()
-                                        .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
+                                    Group {
+                                        Circle()
+                                            .trim(from: 0.0, to: 0.78)
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth*1.2, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(darkMode ? .white : .black)
+                                            .opacity(darkMode ? 0.2 : 0.13)
+                                        Circle()
+                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                            .clipShape(
+                                                Circle()
+                                                    .trim(from: 0.0, to: 0.78)
+                                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            )
+                                            .opacity(item.batteryLevel == 100 ? 0 : 1)
+                                        Circle()
+                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    }.rotationEffect(Angle(degrees: 129.6))
                                     
                                     if item.deviceType == "Mac" && showThisMac == "percent"{
                                         Text(String(item.batteryLevel))
@@ -130,35 +132,40 @@ struct MultiBatteryView: View {
                                     }
                                 }
                                 .frame(width: 38, height: 38, alignment: .center)
+                                Text(item.hasBattery ? "\(item.batteryLevel)" : "")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(darkMode ? .white : .black)
+                                    .scaleEffect(0.5)
+                                    .offset(y: 16.5)
                             }
-                            
                         }
                     }
                     HStack(spacing: 10) {
                         ForEach(batteryList[2..<4], id: \.self) { item in
                             ZStack {
                                 Group {
-                                    Circle()
-                                        .stroke(lineWidth: 6.0*1.2)
-                                        .opacity(darkMode ? 0.2 : 0.13)
-                                        .foregroundColor(darkMode ? .white : .black)
-                                    Circle()
-                                        .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                    Circle()
-                                        .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .shadow(color: .black, radius: 6.0*0.76, x: 0, y: 0)
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                        .clipShape( Circle().stroke(lineWidth: 6.0) )
-                                    Circle()
-                                        .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
+                                    Group {
+                                        Circle()
+                                            .trim(from: 0.0, to: 0.78)
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth*1.2, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(darkMode ? .white : .black)
+                                            .opacity(darkMode ? 0.2 : 0.13)
+                                        Circle()
+                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                            .clipShape(
+                                                Circle()
+                                                    .trim(from: 0.0, to: 0.78)
+                                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            )
+                                            .opacity(item.batteryLevel == 100 ? 0 : 1)
+                                        Circle()
+                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    }.rotationEffect(Angle(degrees: 129.6))
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
@@ -167,11 +174,14 @@ struct MultiBatteryView: View {
                                         .offset(x:0.6, y:0.6)
                                         .frame(width: 44, height: 44, alignment: .center)
                                         .scaleEffect(0.5)
-                                    
                                 }
                                 .frame(width: 38, height: 38, alignment: .center)
+                                Text(item.hasBattery ? "\(item.batteryLevel)" : "")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(darkMode ? .white : .black)
+                                    .scaleEffect(0.5)
+                                    .offset(y: 16.5)
                             }
-                            
                         }
                     }
                 }
@@ -268,9 +278,10 @@ struct popover: View {
                             NSApp.terminate(self)
                         }, label: {
                             Image(systemName: "xmark.circle")
-                                .font(.system(size: 9.6, weight: .semibold))
-                                .frame(width: 10, height: 20, alignment: .center)
+                                .font(.system(size: 14, weight: .light))
+                                .frame(width: 14, height: 14, alignment: .center)
                                 .foregroundColor(overQuitButton ? .red : .secondary)
+                                .opacity(overQuitButton ? 1 : 0.7)
                         })
                         .buttonStyle(PlainButtonStyle())
                         .onHover{ hovering in overQuitButton = hovering }
@@ -279,9 +290,10 @@ struct popover: View {
                             if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
                         }, label: {
                             Image(systemName: "minus.circle")
-                                .font(.system(size: 9.6, weight: .semibold))
-                                .frame(width: 10, height: 20, alignment: .center)
+                                .font(.system(size: 14, weight: .light))
+                                .frame(width: 14, height: 14, alignment: .center)
                                 .foregroundColor(overQuitButton ? Color("my_yellow") : .secondary)
+                                .opacity(overQuitButton ? 1 : 0.7)
                         })
                         .buttonStyle(PlainButtonStyle())
                         .onHover{ hovering in overQuitButton = hovering }
@@ -292,15 +304,17 @@ struct popover: View {
                         NSApp.orderFrontStandardAboutPanel(nil)
                     }, label: {
                         Image(systemName: "info.circle")
-                            .font(.system(size: 9.6, weight: .semibold))
-                            .frame(width: 10, height: 20, alignment: .center)
+                            .font(.system(size: 14, weight: .light))
+                            .frame(width: 16, height: 14, alignment: .center)
                             .foregroundColor(overInfoButton ? .accentColor : .secondary)
+                            .opacity(overInfoButton ? 1 : 0.7)
                     })
                     .buttonStyle(PlainButtonStyle())
                     .onHover{ hovering in overInfoButton = hovering }
                     
                     Button(action: {
                         if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        NSApp.activate(ignoringOtherApps: true)
                         if #available(macOS 14, *) {
                             NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
                         }else if #available(macOS 13, *) {
@@ -311,15 +325,22 @@ struct popover: View {
                         NSApp.activate(ignoringOtherApps: true)
                     }, label: {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 9.6, weight: .semibold))
-                            .frame(width: 10, height: 20, alignment: .center)
+                            .font(.system(size: 13.6, weight: .light))
+                            .frame(width: 14, height: 14, alignment: .center)
                             .foregroundColor(overSettButton ? .accentColor : .secondary)
+                            .opacity(overSettButton ? 1 : 0.7)
                     })
                     .buttonStyle(PlainButtonStyle())
                     .onHover{ hovering in overSettButton = hovering }
-                    
                     Spacer()
+                    if fromDock {
+                        Text("Click Dock icon again to hide this panel")
+                            .font(.system(size: 10, weight: .light))
+                            .foregroundColor(.secondary)
+                            .opacity(0.7).offset(y: 0.5)
+                    }
                 }
+                .offset(y: -3.5)
                 .padding(.horizontal, 5)
                 .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
                 VStack(alignment:.leading,spacing: 0) {
@@ -365,12 +386,18 @@ struct popover: View {
                                         .foregroundColor(Color("black_white"))
                                         .frame(height: 24, alignment: .center)
                                         .padding(.horizontal, 7)
+                                    if alertList.contains(allDevices[index].deviceName) {
+                                        Image(systemName: "bell.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(Color("black_white"))
+                                            .frame(height: 24, alignment: .center)
+                                            .padding(.leading, -10)
+                                    }
                                     Spacer()
-                                    
                                     if overStack == index {
                                         if allDevices[index].deviceID == "@MacInternalBattery" {
                                             //Image(systemName: "clock").font(.system(size: 10))
-                                            Text(allDevices[index].isCharging != 0 ? "Until full:" : "Until empty:")
+                                            Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
                                                 .font(.system(size: 11))
                                                 .foregroundColor(.secondary)
                                             Text(InternalBattery.status.timeLeft)
@@ -387,7 +414,7 @@ struct popover: View {
                                                     alertList.append(allDevices[index].deviceName)
                                                     UserDefaults.standard.set(alertList, forKey: "alertList")
                                                 }, label: {
-                                                    Image(systemName: "bell.fill")
+                                                    Image(systemName: "bell")
                                                         .frame(width: 20, height: 20, alignment: .center)
                                                         .foregroundColor(overAlertButton ? .accentColor : .secondary)
                                                 })
@@ -399,7 +426,7 @@ struct popover: View {
                                                     alertList.removeAll { $0 == allDevices[index].deviceName }
                                                     UserDefaults.standard.set(alertList, forKey: "alertList")
                                                 }, label: {
-                                                    Image(systemName: "bell.slash.fill")
+                                                    Image(systemName: "bell.fill")
                                                         .frame(width: 20, height: 20, alignment: .center)
                                                         .foregroundColor(overAlertButton ? .accentColor : .secondary)
                                                 })
@@ -492,7 +519,8 @@ struct popover: View {
                         .padding(.horizontal, 5)
                         .opacity(0.23)
                 )
-            }.offset(y:-3)
+                .offset(y: 2.5)
+            }
         }
     }
 }

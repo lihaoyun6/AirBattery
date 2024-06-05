@@ -16,6 +16,7 @@ class MagicBattery {
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readAirpods") var readAirpods = true
     @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("deviceName") var deviceName = "Mac"
     
     func startScan() {
         let interval = TimeInterval(10.0 * updateInterval)
@@ -24,6 +25,7 @@ class MagicBattery {
         Thread.detachNewThread {
             if self.readBTDevice {
                 self.getMagicBattery()
+                //self.getMagicBattery_old()
                 self.getOtherBTBattery()
             }
             //if self.readAirpods { self.getAirpods() }
@@ -33,6 +35,7 @@ class MagicBattery {
     @objc func scanDevices() { Thread.detachNewThread {
         if self.readBTDevice {
             self.getMagicBattery()
+            //self.getMagicBattery_old()
             self.getOtherBTBattery()
         }
         //if self.readAirpods { self.getAirpods() }
@@ -68,6 +71,35 @@ class MagicBattery {
         }
         return def
     }
+    
+    func readMagicBattery(object: io_object_t) {
+        var mac = ""
+        var type = "hid"
+        var status = 0
+        var percent = 0
+        var productName = ""
+        let lastUpdate = Date().timeIntervalSince1970
+        if let productProperty = IORegistryEntryCreateCFProperty(object, "DeviceAddress" as CFString, kCFAllocatorDefault, 0) {
+            mac = productProperty.takeRetainedValue() as! String
+            mac = mac.replacingOccurrences(of:"-", with:":").uppercased()
+        }
+        if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryStatusFlags" as CFString, kCFAllocatorDefault, 0) {
+            status = percentProperty.takeRetainedValue() as! Int
+        }
+        if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryPercent" as CFString, kCFAllocatorDefault, 0) {
+            percent = percentProperty.takeRetainedValue() as! Int
+        }
+        if let productProperty = IORegistryEntryCreateCFProperty(object, "Product" as CFString, kCFAllocatorDefault, 0) {
+            productName = productProperty.takeRetainedValue() as! String
+            if productName.contains("Trackpad") { type = "Trackpad" }
+            if productName.contains("Keyboard") { type = "Keyboard" }
+            if productName.contains("Mouse") { type = "MMouse" }
+            productName = getDeviceName(mac, productName)
+        }
+        if !productName.contains("Internal"){
+            AirBatteryModel.updateDevice(Device(deviceID: mac, deviceType: type, deviceName: productName, batteryLevel: percent, isCharging: status, parentName: deviceName, lastUpdate: lastUpdate))
+        }
+    }
 
     func getMagicBattery() {
         var serialPortIterator = io_iterator_t()
@@ -84,34 +116,24 @@ class MagicBattery {
         if KERN_SUCCESS == kernResult {
             repeat {
                 object = IOIteratorNext(serialPortIterator)
-                if object != 0 {
-                    var mac = ""
-                    var type = "hid"
-                    var status = 0
-                    var percent = 0
-                    var productName = ""
-                    let lastUpdate = Date().timeIntervalSince1970
-                    if let productProperty = IORegistryEntryCreateCFProperty(object, "DeviceAddress" as CFString, kCFAllocatorDefault, 0) {
-                        mac = productProperty.takeRetainedValue() as! String
-                        mac = mac.replacingOccurrences(of:"-", with:":").uppercased()
-                    }
-                    if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryStatusFlags" as CFString, kCFAllocatorDefault, 0) {
-                        status = percentProperty.takeRetainedValue() as! Int
-                    }
-                    if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryPercent" as CFString, kCFAllocatorDefault, 0) {
-                        percent = percentProperty.takeRetainedValue() as! Int
-                    }
-                    if let productProperty = IORegistryEntryCreateCFProperty(object, "Product" as CFString, kCFAllocatorDefault, 0) {
-                        productName = productProperty.takeRetainedValue() as! String
-                        if productName.contains("Trackpad") { type = "Trackpad" }
-                        if productName.contains("Keyboard") { type = "Keyboard" }
-                        if productName.contains("Mouse") { type = "Mouse" }
-                        productName = getDeviceName(mac, productName)
-                    }
-                    if !productName.contains("Internal"){
-                        AirBatteryModel.updateDevice(Device(deviceID: mac, deviceType: type, deviceName: productName, batteryLevel: percent, isCharging: status, lastUpdate: lastUpdate))
-                    }
-                }
+                if object != 0 { readMagicBattery(object: object) }
+            } while object != 0
+            IOObjectRelease(object)
+        }
+        IOObjectRelease(serialPortIterator)
+    }
+    
+    func getMagicBattery_old() {
+        var serialPortIterator = io_iterator_t()
+        var object : io_object_t
+        let masterPort: mach_port_t
+        if #available(macOS 12.0, *) { masterPort = kIOMainPortDefault } else { masterPort = kIOMasterPortDefault }
+        let matchingDict : CFDictionary = IOServiceMatching("AppleBluetoothHIDKeyboard")
+        let kernResult = IOServiceGetMatchingServices(masterPort, matchingDict, &serialPortIterator)
+        if KERN_SUCCESS == kernResult {
+            repeat {
+                object = IOIteratorNext(serialPortIterator)
+                if object != 0 { readMagicBattery(object: object) }
             } while object != 0
             IOObjectRelease(object)
         }
@@ -207,7 +229,7 @@ class MagicBattery {
                            let id = info["device_address"] as? String,
                            let type = info["device_minorType"] as? String,
                            (info["device_vendorID"] as? String) != "0x004C" {
-                            let batLevel = Int(level.replacingOccurrences(of: "%", with: "")) ?? 255
+                            guard let batLevel = Int(level.replacingOccurrences(of: "%", with: "")) else { return }
                             AirBatteryModel.updateDevice(Device(deviceID: id, deviceType: type, deviceName: n, batteryLevel: batLevel, isCharging: 0, lastUpdate: Date().timeIntervalSince1970))
                         }
                     }

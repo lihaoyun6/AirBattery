@@ -73,7 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 switch dockOrientation {
                 case "bottom":
                     // Dock 位于屏幕底部
-                    menuX = menuX + 372 > visibleFrame.maxX ? visibleFrame.maxX : menuX - 176
+                    menuX = menuX + 176 > visibleFrame.maxX ? visibleFrame.maxX - 176 : menuX - 176
                     menuY = max(menuY, visibleFrame.origin.y) + 20
                 case "right":
                     // Dock 位于屏幕右侧
@@ -88,7 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     print("⚠️ Failed to get Dock orientation!")
                 }
             }
-            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+25))
+            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+30))
             dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
             dockWindow.title = "AirBattery Dock Window"
             dockWindow.level = .popUpMenu
@@ -98,7 +98,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             dockWindow.contentView?.wantsLayer = true
             dockWindow.contentView?.layer?.cornerRadius = 6
             dockWindow.contentView?.layer?.masksToBounds = true
-            dockWindow.orderFront(nil)
+            dockWindow.orderFront(self)
         }
         return true
     }
@@ -158,7 +158,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 button.addSubview(iconView)
                 button.frame = iconView.frame
             } else {
-                let image = NSImage(named: "menuItem")!
+                let image = NSImage(named: "bolt.square.fill")!
+                image.size = NSSize(width: 16, height: 16)
                 button.image = image
             }
         }
@@ -212,7 +213,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         var hiddenRow = 0
         if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
-        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count,1)+hiddenRow)*37+15)
+        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count,1)+hiddenRow)*37+20)
         let menuItem = NSMenuItem()
         menuItem.view = contentView
         statusMenu.removeAllItems()

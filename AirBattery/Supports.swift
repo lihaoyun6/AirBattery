@@ -71,7 +71,7 @@ struct RectCorner: OptionSet {
     static let bottomRight = RectCorner(rawValue: 1 << 2)
     static let bottomLeft = RectCorner(rawValue: 1 << 3)
     
-    static let allCorners: RectCorner = [.topLeft, topRight, .bottomLeft, .bottomRight]
+    static let allCorners: RectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
 }
 
 
@@ -221,12 +221,13 @@ func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
     } else {
         list = Array(data[totalLength-length..<data.count])
     }
-    if list != [] { while list.count < length { list.append(Device(deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0)) } }
+    if list != [] { while list.count < length { list.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0)) } }
     return list
 }
 
 func batteryAlert() {
     @AppStorage("alertLevel") var alertLevel = 10
+    @AppStorage("fullyLevel") var fullyLevel = 100
     @AppStorage("alertSound") var alertSound = true
     let alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
     for device in AirBatteryModel.getAll().filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
@@ -235,7 +236,18 @@ func batteryAlert() {
         content.body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
         content.sound = alertSound ? UNNotificationSound.default : nil
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-        let request = UNNotificationRequest(identifier: device.deviceName, content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: device.deviceName + ".lowbattery", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
+        }
+    }
+    for device in AirBatteryModel.getAll().filter({ $0.batteryLevel >= fullyLevel && $0.isCharging != 0 && alertList.contains($0.deviceName) }) {
+        let content = UNMutableNotificationContent()
+        content.title = "Fully Charged".local
+        content.body = String(format: "\"%@\" battery has reached %d%%".local, device.deviceName, device.batteryLevel)
+        content.sound = alertSound ? UNNotificationSound.default : nil
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: device.deviceName + ".fullycharged", content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
         }
@@ -344,9 +356,13 @@ func getDeviceIcon(_ d: Device) -> String {
         return "trackpad.fill"
     case "Keyboard":
         return "keyboard.fill"
-    case "Mouse":
+    case "MMouse":
         return "magicmouse.fill"
+    case "Mouse":
+        return "computermouse.fill"
     case "Headphones":
+        return "headphones"
+    case "Headset":
         return "headphones"
     case "ap_pod_right":
         if let model = d.deviceModel {
