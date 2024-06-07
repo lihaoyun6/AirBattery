@@ -26,12 +26,27 @@ extension WidgetConfiguration {
             return self
         }
     }
+    
+    func supportFamily() -> some WidgetConfiguration {
+        if #available(macOS 14, *) {
+            return self.supportedFamilies([.systemMedium])
+        } else {
+            return self.supportedFamilies([.systemMedium, .systemSmall])
+        }
+    }
 }
 
 @main
 struct widgetBundle: WidgetBundle {
     var body: some Widget {
-        batteryWidget()
-        doubleBatteryWidget()
+        widgets()
+    }
+    
+    func widgets() -> some Widget {
+        if #available(macOS 14, *) {
+            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2(), batteryWidget2New())
+        } else {
+            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2())
+        }
     }
 }

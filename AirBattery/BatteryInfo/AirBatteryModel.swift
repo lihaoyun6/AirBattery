@@ -111,11 +111,11 @@ class AirBatteryModel {
         var url: URL
         let bundleIdentifier = Bundle.main.bundleIdentifier
         if bundleIdentifier == key {
-            url = FileManager.default.temporaryDirectory.appendingPathComponent("singleDeviceName")
+            url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("singleDeviceName")
             let devicename = try? String(contentsOf: url, encoding: .utf8)
             return devicename ?? ""
         } else {
-            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/tmp/singleDeviceName")
+            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/singleDeviceName")
             try? UserDefaults.standard.string(forKey: "deviceOnWidget")?.write(to: url, atomically: true, encoding: .utf8)
         }
         return ""
@@ -125,9 +125,9 @@ class AirBatteryModel {
         var url: URL
         let bundleIdentifier = Bundle.main.bundleIdentifier
         if bundleIdentifier == key {
-            url = FileManager.default.temporaryDirectory.appendingPathComponent("temp.json")
+            url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("data.json")
         } else {
-            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/tmp/temp.json")
+            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/data.json")
         }
         return url
     }

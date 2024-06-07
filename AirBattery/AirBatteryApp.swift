@@ -31,7 +31,7 @@ struct AirBatteryApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    static let shared = AppDelegate()
+    //static let shared = AppDelegate()
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -105,6 +105,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
+        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
+        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
         UserDefaults.standard.register( // default defaults (used if not set)
             defaults: [
                 "showOn": "both",
@@ -114,7 +116,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 "intBattOnStatusBar": true,
                 "statusBarBattPercent": false,
                 "hidePercentWhenFull": false,
-                "deviceOnWidget": "@@@@@@@@@@@@@@@@@@@@"
+                "deviceOnWidget": "",
+                "updateInterval": 1.0,
+                "widgetInterval": 0
             ]
         )
     }
@@ -127,9 +131,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         machineType = getMacDeviceType()
         deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
-        AirBatteryModel.writeData()
-        _ = AirBatteryModel.singleDeviceName()
-        WidgetCenter.shared.reloadAllTimelines()
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error { print("⚠️ Notification authorization denied: \(error.localizedDescription)") }
@@ -138,6 +139,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         bleBattery.startScan()
         magicBattery.startScan()
         ideviceBattery.startScan()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            AirBatteryModel.writeData()
+            _ = AirBatteryModel.singleDeviceName()
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         
         menu.delegate = self
         statusMenu.delegate = self
@@ -236,7 +243,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
-    func getMenu(fromDock: Bool = false) {
+    /*func getMenu(fromDock: Bool = false) {
         let now = Double(Date().timeIntervalSince1970)
         let ibStatus = InternalBattery.status
         menu.removeAllItems()
@@ -290,21 +297,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(NSMenuItem.separator())
             menu.addItem(withTitle:"Quit AirBattery".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         }
-    }
+    }*/
     
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         dockWindow.orderOut(nil)
-        getMenu(fromDock: true)
         return menu
-    }
-    
-    func createAlert(level: NSAlert.Style = .warning, title: String, message: String, button1: String, button2: String = "") -> NSAlert {
-        let alert = NSAlert()
-        alert.messageText = title.local
-        alert.informativeText = message.local
-        alert.addButton(withTitle: button1.local)
-        if button2 != "" { alert.addButton(withTitle: button2.local) }
-        alert.alertStyle = level
-        return alert
     }
 }

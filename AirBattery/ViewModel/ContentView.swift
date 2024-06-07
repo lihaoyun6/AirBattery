@@ -6,6 +6,7 @@
 //
 import AppKit
 import SwiftUI
+import WidgetKit
 //import UserNotifications
 
 /*let test_data: [CGFloat] = [99,80,80,73,70,60,59,51,30,30,25,25,19,18,17,15,12,10,10,9] // 示例数据
@@ -57,31 +58,14 @@ struct MultiBatteryView: View {
                     .opacity(darkMode ? 0.55 : 0.2)
             }
             if batteryList.count < 4 {
-                Group {
-                    Circle()
-                        .stroke(lineWidth: 6.0*1.2)
-                        .opacity(darkMode ? 0.2 : 0.13)
-                        .foregroundColor(darkMode ? .white : .black)
-                    Circle()
-                        .trim(from: 0.0, to: 0.0)
-                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(.clear)
-                        .rotationEffect(Angle(degrees: 270.0))
-                    Circle()
-                        .trim(from: CGFloat(abs(0.0-0.001)), to: CGFloat(abs(0.0-0.0005)))
-                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(.clear)
-                        .shadow(color: .black, radius: 6.0*0.76, x: 0, y: 0)
-                        .rotationEffect(Angle(degrees: 270.0))
-                        .clipShape( Circle().stroke(lineWidth: 6.0) )
-                    Circle()
-                        .trim(from: 0, to: 0.0)
-                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(.clear)
-                        .rotationEffect(Angle(degrees: 270.0))
-                }
-                .offset(x:-24, y: -24)
-                .frame(width: 38, height: 38, alignment: .center)
+                Circle()
+                    .trim(from: 0.0, to: 0.75)
+                    .stroke(style: StrokeStyle(lineWidth: lineWidth*1.2, lineCap: .round, lineJoin: .round))
+                    .foregroundColor(darkMode ? .white : .black)
+                    .opacity(darkMode ? 0.2 : 0.13)
+                    .rotationEffect(Angle(degrees: 135))
+                    .offset(x:-24, y: -24)
+                    .frame(width: 38, height: 38, alignment: .center)
             } else {
                 VStack(spacing: 10) {
                     HStack(spacing: 10) {
@@ -90,26 +74,26 @@ struct MultiBatteryView: View {
                                 Group {
                                     Group {
                                         Circle()
-                                            .trim(from: 0.0, to: 0.78)
+                                            .trim(from: 0.0, to: 0.75)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth*1.2, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(darkMode ? .white : .black)
                                             .opacity(darkMode ? 0.2 : 0.13)
                                         Circle()
-                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.75, 0.75))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.75, 0.75))-0.0005)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(Color(getPowerColor(item.batteryLevel)))
                                             .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                             .clipShape(
                                                 Circle()
-                                                    .trim(from: 0.0, to: 0.78)
+                                                    .trim(from: 0.0, to: 0.75)
                                                     .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             )
                                             .opacity(item.batteryLevel == 100 ? 0 : 1)
                                         Circle()
-                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.75)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                    }.rotationEffect(Angle(degrees: 129.6))
+                                    }.rotationEffect(Angle(degrees: 135))
                                     
                                     if item.deviceType == "Mac" && showThisMac == "percent"{
                                         Text(String(item.batteryLevel))
@@ -126,17 +110,16 @@ struct MultiBatteryView: View {
                                             .aspectRatio(contentMode: .fit)
                                             .colorScheme(darkMode ? .dark : .light)
                                             .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item.batteryLevel)) : Color("black_white"))
-                                            .offset(x:0.6, y:0.6)
-                                            .frame(width: 44, height: 44, alignment: .center)
+                                            .offset(y:-1)
+                                            .frame(width: 44, height: 43, alignment: .center)
                                             .scaleEffect(0.5)
                                     }
-                                }
-                                .frame(width: 38, height: 38, alignment: .center)
+                                }.frame(width: 38, height: 38, alignment: .center)
                                 Text(item.hasBattery ? "\(item.batteryLevel)" : "")
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: 22, weight: .medium))
                                     .foregroundColor(darkMode ? .white : .black)
                                     .scaleEffect(0.5)
-                                    .offset(y: 16.5)
+                                    .offset(y: 17)
                             }
                         }
                     }
@@ -146,41 +129,40 @@ struct MultiBatteryView: View {
                                 Group {
                                     Group {
                                         Circle()
-                                            .trim(from: 0.0, to: 0.78)
+                                            .trim(from: 0.0, to: 0.75)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth*1.2, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(darkMode ? .white : .black)
                                             .opacity(darkMode ? 0.2 : 0.13)
                                         Circle()
-                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
+                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.75, 0.75))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.75, 0.75))-0.0005)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(Color(getPowerColor(item.batteryLevel)))
                                             .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                             .clipShape(
                                                 Circle()
-                                                    .trim(from: 0.0, to: 0.78)
+                                                    .trim(from: 0.0, to: 0.75)
                                                     .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             )
                                             .opacity(item.batteryLevel == 100 ? 0 : 1)
                                         Circle()
-                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
+                                            .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.75)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                                             .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                    }.rotationEffect(Angle(degrees: 129.6))
+                                    }.rotationEffect(Angle(degrees: 135))
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .colorScheme(darkMode ? .dark : .light)
                                         .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item.batteryLevel)) : Color("black_white"))
-                                        .offset(x:0.6, y:0.6)
-                                        .frame(width: 44, height: 44, alignment: .center)
+                                        .offset(y:-1)
+                                        .frame(width: 44, height: 43, alignment: .center)
                                         .scaleEffect(0.5)
-                                }
-                                .frame(width: 38, height: 38, alignment: .center)
+                                }.frame(width: 38, height: 38, alignment: .center)
                                 Text(item.hasBattery ? "\(item.batteryLevel)" : "")
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: 22, weight: .medium))
                                     .foregroundColor(darkMode ? .white : .black)
                                     .scaleEffect(0.5)
-                                    .offset(y: 16.5)
+                                    .offset(y: 17)
                             }
                         }
                     }
@@ -188,12 +170,10 @@ struct MultiBatteryView: View {
             }
         }
         .frame(width: 128, height: 128, alignment: .center)
-        .onReceive(alertTimer){_ in
-            batteryAlert()
-        }
-        .onReceive(widgetTimer){_ in
-            AirBatteryModel.writeData()
-            //WidgetCenter.shared.reloadAllTimelines()
+        .onReceive(alertTimer) {_ in batteryAlert() }
+        .onReceive(widgetDataTimer) {_ in AirBatteryModel.writeData() }
+        .onReceive(widgetViewTimer) {_ in
+            if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }
         }
         .onReceive(dockTimer) { t in
             if showOn == "both" || showOn == "dock" { NSApp.dockTile.display() }
@@ -257,6 +237,7 @@ struct popover: View {
     var fromDock: Bool = false
     var allDevices: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
+    @State private var overCopyButton = false
     @State private var overHideButton = false
     @State private var overAlertButton = false
     @State private var overInfoButton = false
@@ -403,48 +384,78 @@ struct popover: View {
                                             Text(InternalBattery.status.timeLeft)
                                                 .font(.system(size: 11))
                                                 .foregroundColor(.secondary)
-                                        }else{
-                                            //Image(systemName: "arrow.clockwise").font(.system(size: 10))
-                                            Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                                .font(.system(size: 11))
-                                                .foregroundColor(.secondary)
-                                            if !alertList.contains(allDevices[index].deviceName) {
+                                            if #available(macOS 14, *) {
                                                 Button(action: {
-                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                    alertList.append(allDevices[index].deviceName)
-                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                    copyToClipboard(allDevices[index].deviceName)
+                                                    _ = createAlert(title: "Device Name Copied".local,
+                                                                                       message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                                       button1: "OK".local).runModal()
                                                 }, label: {
-                                                    Image(systemName: "bell")
+                                                    Image(systemName: "list.clipboard.fill")
                                                         .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
                                                 })
                                                 .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overAlertButton = hovering }
-                                            } else {
-                                                Button(action: {
-                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                    alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                }, label: {
-                                                    Image(systemName: "bell.fill")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overAlertButton = hovering }
+                                                .onHover{ hovering in overCopyButton = hovering }
                                             }
-                                            Button(action: {
-                                                hidden.append(index)
-                                                var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-                                                blackList.append(allDevices[index].deviceName)
-                                                UserDefaults.standard.set(blackList, forKey: "blackList")
-                                            }, label: {
-                                                Image(systemName: "eye.slash.fill")
-                                                    .frame(width: 20, height: 20, alignment: .center)
-                                                    .foregroundColor(overHideButton ? .accentColor : .secondary)
-                                            })
-                                            .buttonStyle(PlainButtonStyle())
-                                            .onHover{ hovering in overHideButton = hovering }
+                                        }else{
+                                            HStack(spacing: 2) {
+                                                //Image(systemName: "arrow.clockwise").font(.system(size: 10))
+                                                Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
+                                                    .font(.system(size: 11))
+                                                    .foregroundColor(.secondary)
+                                                if !alertList.contains(allDevices[index].deviceName) {
+                                                    Button(action: {
+                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                        alertList.append(allDevices[index].deviceName)
+                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                    }, label: {
+                                                        Image(systemName: "bell")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overAlertButton = hovering }
+                                                } else {
+                                                    Button(action: {
+                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                        alertList.removeAll { $0 == allDevices[index].deviceName }
+                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                    }, label: {
+                                                        Image(systemName: "bell.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overAlertButton = hovering }
+                                                }
+                                                if #available(macOS 14, *) {
+                                                    Button(action: {
+                                                        copyToClipboard(allDevices[index].deviceName)
+                                                        _ = createAlert(title: "Device Name Copied".local,
+                                                                                           message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                                           button1: "OK".local).runModal()
+                                                    }, label: {
+                                                        Image(systemName: "list.clipboard.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overCopyButton = hovering }
+                                                }
+                                                Button(action: {
+                                                    hidden.append(index)
+                                                    var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                                    blackList.append(allDevices[index].deviceName)
+                                                    UserDefaults.standard.set(blackList, forKey: "blackList")
+                                                }, label: {
+                                                    Image(systemName: "eye.slash.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overHideButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overHideButton = hovering }
+                                            }
                                         }
                                     } else {
                                         Text("\(allDevices[index].batteryLevel)%")

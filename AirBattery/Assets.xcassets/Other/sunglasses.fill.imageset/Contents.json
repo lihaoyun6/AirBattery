@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "sunglasses.fill.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "sunglasses.fill.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },

@@ -10,10 +10,12 @@ import UserNotifications
 
 let dockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
-let widgetTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+let widgetDataTimer = Timer.publish(every: 29, on: .main, in: .common).autoconnect()
+let widgetInterval = UserDefaults.standard.integer(forKey: "widgetInterval")
+let updateInterval = UserDefaults.standard.double(forKey: "updateInterval")
+let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? abs(widgetInterval) : Int(updateInterval))), on: .main, in: .common).autoconnect()
 let macList = ["MacBookPro1,1":"macbook.gen1", "MacBookPro1,2":"macbook.gen1", "MacBookPro2,1":"macbook.gen1", "MacBookPro2,2":"macbook.gen1", "MacBookPro3,1":"macbook.gen1", "MacBookPro4,1":"macbook.gen1", "MacBookPro5,1":"macbook.gen1", "MacBookPro5,2":"macbook.gen1", "MacBookPro5,3":"macbook.gen1", "MacBookPro5,4":"macbook.gen1", "MacBookPro5,5":"macbook.gen1", "MacBookPro6,1":"macbook.gen1", "MacBookPro6,2":"macbook.gen1", "MacBookPro7,1":"macbook.gen1", "MacBookPro8,1":"macbook.gen1", "MacBookPro8,2":"macbook.gen1", "MacBookPro8,3":"macbook.gen1", "MacBookPro9,1":"macbook.gen1", "MacBookPro9,2":"macbook.gen1", "MacBookPro10,1":"macbook.gen1", "MacBookPro10,2":"macbook.gen1", "MacBookPro11,1":"macbook.gen1", "MacBookPro11,2":"macbook.gen1", "MacBookPro11,3":"macbook.gen1", "MacBookPro11,4":"macbook.gen1", "MacBookPro11,5":"macbook.gen1", "MacBookPro12,1":"macbook.gen1", "MacBookPro13,1":"macbook.gen1", "MacBookPro13,2":"macbook.gen1", "MacBookPro13,3":"macbook.gen1", "MacBookPro14,1":"macbook.gen1", "MacBookPro14,2":"macbook.gen1", "MacBookPro14,3":"macbook.gen1", "MacBookPro15,1":"macbook.gen1", "MacBookPro15,2":"macbook.gen1", "MacBookPro15,3":"macbook.gen1", "MacBookPro15,4":"macbook.gen1", "MacBookPro16,1":"macbook.gen1", "MacBookPro16,2":"macbook.gen1", "MacBookPro16,3":"macbook.gen1", "MacBookPro16,4":"macbook.gen1", "MacBookPro17,1":"macbook.gen1", "MacBookPro18,1":"macbook", "MacBookPro18,2":"macbook", "MacBookPro18,3":"macbook", "MacBookPro18,4":"macbook", "Mac14,5":"macbook", "Mac14,6":"macbook", "Mac14,7":"macbook.gen1", "Mac14,9":"macbook", "Mac14,10":"macbook", "Mac15,3":"macbook", "Mac15,6":"macbook", "Mac15,7":"macbook", "Mac15,8":"macbook", "Mac15,9":"macbook", "Mac15,10":"macbook", "Mac15,11":"macbook"]
 let macID = getMacModelIdentifier()
-
 
 struct dayAndWeek {
     var day: String
@@ -147,6 +149,16 @@ public func process(path: String, arguments: [String]) -> String? {
     return output.trimmingCharacters(in: .newlines)
 }
 
+func createAlert(level: NSAlert.Style = .warning, title: String, message: String, button1: String, button2: String = "") -> NSAlert {
+    let alert = NSAlert()
+    alert.messageText = title.local
+    alert.informativeText = message.local
+    alert.addButton(withTitle: button1.local)
+    if button2 != "" { alert.addButton(withTitle: button2.local) }
+    alert.alertStyle = level
+    return alert
+}
+
 func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
     for (key, subJson) in json {
         if let subJsonDictionary = subJson as? [String: Any] {
@@ -223,6 +235,12 @@ func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
     }
     if list != [] { while list.count < length { list.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0)) } }
     return list
+}
+
+func copyToClipboard(_ text: String) {
+    let pasteboard = NSPasteboard.general
+    pasteboard.clearContents()
+    pasteboard.setString(text, forType: .string)
 }
 
 func batteryAlert() {

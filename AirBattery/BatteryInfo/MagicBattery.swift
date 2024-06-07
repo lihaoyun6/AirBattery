@@ -35,7 +35,9 @@ class MagicBattery {
     @objc func scanDevices() { Thread.detachNewThread {
         if self.readBTDevice {
             self.getMagicBattery()
-            //self.getMagicBattery_old()
+            self.getOldMagicKeyboard()
+            self.getOldMagicTrackpad()
+            self.getOldMagicMouse()
             self.getOtherBTBattery()
         }
         //if self.readAirpods { self.getAirpods() }
@@ -123,12 +125,46 @@ class MagicBattery {
         IOObjectRelease(serialPortIterator)
     }
     
-    func getMagicBattery_old() {
+    func getOldMagicKeyboard() {
         var serialPortIterator = io_iterator_t()
         var object : io_object_t
         let masterPort: mach_port_t
         if #available(macOS 12.0, *) { masterPort = kIOMainPortDefault } else { masterPort = kIOMasterPortDefault }
         let matchingDict : CFDictionary = IOServiceMatching("AppleBluetoothHIDKeyboard")
+        let kernResult = IOServiceGetMatchingServices(masterPort, matchingDict, &serialPortIterator)
+        if KERN_SUCCESS == kernResult {
+            repeat {
+                object = IOIteratorNext(serialPortIterator)
+                if object != 0 { readMagicBattery(object: object) }
+            } while object != 0
+            IOObjectRelease(object)
+        }
+        IOObjectRelease(serialPortIterator)
+    }
+    
+    func getOldMagicTrackpad() {
+        var serialPortIterator = io_iterator_t()
+        var object : io_object_t
+        let masterPort: mach_port_t
+        if #available(macOS 12.0, *) { masterPort = kIOMainPortDefault } else { masterPort = kIOMasterPortDefault }
+        let matchingDict : CFDictionary = IOServiceMatching("BNBTrackpadDevice")
+        let kernResult = IOServiceGetMatchingServices(masterPort, matchingDict, &serialPortIterator)
+        if KERN_SUCCESS == kernResult {
+            repeat {
+                object = IOIteratorNext(serialPortIterator)
+                if object != 0 { readMagicBattery(object: object) }
+            } while object != 0
+            IOObjectRelease(object)
+        }
+        IOObjectRelease(serialPortIterator)
+    }
+    
+    func getOldMagicMouse() {
+        var serialPortIterator = io_iterator_t()
+        var object : io_object_t
+        let masterPort: mach_port_t
+        if #available(macOS 12.0, *) { masterPort = kIOMainPortDefault } else { masterPort = kIOMasterPortDefault }
+        let matchingDict : CFDictionary = IOServiceMatching("BNBMouseDevice")
         let kernResult = IOServiceGetMatchingServices(masterPort, matchingDict, &serialPortIterator)
         if KERN_SUCCESS == kernResult {
             repeat {
@@ -157,7 +193,7 @@ class MagicBattery {
                             var id = n
                             if let mac = info["device_address"] as? String { id = mac }
                             if let pid = info["device_productID"] as? String { productID = pid.replacingOccurrences(of: "0x", with: "") }
-                            if let level = Int(level.replacingOccurrences(of: "%", with: "")) {
+                            if let level = Int(level.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "%", with: "")) {
                                 if var apCase = AirBatteryModel.getByName(n + " (Case)".local) {
                                     apCase.batteryLevel = level
                                     apCase.lastUpdate = now
@@ -229,7 +265,7 @@ class MagicBattery {
                            let id = info["device_address"] as? String,
                            let type = info["device_minorType"] as? String,
                            (info["device_vendorID"] as? String) != "0x004C" {
-                            guard let batLevel = Int(level.replacingOccurrences(of: "%", with: "")) else { return }
+                            guard let batLevel = Int(level.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "%", with: "")) else { return }
                             AirBatteryModel.updateDevice(Device(deviceID: id, deviceType: type, deviceName: n, batteryLevel: batLevel, isCharging: 0, lastUpdate: Date().timeIntervalSince1970))
                         }
                     }

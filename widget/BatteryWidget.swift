@@ -8,9 +8,45 @@
 import WidgetKit
 import SwiftUI
 
+@available(macOS 14, *)
+struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> SimpleEntry {
+        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, configuration: nil)
+    }
+
+    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
+        var mainApp = false
+        let apps = NSWorkspace.shared.runningApplications
+        for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
+        var data = AirBatteryModel.readData()
+        if context.family == .systemSmall || context.family == .systemMedium {
+            while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
+        } else if context.family ==  .systemLarge {
+            if data.count >= 8 { data = Array(data[0..<8]) }
+        }
+        return SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
+    }
+    
+    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
+        var mainApp = false
+        let apps = NSWorkspace.shared.runningApplications
+        for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
+        var data = AirBatteryModel.readData()
+        let entry: SimpleEntry
+        if context.family == .systemSmall || context.family == .systemMedium {
+            while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
+        } else if context.family ==  .systemLarge {
+            if data.count >= 8 { data = Array(data[0..<8]) }
+        }
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
+        let entries: [SimpleEntry] = [entry]
+        return Timeline(entries: entries, policy: .atEnd)
+    }
+}
+
 struct ViewSizeTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true)
+        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, configuration: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> Void) {
@@ -24,7 +60,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 8 { data = Array(data[0..<8]) }
         }
-        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp)
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
         completion(entry)
     }
     
@@ -39,7 +75,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 8 { data = Array(data[0..<8]) }
         }
-        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp)
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
         let entries: [SimpleEntry] = [entry]
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
@@ -51,6 +87,7 @@ struct SimpleEntry: TimelineEntry {
     let data: [Device]
     let family: WidgetFamily
     let mainApp: Bool
+    let configuration: Any?
 }
 
 struct batteryWidgetEntryView : View {
@@ -170,19 +207,35 @@ struct SmallWidgetView : View {
                 VStack(spacing: 17) {
                     HStack(spacing: 17) {
                         ForEach(0..<2) { index in
-                            Circle()
-                                .stroke(lineWidth: lineWidth)
-                                .frame(width: 58, alignment: .center)
+                            ZStack {
+                                Circle()
+                                    .trim(from: 0.0, to: 0.78)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .frame(width: 58, alignment: .center)
+                                    .rotationEffect(Angle(degrees: 129.6))
+                                    .opacity(0.15)
+                                Text("    ")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .offset(y: 25)
+                            }
                         }
                     }
                     HStack(spacing: 17) {
                         ForEach(0..<2) { index in
-                            Circle()
-                                .stroke(lineWidth: lineWidth)
-                                .frame(width: 58, alignment: .center)
+                            ZStack {
+                                Circle()
+                                    .trim(from: 0.0, to: 0.78)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .frame(width: 58, alignment: .center)
+                                    .rotationEffect(Angle(degrees: 129.6))
+                                    .opacity(0.15)
+                                Text("    ")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .offset(y: 25)
+                            }
                         }
                     }
-                }.opacity(0.15)
+                }
             }else{
                 VStack(spacing: 17) {
                     HStack(spacing: 17){
@@ -436,12 +489,8 @@ struct batteryWidget: Widget {
                 .widgetBackground(Color("WidgetBackground"))
         }
         .configurationDisplayName("Batteries")
-        .description("Displays battery information for your devices from AirBattery.")
+        .description("Displays battery usage for your devices from AirBattery.")
         .disableContentMarginsIfNeeded()
-        .supportedFamilies([
-            .systemSmall,
-            .systemMedium,
-            .systemLarge,
-        ])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

@@ -8,7 +8,7 @@
 import WidgetKit
 import SwiftUI
 
-struct doubleBatteryWidgetEntryView : View {
+struct doubleRowBatteryWidgetEntryView: View {
     var entry: ViewSizeTimelineProvider.Entry
     let lineWidth = 6.0
     
@@ -23,19 +23,35 @@ struct doubleBatteryWidgetEntryView : View {
                 VStack(spacing: 17){
                     HStack(spacing: 23) {
                         ForEach(0..<4) { index in
-                            Circle()
-                                .stroke(lineWidth: lineWidth)
-                                .frame(width: 58, alignment: .center)
+                            ZStack {
+                                Circle()
+                                    .trim(from: 0.0, to: 0.78)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .frame(width: 58, alignment: .center)
+                                    .rotationEffect(Angle(degrees: 129.6))
+                                    .opacity(0.15)
+                                Text("    ")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .offset(y: 25)
+                            }
                         }
                     }
                     HStack(spacing: 23) {
                         ForEach(0..<4) { index in
-                            Circle()
-                                .stroke(lineWidth: lineWidth)
-                                .frame(width: 58, alignment: .center)
+                            ZStack{
+                                Circle()
+                                    .trim(from: 0.0, to: 0.78)
+                                    .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                    .frame(width: 58, alignment: .center)
+                                    .rotationEffect(Angle(degrees: 129.6))
+                                    .opacity(0.15)
+                                Text("    ")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .offset(y: 25)
+                            }
                         }
                     }
-                }.opacity(0.15)
+                }
             } else {
                 VStack(spacing: 17){
                     HStack(spacing: 23) {
@@ -87,7 +103,7 @@ struct doubleBatteryWidgetEntryView : View {
                                     }.frame(width: 58, height: 58, alignment: .center)
                                     Text(item.hasBattery ? "\(item.batteryLevel)%" : "")
                                         .font(.system(size: 10, weight: .medium))
-                                        .offset(x: 1, y: 24)
+                                        .offset(x: 1, y: 25)
                                 }.compositingGroup()
                             }
                         }
@@ -153,10 +169,12 @@ struct doubleBatteryWidgetEntryView : View {
     }
 }
 
-struct singleBatteryWidgetEntryView : View {
+struct singleBatteryWidgetEntryView: View {
     var entry: ViewSizeTimelineProvider.Entry
     var item: Device?
-    let lineWidth = 10.0
+    var deviceName: String
+    var warringText: String
+    private let lineWidth = 10.0
     
     var body: some View {
         if !entry.mainApp{
@@ -222,32 +240,25 @@ struct singleBatteryWidgetEntryView : View {
                         .truncationMode(.middle)
                 }.offset(y: item.isCharging != 0 ? 5 : 3.5)
             } else {
-                VStack(spacing: 14) {
-                    ZStack {
+                VStack(spacing: 10) {
+                    ZStack{
                         Circle()
-                            .stroke(lineWidth: lineWidth)
-                            .frame(width: 104, alignment: .center)
+                            .trim(from: 0.0, to: 0.8)
+                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                            .frame(width: 110, height: 110, alignment: .center)
+                            .rotationEffect(Angle(degrees: 126))
                             .opacity(0.15)
-                        HStack(spacing: 5) {
-                            Image("blank")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 18, height: 18, alignment: .center)
-                                .offset(y: 0.5)
-                            Text("    ")
-                                .font(.system(size: 25))
-                        }
-                    }.offset(y: 0.5)
-                    let devicename = AirBatteryModel.singleDeviceName()
-                    Text(devicename == "@@@@@@@@@@@@@@@@@@@@" ? "Select a Device in Preferences".local : "Searching for ".local + devicename)
+                        Text("     ")
+                            .font(.system(size: 17))
+                            .offset(x: 1, y: 47)
+                    }
+                    Text(deviceName == "" ? warringText : "Searching: ".local + deviceName)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(Color.gray)
-                        .frame(width: 154, alignment: .center)
+                        .foregroundColor(.secondary.opacity(0.6))
+                        .frame(width: 150, alignment: .center)
                         .lineLimit(1)
                         .truncationMode(.middle)
-                        .opacity(0.15)
-                }
-                .offset(y: 2)
+                }.offset(y: 3.5)
             }
         }
     }
@@ -260,10 +271,17 @@ struct batteryWidgetEntryView2: View {
         VStack {
             switch entry.family {
             case .systemSmall:
-                let item = entry.data.first(where: { $0.deviceName == AirBatteryModel.singleDeviceName() })
-                singleBatteryWidgetEntryView(entry: entry, item: item)
+                if #available(macOS 14, *) {
+                    let deviceName = (entry.configuration as! ConfigurationAppIntent).deviceName
+                    let item = deviceName != "" ? entry.data.first(where: { $0.deviceName == deviceName }) : nil
+                    singleBatteryWidgetEntryView(entry: entry, item: item, deviceName: deviceName, warringText: "Right click to configure".local)
+                } else {
+                    let deviceName = AirBatteryModel.singleDeviceName()
+                    let item = deviceName != "" ? entry.data.first(where: { $0.deviceName == deviceName }) : nil
+                    singleBatteryWidgetEntryView(entry: entry, item: item, deviceName: deviceName, warringText: "Select a Device in Preferences".local)
+                }
             case .systemMedium:
-                doubleBatteryWidgetEntryView(entry: entry)
+                doubleRowBatteryWidgetEntryView(entry: entry)
             case .systemLarge:
                 EmptyView()
             case .systemExtraLarge:
@@ -275,8 +293,26 @@ struct batteryWidgetEntryView2: View {
     }
 }
 
-struct doubleBatteryWidget: Widget {
-    let kind: String = "widget.doubleBattery"
+@available(macOS 14, *)
+struct batteryWidget2New: Widget {
+    let kind: String = "widget.battery.part3"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: ViewSizeTimelineProviderNew()) { entry in
+            batteryWidgetEntryView2(entry: entry)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+                .widgetBackground(Color("WidgetBackground"))
+        }
+        .configurationDisplayName("Batteries")
+        .description("Displays the battery usage of a specific device.")
+        .disableContentMarginsIfNeeded()
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct batteryWidget2: Widget {
+    let kind: String = "widget.battery.part2"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ViewSizeTimelineProvider()) { entry in
@@ -286,11 +322,8 @@ struct doubleBatteryWidget: Widget {
                 .widgetBackground(Color("WidgetBackground"))
         }
         .configurationDisplayName("Batteries")
-        .description("Displays battery information for your devices from AirBattery.")
+        .description("More ways to displays battery usage for your devices from AirBattery.")
         .disableContentMarginsIfNeeded()
-        .supportedFamilies([
-            .systemSmall,
-            .systemMedium,
-        ])
+        .supportFamily()
     }
 }

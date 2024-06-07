@@ -51,7 +51,7 @@ struct UpdaterSettingsView: View {
     }
     
     var body: some View {
-        HStack() {
+        HStack {
             Toggle("Automatically check for updates", isOn: $automaticallyChecksForUpdates)
                 .onChange(of: automaticallyChecksForUpdates) { newValue in
                     updater.automaticallyChecksForUpdates = newValue
