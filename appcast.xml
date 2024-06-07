@@ -3,6 +3,32 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.3.4</title>
+            <pubDate>Fri, 07 Jun 2024 20:19:05 +0800</pubDate>
+            <sparkle:version>134</sparkle:version>
+            <sparkle:shortVersionString>1.3.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 5;padding-left: 18;}</style><ul>
+                  <li>新增设备充满提醒功能, 设备黑名单功能以及查看选项注释的功能</li>
+                  <li>为 Magic Keyboard / Trackpad / Mouse 1代添加了支持</li>
+                  <li>为 macOS 14 添加了可配置的单设备小组件, 多个组件可同时显示不同设备</li>
+                  <li>为更多小组件添加了百分比电量显示, 且允许用户自定义小组件更新频率</li>
+                  <li>修复了小组件在 macOS 11~13 系统中的可用性</li>
+                  <li>修复了部分第三方耳机显示问号图标的问题, 修复已知的 bug, 改进了 UI</li>
+                  </ul><ul>
+                  <li>Added Fully Charged Notification, Device Blacklist and Tooltips</li>
+                  <li>Added support for Magic Keyboard / Trackpad / Mouse 1st generation</li>
+                  <li>Multiple single-device widgets can display different devices in macOS 14</li>
+                  <li>Widgets now work on macOS 11~13 and you can set the update interval</li>
+                  <li>All widgets can display the battery percentage numerically</li>
+                  <li>Fixed an issue where some third-party headsets displayed incorrect icons</li>
+                  <li>Fixed other known bugs and improved the UI &nbsp;&nbsp;&nbsp;&nbsp;<b>(Scroll down for more⬇)</b></li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.4/AirBattery_v1.3.4.dmg" length="7788469" type="application/octet-stream" sparkle:edSignature="KzKo5uK2r/xb6e+9ScvLUSK7iuaHdZjESvg2lXhpOcfO6yU26TG5xVRBO6pyrFdUHua4y9ZXctcEqnrx5AubDQ=="/>
+        </item>
+        <item>
             <title>v1.3.3</title>
             <pubDate>Mon, 03 Jun 2024 15:57:08 +0800</pubDate>
             <sparkle:version>133</sparkle:version>
