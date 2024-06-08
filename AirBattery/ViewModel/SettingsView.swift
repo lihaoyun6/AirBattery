@@ -133,7 +133,7 @@ struct SettingsView: View {
                         HStack{
                             Toggle(isOn: $readIDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
-                                Text("WiFi / LAN Scanner")
+                                Text("WiFi Scanner (iOS)")
                                 SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Scan your iPhone / iPad / Apple Watch / VisionPro and other iDevices under the same router".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
@@ -141,7 +141,7 @@ struct SettingsView: View {
                         HStack{
                             Toggle(isOn: $ideviceOverBLE) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
-                                Text("Bluetooth Scanner")
+                                Text("BLE Scanner (iOS)")
                                 SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Scan your iPhone and iPad(Cellular) via Bluetooth".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
@@ -158,21 +158,21 @@ struct SettingsView: View {
                     Spacer()
                     Form(){
                         HStack{
-                            Toggle(isOn: $readAirpods) {}.toggleStyle(.switch)
-                            Text("Find AirPods / Beats")
-                        }
-                        HStack{
                             Toggle(isOn: $readBTDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
-                                Text("Non-Apple Devices")
-                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Only some of non-Apple peripherals are supported!".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                Text("Bluetooth Scanner")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: Some devices cannot be listed even though macOS knows their battery usage".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
                         }
                         HStack{
+                            Toggle(isOn: $readAirpods) {}.toggleStyle(.switch)
+                            Text("Find AirPods / Beats")
+                        }
+                        HStack{
                             Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
-                                Text("Get All BLE Devices")
+                                Text("Non-Apple BLE Devices")
                                 SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!".local, primaryColor: NSColor(named: "my_yellow") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
@@ -183,19 +183,29 @@ struct SettingsView: View {
                 //Divider().frame(width: 440)
                 HStack {
                     Spacer()
-                    Picker("Update Interval", selection: $updateInterval) {
-                        Text("Short").tag(1.0)
-                        Text("Medium").tag(2.0)
-                        Text("Long").tag(3.0)
-                    }
-                        .frame(width: 270)
+                    HStack(spacing: 2) {
+                        Picker("Update Interval", selection: $updateInterval) {
+                            Text("Default".local).tag(1.0)
+                            Text("Custom".local).tag(updateInterval == 1.0 ? 2.0 : updateInterval)
+                        }
                         .pickerStyle(.segmented)
                         .onChange(of: updateInterval) { _ in
                             _ = createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
                         }
+                        TextField("", value: $updateInterval, formatter: NumberFormatter())
+                            .textFieldStyle(.squareBorder)
+                            .frame(width: 26)
+                            .onChange(of: updateInterval) { newValue in
+                                if newValue > 99.0 { updateInterval = 99.0 }
+                                if newValue < 1.0 { updateInterval = 1.0 }
+                            }
+                            .disabled(updateInterval == 1.0)
+                        Text("min")
+                            .foregroundColor(updateInterval == 1.0 ? .secondary : .primary)
+                    }.fixedSize()
                     Spacer()
                     HStack(spacing: 2) {
-                        Text("Merge Threshold".local).padding(.trailing, 5)
+                        Text("Merge Limits".local).padding(.trailing, 5)
                         TextField("", value: $twsMerge, formatter: NumberFormatter())
                             .textFieldStyle(.squareBorder)
                             .frame(width: 26)
@@ -287,15 +297,12 @@ struct SettingsView: View {
                     Text("Reverse the Device List")
                 }
                 HStack(spacing: 3) {
-                    Text("Update Interval")
-                    SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "System: Determined by macOS\n\nNearbility: Same as Nearbility setting".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .maxX)
+                    Text("Refresh Interval")
+                    SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "System Default: Determined by macOS\n\nNearbility: Same as Nearbility setting".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .maxX)
                         .frame(width: 19, height: 19)
                     Picker("", selection: $widgetInterval) {
-                        Text("System").tag(-1)
+                        Text("System Default").tag(-1)
                         Text("Nearbility").tag(0)
-                        Text("1 "+"min".local).tag(1)
-                        Text("3 "+"min".local).tag(3)
-                        Text("5 "+"min".local).tag(5)
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: widgetInterval) { _ in
@@ -315,14 +322,14 @@ struct SettingsView: View {
                     }.onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
                 }
                 HStack {
-                    Spacer()
                     Button(action: {
                         AirBatteryModel.writeData()
-                        _ = AirBatteryModel.singleDeviceName()
                         WidgetCenter.shared.reloadAllTimelines()
                     }, label: {
                         Text("Reload All Widgets")
-                    })}
+                            .foregroundColor(.orange)
+                    }).padding(.top, 14)
+                }
             }
             .onAppear { devices = AirBatteryModel.getAll(noFilter: true).filter({ $0.hasBattery }).map({ $0.deviceName }) }
             .onReceive(dockTimer) { _ in

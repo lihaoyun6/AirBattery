@@ -237,6 +237,7 @@ struct popover: View {
     var fromDock: Bool = false
     var allDevices: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
+    @State private var overReloadButton = false
     @State private var overCopyButton = false
     @State private var overHideButton = false
     @State private var overAlertButton = false

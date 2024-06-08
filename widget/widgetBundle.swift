@@ -29,9 +29,9 @@ extension WidgetConfiguration {
     
     func supportFamily() -> some WidgetConfiguration {
         if #available(macOS 14, *) {
-            return self.supportedFamilies([.systemMedium])
+            return self.supportedFamilies([.systemLarge, .systemMedium])
         } else {
-            return self.supportedFamilies([.systemMedium, .systemSmall])
+            return self.supportedFamilies([.systemLarge, .systemMedium, .systemSmall])
         }
     }
 }
@@ -44,9 +44,9 @@ struct widgetBundle: WidgetBundle {
     
     func widgets() -> some Widget {
         if #available(macOS 14, *) {
-            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2(), batteryWidget2New())
+            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2New(), batteryWidget2(), batteryWidget3())
         } else {
-            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2())
+            return WidgetBundleBuilder.buildBlock(batteryWidget(), batteryWidget2(), batteryWidget3())
         }
     }
 }

@@ -8,13 +8,94 @@
 import WidgetKit
 import SwiftUI
 
+struct LargeWidgetView2: View {
+    var entry: ViewSizeTimelineProvider.Entry
+    let lineWidth = 6.0
+    
+    var body: some View {
+        if !entry.mainApp{
+            Text("AirBattery is not running\nLaunch the app to make the widget work")
+                .multilineTextAlignment(.center)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color.gray)
+        } else {
+            if entry.data.count == 0 {
+                VStack(alignment:.leading) {
+                    ForEach(0..<11) { index in
+                        VStack{
+                            HStack() {
+                                Image("blank")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20, alignment: .center)
+                                Text("                       ")
+                                    .font(.system(size: 11))
+                                    .frame(height: 20, alignment: .center)
+                                    .padding(.horizontal, 7)
+                                Spacer()
+                                Text("     ")
+                                    .font(.system(size: 11))
+                                Image("blank")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20, alignment: .center)
+                            }
+                            if index != 10 { Divider().padding(.top, -2) }
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 15)
+            } else {
+                VStack(alignment:.leading) {
+                    ForEach(entry.data.indices, id: \.self) { index in
+                        let item = entry.data[index]
+                        VStack{
+                            HStack() {
+                                Image(getDeviceIcon(item))
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20, alignment: .center)
+                                Text("\(((Date().timeIntervalSince1970 - item.lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(item.deviceName)")
+                                    .font(.system(size: 11))
+                                    .frame(height: 20, alignment: .center)
+                                    .padding(.horizontal, 7)
+                                Spacer()
+                                if item.batteryLevel <= 10 {
+                                    Text("\(item.batteryLevel)%") .font(.system(size: 11))
+                                        .foregroundColor(Color("dark_my_red"))
+                                } else {
+                                    Text("\(item.batteryLevel)%") .font(.system(size: 11))
+                                }
+                                
+                                /*Image(getBatteryIcon(item))
+                                 .resizable()
+                                 .aspectRatio(contentMode: .fit)
+                                 .frame(width: 20, height: 20, alignment: .center)
+                                 */
+                                BatteryView(item: item)
+                                    .scaleEffect(0.76)
+                            }
+                            if index != 10 { Divider().padding(.top, -2) }
+                        }
+                    }
+                    Spacer()
+                }
+                .offset(y:4)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 18)
+            }
+        }
+    }
+}
+
 struct doubleRowBatteryWidgetEntryView: View {
     var entry: ViewSizeTimelineProvider.Entry
     let lineWidth = 6.0
     
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make the widget work.")
+            Text("AirBattery is not running\nLaunch the app to make the widget work")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -178,7 +259,7 @@ struct singleBatteryWidgetEntryView: View {
     
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make\nthe widget work.")
+            Text("AirBattery is not running\nLaunch the app to make\nthe widget work")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -283,13 +364,13 @@ struct batteryWidgetEntryView2: View {
             case .systemMedium:
                 doubleRowBatteryWidgetEntryView(entry: entry)
             case .systemLarge:
-                EmptyView()
+                LargeWidgetView2(entry: entry)
             case .systemExtraLarge:
                 EmptyView()
             @unknown default:
                 EmptyView()
             }
-        }
+        }.widgetURL(URL(string: "airbattery://reloadwingets"))
     }
 }
 
@@ -305,7 +386,7 @@ struct batteryWidget2New: Widget {
                 .widgetBackground(Color("WidgetBackground"))
         }
         .configurationDisplayName("Batteries")
-        .description("Displays the battery usage of a specific device.")
+        .description("Displays the battery usage of a specific device")
         .disableContentMarginsIfNeeded()
         .supportedFamilies([.systemSmall])
     }
@@ -322,7 +403,7 @@ struct batteryWidget2: Widget {
                 .widgetBackground(Color("WidgetBackground"))
         }
         .configurationDisplayName("Batteries")
-        .description("More ways to displays battery usage for your devices from AirBattery.")
+        .description("More ways to displays battery usage for your devices")
         .disableContentMarginsIfNeeded()
         .supportFamily()
     }

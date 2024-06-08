@@ -40,6 +40,7 @@
 		18B8E5C92B83C9AD00A20D03 /* BatteryWidget2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B8E5C82B83C9AD00A20D03 /* BatteryWidget2.swift */; };
 		18E6E36E2C0BA6A800A666CE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 18E6E36D2C0BA6A800A666CE /* Sparkle */; };
 		18E6E3702C0BA7D200A666CE /* Sparkle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6E36F2C0BA7D200A666CE /* Sparkle.swift */; };
+		18EF7E632C141CB70065A9E1 /* BatteryWidget3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */; };
 		18F615F32B763DD800873AA4 /* BLEBattery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F615F22B763DD800873AA4 /* BLEBattery.swift */; };
 		18F615F92B76439300873AA4 /* AirBatteryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F615F82B76439300873AA4 /* AirBatteryModel.swift */; };
 		18F615FB2B7676D200873AA4 /* Supports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F615FA2B7676D200873AA4 /* Supports.swift */; };
@@ -114,6 +115,7 @@
 		18B8E5C82B83C9AD00A20D03 /* BatteryWidget2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryWidget2.swift; sourceTree = "<group>"; };
 		18C7CFDE2AAF842E005898EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = Base; path = Base.lproj/Credits.rtf; sourceTree = "<group>"; };
 		18E6E36F2C0BA7D200A666CE /* Sparkle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkle.swift; sourceTree = "<group>"; };
+		18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryWidget3.swift; sourceTree = "<group>"; };
 		18F615F22B763DD800873AA4 /* BLEBattery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEBattery.swift; sourceTree = "<group>"; };
 		18F615F82B76439300873AA4 /* AirBatteryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirBatteryModel.swift; sourceTree = "<group>"; };
 		18F615FA2B7676D200873AA4 /* Supports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supports.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 				180B1C0D2C12017400DDB570 /* AppIntent.swift */,
 				18892A8F2B81F8320017377E /* BatteryWidget.swift */,
 				18B8E5C82B83C9AD00A20D03 /* BatteryWidget2.swift */,
+				18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */,
 				18892A952B81F8330017377E /* Info.plist */,
 				18892A962B81F8330017377E /* widget.entitlements */,
 			);
@@ -434,6 +437,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				18892AA22B82F0880017377E /* AirBatteryModel.swift in Sources */,
+				18EF7E632C141CB70065A9E1 /* BatteryWidget3.swift in Sources */,
 				18892AA32B82F09C0017377E /* InternalBattery.swift in Sources */,
 				18892A8E2B81F8320017377E /* widgetBundle.swift in Sources */,
 				18892A902B81F8320017377E /* BatteryWidget.swift in Sources */,
@@ -492,7 +496,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBatteryHelper/AirBatteryHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBatteryHelper/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -507,7 +511,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBatteryHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -526,7 +530,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBatteryHelper/AirBatteryHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBatteryHelper/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -541,7 +545,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBatteryHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -678,7 +682,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
@@ -695,7 +699,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -712,7 +716,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
@@ -729,7 +733,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -745,7 +749,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widget/widget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -761,7 +765,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -779,7 +783,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widget/widget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 134;
+				CURRENT_PROJECT_VERSION = 135;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -795,7 +799,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.4;
+				MARKETING_VERSION = 1.3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

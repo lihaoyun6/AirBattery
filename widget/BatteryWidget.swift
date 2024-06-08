@@ -22,7 +22,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
         } else if context.family ==  .systemLarge {
-            if data.count >= 8 { data = Array(data[0..<8]) }
+            if data.count >= 11 { data = Array(data[0..<11]) }
         }
         return SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
     }
@@ -36,7 +36,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
         } else if context.family ==  .systemLarge {
-            if data.count >= 8 { data = Array(data[0..<8]) }
+            if data.count >= 11 { data = Array(data[0..<11]) }
         }
         entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
         let entries: [SimpleEntry] = [entry]
@@ -107,7 +107,7 @@ struct batteryWidgetEntryView : View {
             @unknown default:
                 EmptyView()
             }
-        }
+        }.widgetURL(URL(string: "airbattery://reloadwingets"))
     }
 }
 
@@ -117,7 +117,7 @@ struct LargeWidgetView : View {
     
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make the widget work.")
+            Text("AirBattery is not running\nLaunch the app to make the widget work")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -151,35 +151,38 @@ struct LargeWidgetView : View {
                 .padding(.horizontal, 15)
             } else {
                 VStack(alignment:.leading) {
-                    ForEach(entry.data, id: \.self) { item in
-                        VStack{
-                            HStack() {
-                                Image(getDeviceIcon(item))
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
+                    ForEach(entry.data.indices, id: \.self) { index in
+                        if index < 8 {
+                            let item = entry.data[index]
+                            VStack{
+                                HStack() {
+                                    Image(getDeviceIcon(item))
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
                                     //.foregroundColor(Color("black_white"))
-                                    .frame(width: 20, height: 20, alignment: .center)
-                                Text("\(((Date().timeIntervalSince1970 - item.lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(item.deviceName)")
-                                    .font(.system(size: 11))
-                                    .frame(height: 31, alignment: .center)
-                                    .padding(.horizontal, 7)
-                                Spacer()
-                                if item.batteryLevel <= 10 {
-                                    Text("\(item.batteryLevel)%") .font(.system(size: 11))
-                                        .foregroundColor(Color("dark_my_red"))
-                                } else {
-                                    Text("\(item.batteryLevel)%") .font(.system(size: 11))
+                                        .frame(width: 20, height: 20, alignment: .center)
+                                    Text("\(((Date().timeIntervalSince1970 - item.lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(item.deviceName)")
+                                        .font(.system(size: 11))
+                                        .frame(height: 31, alignment: .center)
+                                        .padding(.horizontal, 7)
+                                    Spacer()
+                                    if item.batteryLevel <= 10 {
+                                        Text("\(item.batteryLevel)%") .font(.system(size: 11))
+                                            .foregroundColor(Color("dark_my_red"))
+                                    } else {
+                                        Text("\(item.batteryLevel)%") .font(.system(size: 11))
+                                    }
+                                    
+                                    /*Image(getBatteryIcon(item))
+                                     .resizable()
+                                     .aspectRatio(contentMode: .fit)
+                                     .frame(width: 20, height: 20, alignment: .center)
+                                     */
+                                    BatteryView(item: item)
+                                        .scaleEffect(0.76)
                                 }
-                                
-                                /*Image(getBatteryIcon(item))
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 20, height: 20, alignment: .center)
-                                 */
-                                BatteryView(item: item)
-                                    .scaleEffect(0.76)
+                                if index != 7 { Divider() }
                             }
-                            if entry.data.firstIndex(of: item) != 7 { Divider() }
                         }
                     }
                     Spacer()
@@ -198,7 +201,7 @@ struct SmallWidgetView : View {
     
     var body: some View {
         if !entry.mainApp {
-            Text("AirBattery is not running\nLaunch the app to make\nthe widget work.")
+            Text("AirBattery is not running\nLaunch the app to make\nthe widget work")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -357,7 +360,7 @@ struct MediumWidgetView : View {
 
     var body: some View {
         if !entry.mainApp{
-            Text("AirBattery is not running\nLaunch the app to make the widget work.")
+            Text("AirBattery is not running\nLaunch the app to make the widget work")
                 .multilineTextAlignment(.center)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color.gray)
@@ -382,26 +385,25 @@ struct MediumWidgetView : View {
                         VStack(spacing: 17){
                             ZStack{
                                 Group {
-                                    Circle()
-                                        .stroke(lineWidth: lineWidth)
-                                        .opacity(0.15)
-                                    Circle()
-                                        .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
-                                        .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                    Circle()
-                                        .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
-                                        .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
-                                        .rotationEffect(Angle(degrees: 270.0))
-                                        .clipShape( Circle().stroke(lineWidth: lineWidth) )
-                                    Circle()
-                                        .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
-                                        .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                        .foregroundColor(Color(getPowerColor(item.batteryLevel)))
-                                        .rotationEffect(Angle(degrees: 270.0))
+                                    Group {
+                                        Circle()
+                                            .stroke(lineWidth: lineWidth)
+                                            .opacity(0.15)
+                                        Circle()
+                                            .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                        Circle()
+                                            .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
+                                            .clipShape( Circle().stroke(lineWidth: lineWidth) )
+                                        Circle()
+                                            .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
+                                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    }.rotationEffect(Angle(degrees: 270.0))
                                     
                                     Image(getDeviceIcon(item))
                                         .resizable()
@@ -489,7 +491,7 @@ struct batteryWidget: Widget {
                 .widgetBackground(Color("WidgetBackground"))
         }
         .configurationDisplayName("Batteries")
-        .description("Displays battery usage for your devices from AirBattery.")
+        .description("Displays battery usage for your devices from AirBattery")
         .disableContentMarginsIfNeeded()
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

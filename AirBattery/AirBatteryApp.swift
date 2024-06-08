@@ -48,6 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let magicBattery = MagicBattery()
     let ideviceBattery = IDeviceBattery()
     
+    func application(_ application: NSApplication, open urls: [URL]) {
+        print(urls)
+    }
+    
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
         if showOn == "sbar" {
@@ -73,7 +77,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 switch dockOrientation {
                 case "bottom":
                     // Dock 位于屏幕底部
-                    menuX = menuX + 176 > visibleFrame.maxX ? visibleFrame.maxX - 176 : menuX - 176
+                    menuX = menuX + 186 > visibleFrame.maxX ? visibleFrame.maxX - 362 : menuX - 176
+                    if menuX + 186 > visibleFrame.maxX {
+                        menuX = visibleFrame.maxX - 362
+                    } else if menuX - 166 < visibleFrame.minX {
+                        menuX = visibleFrame.minX + 10
+                    } else {
+                        menuX = menuX - 176
+                    }
                     menuY = max(menuY, visibleFrame.origin.y) + 20
                 case "right":
                     // Dock 位于屏幕右侧
@@ -124,6 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(_:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
@@ -225,6 +237,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuItem.view = contentView
         statusMenu.removeAllItems()
         statusMenu.addItem(menuItem)
+    }
+    
+    @objc func handleURLEvent(_ event: NSAppleEventDescriptor, replyEvent: NSAppleEventDescriptor) {
+        if let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
+           let url = URL(string: urlString) {
+            if url.scheme == "airbattery"{
+                switch url.host {
+                case "reloadwingets" :
+                    print("Reloading all widgets...")
+                    AirBatteryModel.writeData()
+                    WidgetCenter.shared.reloadAllTimelines()
+                default: print("Unknow command!")
+                }
+            }
+        }
     }
      
     @objc func openAboutPanel() {

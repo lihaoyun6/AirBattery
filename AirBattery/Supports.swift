@@ -10,7 +10,7 @@ import UserNotifications
 
 let dockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
-let widgetDataTimer = Timer.publish(every: 29, on: .main, in: .common).autoconnect()
+let widgetDataTimer = Timer.publish(every: 25, on: .main, in: .common).autoconnect()
 let widgetInterval = UserDefaults.standard.integer(forKey: "widgetInterval")
 let updateInterval = UserDefaults.standard.double(forKey: "updateInterval")
 let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? abs(widgetInterval) : Int(updateInterval))), on: .main, in: .common).autoconnect()
