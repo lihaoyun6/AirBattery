@@ -29,7 +29,8 @@ brew install lihaoyun6/tap/airbattery
 - After AirBattery is started, it will be displayed on both the Dock and the status bar by default, or only one of them (can be configured)  
 
 - AirBattery will automatically search for all devices supported by the **"Nearbility Engine"** without manual configuration.  
-- Left/Right-click the Dock icon/left-click the status bar icon, or add a widget to view the battery level of your devices.  
+- Click the Dock icon / status bar icon, or add a widget to view the battery usage of your devices.  
+- You can also use the **"Nearcast"** feature to check the battery usage of other Macs and their peripherals in the LAN at any time.  
 - You can also change the status bar icon to a real-time battery icon in preferences, just like the one that comes with the system.  
 - If necessary, you can hide certain devices in the Dock menu or status bar menu, and unhide them at any time.  
 

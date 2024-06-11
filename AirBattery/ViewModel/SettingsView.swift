@@ -378,6 +378,8 @@ struct SettingsView: View {
                             Text(deviceOnWidget).tag(deviceOnWidget)
                         }
                     }.onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
+                } else {
+                    Spacer().frame(height: 1)
                 }
                 HStack {
                     Button(action: {
@@ -386,7 +388,7 @@ struct SettingsView: View {
                     }, label: {
                         Text("Reload All Widgets")
                             .foregroundColor(.orange)
-                    }).padding(.top, 14)
+                    })
                 }
             }
             .onAppear { devices = AirBatteryModel.getAll(noFilter: true).filter({ $0.hasBattery }).map({ $0.deviceName }) }
