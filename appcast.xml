@@ -10,11 +10,11 @@
             <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
                   <style>ul{margin-top: 0;margin-bottom: 5;padding-left: 18;}</style><ul>
-                  <li>新增了 Nearcast 功能, 用于获取局域网中其他 Mac 及其外设的电量信息</li>
+                  <li><b>新增了 Nearcast 功能, 用于获取局域网中其他 Mac 及其外设的电量信息</b></li>
                   <li>修复了部分蓝牙耳机合并显示状态下图标匹配错误的问题</li>
                   <li>修复了设置面板中部分选项无法修改的问题</li>
                   </ul><ul>
-                  <li>The new "Nearcast" feature allows you to get the battery usage of other Macs and their peripherals on the same LAN</li>
+                  <li><b>The new "Nearcast" feature allows you to get the battery usage of other Macs and their peripherals on the same LAN</b></li>
                   <li>Fixed: Some Bluetooth headphone icons were incorrect</li>
                   <li>Fixed: Some options in the settings panel cannot be modified</li>
                   </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="255"/>
