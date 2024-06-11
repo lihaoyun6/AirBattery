@@ -38,6 +38,8 @@
 		18B8E5C62B8329C500A20D03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1841D4522AA6071D0022A1BE /* Assets.xcassets */; };
 		18B8E5C72B83C32100A20D03 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1841D47A2AA8DEF20022A1BE /* Localizable.strings */; };
 		18B8E5C92B83C9AD00A20D03 /* BatteryWidget2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B8E5C82B83C9AD00A20D03 /* BatteryWidget2.swift */; };
+		18BBC05F2C16E7C900D9FE76 /* Multipeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BBC05E2C16E7C900D9FE76 /* Multipeer.swift */; };
+		18BBC0672C16F4F900D9FE76 /* MultipeerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 18BBC0662C16F4F900D9FE76 /* MultipeerKit */; };
 		18E6E36E2C0BA6A800A666CE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 18E6E36D2C0BA6A800A666CE /* Sparkle */; };
 		18E6E3702C0BA7D200A666CE /* Sparkle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6E36F2C0BA7D200A666CE /* Sparkle.swift */; };
 		18EF7E632C141CB70065A9E1 /* BatteryWidget3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */; };
@@ -113,6 +115,7 @@
 		189BD5EA2BDE69660056D06C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		18A0A9CC2AAE07EA00975B81 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "zh-Hans"; path = "zh-Hans.lproj/Credits.rtf"; sourceTree = "<group>"; };
 		18B8E5C82B83C9AD00A20D03 /* BatteryWidget2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryWidget2.swift; sourceTree = "<group>"; };
+		18BBC05E2C16E7C900D9FE76 /* Multipeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multipeer.swift; sourceTree = "<group>"; };
 		18C7CFDE2AAF842E005898EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = Base; path = Base.lproj/Credits.rtf; sourceTree = "<group>"; };
 		18E6E36F2C0BA7D200A666CE /* Sparkle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkle.swift; sourceTree = "<group>"; };
 		18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryWidget3.swift; sourceTree = "<group>"; };
@@ -134,6 +137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				18E6E36E2C0BA6A800A666CE /* Sparkle in Frameworks */,
+				18BBC0672C16F4F900D9FE76 /* MultipeerKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +203,7 @@
 				18F615FA2B7676D200873AA4 /* Supports.swift */,
 				18E6E36F2C0BA7D200A666CE /* Sparkle.swift */,
 				182CD1092C0ED4650048D924 /* InfoButton.swift */,
+				18BBC05E2C16E7C900D9FE76 /* Multipeer.swift */,
 				18F615F72B763FC900873AA4 /* ViewModel */,
 				18F615F62B763FAB00873AA4 /* BatteryInfo */,
 				18A0A9CD2AAE07EA00975B81 /* Credits.rtf */,
@@ -302,6 +307,7 @@
 			name = AirBattery;
 			packageProductDependencies = (
 				18E6E36D2C0BA6A800A666CE /* Sparkle */,
+				18BBC0662C16F4F900D9FE76 /* MultipeerKit */,
 			);
 			productName = DockBattery;
 			productReference = 1841D44B2AA6071C0022A1BE /* AirBattery.app */;
@@ -357,6 +363,7 @@
 			mainGroup = 1841D4422AA6071C0022A1BE;
 			packageReferences = (
 				18E6E36C2C0BA6A800A666CE /* XCRemoteSwiftPackageReference "Sparkle" */,
+				18BBC0652C16F4F900D9FE76 /* XCRemoteSwiftPackageReference "MultipeerKit" */,
 			);
 			productRefGroup = 1841D44C2AA6071C0022A1BE /* Products */;
 			projectDirPath = "";
@@ -423,6 +430,7 @@
 				18F615F32B763DD800873AA4 /* BLEBattery.swift in Sources */,
 				1895851B2B724DCD00108E5C /* IDeviceBattery.swift in Sources */,
 				18F615F92B76439300873AA4 /* AirBatteryModel.swift in Sources */,
+				18BBC05F2C16E7C900D9FE76 /* Multipeer.swift in Sources */,
 				18347DCE2B88417500A78DF6 /* BatteryView.swift in Sources */,
 				18E6E3702C0BA7D200A666CE /* Sparkle.swift in Sources */,
 				18347DCA2B882C6500A78DF6 /* MagicBattery.swift in Sources */,
@@ -496,7 +504,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBatteryHelper/AirBatteryHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBatteryHelper/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -511,7 +519,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBatteryHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -530,7 +538,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBatteryHelper/AirBatteryHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBatteryHelper/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -545,7 +553,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBatteryHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -682,7 +690,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
@@ -699,7 +707,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -716,7 +724,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
@@ -733,7 +741,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -749,7 +757,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widget/widget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -765,7 +773,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -783,7 +791,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widget/widget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 135;
+				CURRENT_PROJECT_VERSION = 136;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -799,7 +807,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AirBattery.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -850,6 +858,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		18BBC0652C16F4F900D9FE76 /* XCRemoteSwiftPackageReference "MultipeerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/insidegui/MultipeerKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
 		18E6E36C2C0BA6A800A666CE /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -861,6 +877,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		18BBC0662C16F4F900D9FE76 /* MultipeerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 18BBC0652C16F4F900D9FE76 /* XCRemoteSwiftPackageReference "MultipeerKit" */;
+			productName = MultipeerKit;
+		};
 		18E6E36D2C0BA6A800A666CE /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 18E6E36C2C0BA6A800A666CE /* XCRemoteSwiftPackageReference "Sparkle" */;

@@ -54,10 +54,13 @@ brew install lihaoyun6/tap/airbattery
 
 ## 致谢
 [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) @libimobiledevice  
-> 注: 本项目使用基于`73b6fd1`版本编译的 libimobiledevice 可执行文件及运行库. 如有疑虑可自行编译替换  
+> AirBattery 使用基于`73b6fd1`版本编译的 libimobiledevice 可执行文件及运行库. 如有疑虑可自行编译替换  
 
 [comptest](https://gist.github.com/nikias/ebc6e975dc908f3741af0f789c5b1088) @nikias  
-> 注: 本项目使用基于此源代码编译的 comptest 可执行文件. 如有疑虑可自行编译替换  
+> AirBattery 使用基于此源代码编译的 comptest 可执行文件. 如有疑虑可自行编译替换  
+
+[MultipeerKit](https://github.com/insidegui/MultipeerKit) @insidegui  
+> AirBattery 使用 MultipeerKit 框架来进行局域网内的对称多端通信   
 
 [ChatGPT](https://chat.openai.com) @OpenAI  
 > 注: 本项目部分代码使用 ChatGPT 生成或重构整理

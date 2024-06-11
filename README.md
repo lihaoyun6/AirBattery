@@ -54,10 +54,13 @@ brew install lihaoyun6/tap/airbattery
 
 ## Thanks
 [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) @libimobiledevice  
-> This project uses executable files and runtime libraries compiled from libimobiledevice based on version `73b6fd1`. Feel free to compile and replace them if in doubt.
+> AirBattery uses executable files and runtime libraries compiled from libimobiledevice based on version `73b6fd1`. Feel free to compile and replace them if in doubt.
 
 [comptest](https://gist.github.com/nikias/ebc6e975dc908f3741af0f789c5b1088) @nikias  
-> This project uses executable files compiled based on this source code. Feel free to compile and replace them if in doubt.  
+> AirBattery uses executable files compiled based on this source code. Feel free to compile and replace them if in doubt.  
+
+[MultipeerKit](https://github.com/insidegui/MultipeerKit) @insidegui  
+> AirBattery uses MultipeerKit for symmetric multi-end communication within the LAN  
 
 [ChatGPT](https://chat.openai.com) @OpenAI  
-> Some of the code in this project is generated or refactored by ChatGPT.
+> Some of the code in this project is generated or refactored by ChatGPT.  

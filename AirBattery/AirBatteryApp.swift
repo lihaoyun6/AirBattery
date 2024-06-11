@@ -12,6 +12,9 @@ import Sparkle
 
 var updaterController: SPUStandardUpdaterController!
 var statusBarItem: NSStatusItem!
+var netcastService: MultipeerService?
+let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
+let systemUUID = getMacDeviceUUID()
 
 @main
 struct AirBatteryApp: App {
@@ -35,6 +38,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
+    @AppStorage("ncGroupID") var ncGroupID = ""
+    @AppStorage("nearCast") var nearCast = false
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
@@ -63,10 +68,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             var allDevices = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
-            if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+            allDevices.insert(ib2ab(ibStatus), at: 0)
             let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
             let contentView = NSHostingView(rootView: contentViewSwiftUI)
             let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
+            let allNearcast = getFiles(withExtension: "json", in: ncFolder)
+            var ncCount = 0
+            var ncDeviceCount = 0
+            for jsonUrl in allNearcast {
+                let count = AirBatteryModel.ncGetAll(url: jsonUrl).count
+                if count != 0 {
+                    ncCount += 7
+                    ncDeviceCount += AirBatteryModel.ncGetAll(url: jsonUrl).count
+                }
+            }
             let mouse = NSEvent.mouseLocation
             var menuX = mouse.x
             var menuY = mouse.y
@@ -77,7 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 switch dockOrientation {
                 case "bottom":
                     // Dock 位于屏幕底部
-                    menuX = menuX + 186 > visibleFrame.maxX ? visibleFrame.maxX - 362 : menuX - 176
+                    //menuX = menuX + 186 > visibleFrame.maxX ? visibleFrame.maxX - 362 : menuX - 176
                     if menuX + 186 > visibleFrame.maxX {
                         menuX = visibleFrame.maxX - 362
                     } else if menuX - 166 < visibleFrame.minX {
@@ -99,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     print("⚠️ Failed to get Dock orientation!")
                 }
             }
-            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count,1)+hiddenRow)*37+30))
+            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count+ncDeviceCount,1)+hiddenRow)*37+30+ncCount))
             dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
             dockWindow.title = "AirBattery Dock Window"
             dockWindow.level = .popUpMenu
@@ -129,9 +144,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 "hidePercentWhenFull": false,
                 "deviceOnWidget": "",
                 "updateInterval": 1.0,
-                "widgetInterval": 0
+                "widgetInterval": 0,
+                "nearCast": false
             ]
         )
+        
+        if !FileManager.default.fileExists(atPath: ncFolder.path) {
+            do {
+                try FileManager.default.createDirectory(at: ncFolder, withIntermediateDirectories: true, attributes: nil)
+                print("ℹ️ Folder created at: \(ncFolder.path)")
+            } catch {
+                print("⚠️ Failed to create folder: \(error)")
+            }
+        } else {
+            let oldFiles = getFiles(withExtension: "json", in: ncFolder)
+            for url in oldFiles { try? FileManager.default.removeItem(at: url) }
+        }
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -139,7 +167,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
-        
+        if ncGroupID != "" {
+            netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
+            if nearCast { netcastService?.resume() }
+        }
         machineType = getMacDeviceType()
         deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
@@ -227,12 +258,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
-        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+        allDevices.insert(ib2ab(ibStatus), at: 0)
         let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
-        var hiddenRow = 0
-        if AirBatteryModel.getBlackList().count > 0 { hiddenRow = 1 }
-        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count,1)+hiddenRow)*37+20)
+        let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
+        let allNearcast = getFiles(withExtension: "json", in: ncFolder)
+        var ncCount = 0
+        var ncDeviceCount = 0
+        for jsonUrl in allNearcast {
+            let count = AirBatteryModel.ncGetAll(url: jsonUrl).count
+            if count != 0 {
+                ncCount += 7
+                ncDeviceCount += AirBatteryModel.ncGetAll(url: jsonUrl).count
+            }
+        }
+        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count+ncDeviceCount,1)+hiddenRow)*37+20+ncCount)
         let menuItem = NSMenuItem()
         menuItem.view = contentView
         statusMenu.removeAllItems()

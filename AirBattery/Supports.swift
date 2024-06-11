@@ -5,6 +5,7 @@
 //  Created by apple on 2024/2/9.
 //
 import SwiftUI
+import CryptoKit
 import SystemConfiguration
 import UserNotifications
 
@@ -13,7 +14,8 @@ let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetDataTimer = Timer.publish(every: 25, on: .main, in: .common).autoconnect()
 let widgetInterval = UserDefaults.standard.integer(forKey: "widgetInterval")
 let updateInterval = UserDefaults.standard.double(forKey: "updateInterval")
-let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? abs(widgetInterval) : Int(updateInterval))), on: .main, in: .common).autoconnect()
+let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Double(arc4random_uniform(10)) - Double(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
+let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? Double(abs(widgetInterval)) : updateInterval)), on: .main, in: .common).autoconnect()
 let macList = ["MacBookPro1,1":"macbook.gen1", "MacBookPro1,2":"macbook.gen1", "MacBookPro2,1":"macbook.gen1", "MacBookPro2,2":"macbook.gen1", "MacBookPro3,1":"macbook.gen1", "MacBookPro4,1":"macbook.gen1", "MacBookPro5,1":"macbook.gen1", "MacBookPro5,2":"macbook.gen1", "MacBookPro5,3":"macbook.gen1", "MacBookPro5,4":"macbook.gen1", "MacBookPro5,5":"macbook.gen1", "MacBookPro6,1":"macbook.gen1", "MacBookPro6,2":"macbook.gen1", "MacBookPro7,1":"macbook.gen1", "MacBookPro8,1":"macbook.gen1", "MacBookPro8,2":"macbook.gen1", "MacBookPro8,3":"macbook.gen1", "MacBookPro9,1":"macbook.gen1", "MacBookPro9,2":"macbook.gen1", "MacBookPro10,1":"macbook.gen1", "MacBookPro10,2":"macbook.gen1", "MacBookPro11,1":"macbook.gen1", "MacBookPro11,2":"macbook.gen1", "MacBookPro11,3":"macbook.gen1", "MacBookPro11,4":"macbook.gen1", "MacBookPro11,5":"macbook.gen1", "MacBookPro12,1":"macbook.gen1", "MacBookPro13,1":"macbook.gen1", "MacBookPro13,2":"macbook.gen1", "MacBookPro13,3":"macbook.gen1", "MacBookPro14,1":"macbook.gen1", "MacBookPro14,2":"macbook.gen1", "MacBookPro14,3":"macbook.gen1", "MacBookPro15,1":"macbook.gen1", "MacBookPro15,2":"macbook.gen1", "MacBookPro15,3":"macbook.gen1", "MacBookPro15,4":"macbook.gen1", "MacBookPro16,1":"macbook.gen1", "MacBookPro16,2":"macbook.gen1", "MacBookPro16,3":"macbook.gen1", "MacBookPro16,4":"macbook.gen1", "MacBookPro17,1":"macbook.gen1", "MacBookPro18,1":"macbook", "MacBookPro18,2":"macbook", "MacBookPro18,3":"macbook", "MacBookPro18,4":"macbook", "Mac14,5":"macbook", "Mac14,6":"macbook", "Mac14,7":"macbook.gen1", "Mac14,9":"macbook", "Mac14,10":"macbook", "Mac15,3":"macbook", "Mac15,6":"macbook", "Mac15,7":"macbook", "Mac15,8":"macbook", "Mac15,9":"macbook", "Mac15,10":"macbook", "Mac15,11":"macbook"]
 let macID = getMacModelIdentifier()
 
@@ -180,6 +182,19 @@ func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
     return nil
 }
 
+func randomString(type: Int = 1, length: Int) -> String {
+    var characters = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    if type == 1 { characters = Array("abcdefghijklmnopqrstuvwxyz0123456789") }
+    var randomString = ""
+
+    for _ in 0..<length {
+        if let randomCharacter = characters.randomElement() {
+            randomString.append(randomCharacter)
+        }
+    }
+    return randomString
+}
+
 func getPowerState() -> iBattery {
     @AppStorage("machineType") var machineType = "Mac"
     if !machineType.lowercased().contains("book") { return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0) }
@@ -221,7 +236,7 @@ func getMonoNum(_ num: Int, count: Int = 3, bold: Bool = false) -> String {
 func ib2ab(_ ib: iBattery) -> Device {
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
-    return Device(deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: deviceName, deviceModel: machineType, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged,acPowered: ib.acPowered, lastUpdate: Double(Date().timeIntervalSince1970))
+    return Device(hasBattery: ib.hasBattery, deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: deviceName, deviceModel: machineType, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged, acPowered: ib.acPowered, lastUpdate: Double(Date().timeIntervalSince1970))
 }
 
 func sliceList(data: [Device], length: Int, count: Int) -> [Device] {
@@ -241,6 +256,19 @@ func copyToClipboard(_ text: String) {
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
     pasteboard.setString(text, forType: .string)
+}
+
+func pasteFromClipboard() -> String? {
+    if let content = NSPasteboard.general.string(forType: .string) { return content }
+    return nil
+}
+
+func isGroudIDValid(id: String) -> Bool {
+    let pre = NSPredicate(format: "SELF MATCHES %@", "^[a-z0-9\\-]+$")
+    let pre2 = NSPredicate(format: "SELF MATCHES %@", "^[a-zA-Z0-9\\-]+$")
+    let ncid = pre.evaluate(with: String(id.prefix(15)))
+    let pasd = pre2.evaluate(with: id)
+    return (id.count == 23 && String(id.prefix(3)) == "nc-" && ncid && pasd)
 }
 
 func batteryAlert() {
@@ -283,6 +311,19 @@ func getMacDeviceType() -> String {
     return "Mac"
 }
 
+func getMacDeviceUUID() -> String? {
+    let dev = IOServiceMatching("IOPlatformExpertDevice")
+    let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, dev)
+    if platformExpert != 0 {
+        if let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformUUIDKey as CFString, kCFAllocatorDefault, 0)?.takeUnretainedValue() {
+            IOObjectRelease(platformExpert)
+            return serialNumberAsCFString as? String
+        }
+        IOObjectRelease(platformExpert)
+    }
+    return nil
+}
+
 func getMacModelIdentifier() -> String {
     var size = 0
     sysctlbyname("hw.model", nil, &size, nil, 0)
@@ -320,7 +361,9 @@ func getHeadphoneModel(_ model: String) -> String {
     case "2014":
         return "Airpods Pro 2"
     case "2003":
-        return "PowerBeats"
+        return "PowerBeats 3"
+    case "200d":
+        return "PowerBeats 4"
     case "200b":
         return "PowerBeats Pro"
     case "200c":
@@ -332,9 +375,9 @@ func getHeadphoneModel(_ model: String) -> String {
     case "2005":
         return "BeatsX"
     case "2006":
-        return "Beats Solo3"
+        return "Beats Solo 3"
     case "2009":
-        return "Beats Studio3"
+        return "Beats Studio 3"
     case "2017":
         return "Beats Studio Pro"
     case "2012":
@@ -397,8 +440,10 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpod3.right"
             case "Airpods Pro 2":
                 return "airpodpro.right"
-            case "PowerBeats":
-                return "beats.powerbeats.right"
+            case "PowerBeats 3":
+                return "beats.powerbeats3.right"
+            case "PowerBeats 4":
+                return "beats.powerbeats4.right"
             case "PowerBeats Pro":
                 return "beats.powerbeatspro.right"
             case "Beats Solo Pro":
@@ -409,12 +454,12 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "beats.earphones"
             case "BeatsX":
                 return "beats.earphones"
-            case "Beats Solo3":
+            case "Beats Solo 3":
                 return "beats.headphones"
-            case "Beats Studio3":
-                return "beats.studiobud.right"
+            case "Beats Studio 3":
+                return "beats.headphones"
             case "Beats Studio Pro":
-                return "beats.studiobud.right"
+                return "beats.headphones"
             case "Beats Fit Pro":
                 return "beats.fitpro.right"
             case "Beats Studio Buds+":
@@ -439,8 +484,10 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpod3.right"
             case "Airpods Pro 2":
                 return "airpodpro.left"
-            case "PowerBeats":
-                return "beats.powerbeats.left"
+            case "PowerBeats 3":
+                return "beats.powerbeats3.left"
+            case "PowerBeats 4":
+                return "beats.powerbeats4.left"
             case "PowerBeats Pro":
                 return "beats.powerbeatspro.left"
             case "Beats Solo Pro":
@@ -451,12 +498,12 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "beats.earphones"
             case "BeatsX":
                 return "beats.earphones"
-            case "Beats Solo3":
+            case "Beats Solo 3":
                 return "beats.headphones"
-            case "Beats Studio3":
-                return "beats.studiobud.left"
+            case "Beats Studio 3":
+                return "beats.headphones"
             case "Beats Studio Pro":
-                return "beats.studiobud.left"
+                return "beats.headphones"
             case "Beats Fit Pro":
                 return "beats.fitpro.left"
             case "Beats Studio Buds+":
@@ -467,12 +514,54 @@ func getDeviceIcon(_ d: Device) -> String {
         }
         return "airpod.left"
     case "ap_pod_all":
+        if let model = d.deviceModel {
+            switch model {
+            case "Airpods":
+                return "airpods"
+            case "Airpods Pro":
+                return "airpodspro"
+            case "Airpods Max":
+                return "airpodsmax"
+            case "Airpods 2":
+                return "airpods"
+            case "Airpods 3":
+                return "airpods3"
+            case "Airpods Pro 2":
+                return "airpodspro"
+            case "PowerBeats 3":
+                return "beats.powerbeats3"
+            case "PowerBeats 4":
+                return "beats.powerbeats4"
+            case "PowerBeats Pro":
+                return "beats.powerbeatspro"
+            case "Beats Solo Pro":
+                return "beats.headphones"
+            case "Beats Studio Buds":
+                return "beats.studiobud"
+            case "Beats Flex":
+                return "beats.earphones"
+            case "BeatsX":
+                return "beats.earphones"
+            case "Beats Solo 3":
+                return "beats.headphones"
+            case "Beats Studio 3":
+                return "beats.headphones"
+            case "Beats Studio Pro":
+                return "beats.headphones"
+            case "Beats Fit Pro":
+                return "beats.fitpro"
+            case "Beats Studio Buds+":
+                return "beats.studiobud"
+            default:
+                return "airpodspro"
+            }
+        }
         return "airpodspro"
     case "ap_case":
         if let model = d.deviceModel {
             switch model {
             case "Airpods":
-                return "airpods.case.fill"
+                return "airpods1.case.fill"
             case "Airpods Pro":
                 return "airpodspro.case.fill"
             case "Airpods Max":
@@ -483,7 +572,9 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpods3.case.fill"
             case "Airpods Pro 2":
                 return "airpodspro.case.fill"
-            case "PowerBeats":
+            case "PowerBeats 3":
+                return "beats.powerbeatspro.case.fill"
+            case "PowerBeats 4":
                 return "beats.powerbeatspro.case.fill"
             case "PowerBeats Pro":
                 return "beats.powerbeatspro.case.fill"
@@ -495,12 +586,12 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "beats.earphones"
             case "BeatsX":
                 return "beats.earphones"
-            case "Beats Solo3":
+            case "Beats Solo 3":
                 return "beats.headphones"
-            case "Beats Studio3":
+            case "Beats Studio 3":
                 return "beats.studiobuds.case.fill"
             case "Beats Studio Pro":
-                return "beats.studiobuds.case.fill"
+                return "beats.headphones"
             case "Beats Fit Pro":
                 return "beats.fitpro.case.fill"
             case "Beats Studio Buds+":
@@ -523,5 +614,66 @@ func getDeviceIcon(_ d: Device) -> String {
         return "display"
     default:
         return "questionmark.circle.fill"
+    }
+}
+
+func generateSymmetricKey(password: String) -> SymmetricKey {
+    let pass = substring(from: password, start: 15, length: 8)
+    let salt = String(password.prefix(15))
+    let passwordData = Data(pass!.utf8)
+    let saltData = salt.data(using: .utf8)!
+    let derivedKey = HKDF<SHA256>.deriveKey(inputKeyMaterial: SymmetricKey(data: passwordData), salt: saltData, info: Data(), outputByteCount: 32)
+    return derivedKey
+}
+
+func encryptString(_ string: String, password: String) -> String? {
+    let key = generateSymmetricKey(password: password)
+    let stringData = Data(string.utf8)
+    
+    do {
+        let sealedBox = try AES.GCM.seal(stringData, using: key)
+        return sealedBox.combined?.base64EncodedString()
+    } catch {
+        print("Encryption error: \(error)")
+        return nil
+    }
+}
+
+func decryptString(_ string: String, password: String) -> String? {
+    let key = generateSymmetricKey(password: password)
+    
+    do {
+        guard let data = Data(base64Encoded: string) else { return nil }
+        let sealedBox = try AES.GCM.SealedBox(combined: data)
+        let decryptedData = try AES.GCM.open(sealedBox, using: key)
+        return String(data: decryptedData, encoding: .utf8)
+    } catch {
+        print("Decryption error: \(error)")
+        return nil
+    }
+}
+
+func substring(from string: String, start: Int, length: Int) -> String? {
+    guard start >= 0, length > 0, start + length <= string.count else {
+        return nil
+    }
+
+    let startIndex = string.index(string.startIndex, offsetBy: start)
+    let endIndex = string.index(startIndex, offsetBy: length)
+    let substring = string[startIndex..<endIndex]
+    return String(substring)
+}
+
+
+func getFiles(withExtension fileExtension: String, in directory: URL) -> [URL] {
+    let fileManager = FileManager.default
+    
+    do {
+        let filesAndDirectories = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [])
+        let filteredFiles = filesAndDirectories.filter { $0.pathExtension == fileExtension }
+        return filteredFiles
+    } catch {
+        print("Failed to get contents of directory: \(error)")
+        return []
     }
 }

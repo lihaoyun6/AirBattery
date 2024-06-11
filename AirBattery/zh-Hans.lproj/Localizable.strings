@@ -117,3 +117,12 @@
 "Reload All Widgets" = "刷新所有小组件";
 "Default" = "默认";
 "Custom" = "自定义";
+"Enable Nearcast" = "启用 Nearcast";
+"Group ID" = "小组 ID";
+"Invalid group ID" = "无效的小组 ID";
+"New" = "新建";
+"Group ID Copied" = "小组 ID 已复制";
+"Please create or enter a valid Group ID before use!" = "使用前请先创建或输入一个有效的小组 ID";
+"Group ID copied. Please enter it on your other Mac to join this group." = "小组 ID 已复制到剪贴板, 请在您的其他 Mac 上输入它以加入此 Nearcast 小组";
+"Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others." = "Nearcast 将会按照与 Nearbility 引擎相同的更新频率在局域网中发送电量信息.\n所有被发送的电量数据都已经过加密, 所以请不要将你的小组 ID 告诉其他人.";
+"Do not add too many Macs to a group, this can be tiring for the router!" = "请不要将太多 Mac 加入同一个 Nearcast 小组, 这可能会加重路由器的负担!";

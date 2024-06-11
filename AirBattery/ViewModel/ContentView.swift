@@ -35,6 +35,10 @@ struct MultiBatteryView: View {
     //@AppStorage("machineType") var machineType = "Mac"
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("showOn") var showOn = "both"
+    @AppStorage("deviceName") var deviceName = "Mac"
+    @AppStorage("widgetInterval") var widgetInterval = 0
+    @AppStorage("nearCast") var nearCast = false
+    @AppStorage("ncGroupID") var ncGroupID = ""
     
     //@State var statusBarItem: NSStatusItem
 
@@ -172,8 +176,21 @@ struct MultiBatteryView: View {
         .frame(width: 128, height: 128, alignment: .center)
         .onReceive(alertTimer) {_ in batteryAlert() }
         .onReceive(widgetDataTimer) {_ in AirBatteryModel.writeData() }
-        .onReceive(widgetViewTimer) {_ in
-            if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }
+        .onReceive(widgetViewTimer) {_ in if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }}
+        .onReceive(nearCastTimer) {_ in
+            if nearCast && ncGroupID != ""{
+                var allDevices = AirBatteryModel.getAll()
+                allDevices.insert(ib2ab(InternalBattery.status), at: 0)
+                do {
+                    let jsonData = try JSONEncoder().encode(allDevices)
+                    guard let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+                    guard let data = encryptString(jsonString, password: ncGroupID) else { return }
+                    let message = NCMessage(sender: systemUUID ?? deviceName, content: data)
+                    netcastService?.sendMessage(message)
+                } catch {
+                    print("Write JSON error：\(error)")
+                }
+            }
         }
         .onReceive(dockTimer) { t in
             if showOn == "both" || showOn == "dock" { NSApp.dockTile.display() }
@@ -246,9 +263,11 @@ struct popover: View {
     @State private var overSettButton = false
     @State private var overStack = -1
     @State private var overStack2 = -1
+    @State private var overStackNC = -1
     @State private var hidden:[Int] = []
     @State private var hidden2:[Int] = []
     @State private var alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+    @State private var allNearcast = getFiles(withExtension: "json", in: ncFolder)
     
     var body: some View {
         ZStack{
@@ -378,33 +397,35 @@ struct popover: View {
                                     Spacer()
                                     if overStack == index {
                                         if allDevices[index].deviceID == "@MacInternalBattery" {
-                                            //Image(systemName: "clock").font(.system(size: 10))
-                                            Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
-                                                .font(.system(size: 11))
-                                                .foregroundColor(.secondary)
-                                            Text(InternalBattery.status.timeLeft)
-                                                .font(.system(size: 11))
-                                                .foregroundColor(.secondary)
-                                            if #available(macOS 14, *) {
-                                                Button(action: {
-                                                    copyToClipboard(allDevices[index].deviceName)
-                                                    _ = createAlert(title: "Device Name Copied".local,
-                                                                                       message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                                       button1: "OK".local).runModal()
-                                                }, label: {
-                                                    Image(systemName: "list.clipboard.fill")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overCopyButton = hovering }
+                                            if allDevices[index].hasBattery {
+                                                //Image(systemName: "clock").font(.system(size: 10))
+                                                Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
+                                                    .font(.system(size: 11))
+                                                    //.foregroundColor(.secondary)
+                                                Text(InternalBattery.status.timeLeft)
+                                                    .font(.system(size: 11))
+                                                    //.foregroundColor(.secondary)
+                                                if #available(macOS 14, *) {
+                                                    Button(action: {
+                                                        copyToClipboard(allDevices[index].deviceName)
+                                                        _ = createAlert(title: "Device Name Copied".local,
+                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                        button1: "OK".local).runModal()
+                                                    }, label: {
+                                                        Image(systemName: "list.clipboard.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overCopyButton = hovering }
+                                                }
                                             }
                                         }else{
                                             HStack(spacing: 2) {
                                                 //Image(systemName: "arrow.clockwise").font(.system(size: 10))
                                                 Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
                                                     .font(.system(size: 11))
-                                                    .foregroundColor(.secondary)
+                                                    //.foregroundColor(.secondary)
                                                 if !alertList.contains(allDevices[index].deviceName) {
                                                     Button(action: {
                                                         alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
@@ -434,8 +455,8 @@ struct popover: View {
                                                     Button(action: {
                                                         copyToClipboard(allDevices[index].deviceName)
                                                         _ = createAlert(title: "Device Name Copied".local,
-                                                                                           message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                                           button1: "OK".local).runModal()
+                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                        button1: "OK".local).runModal()
                                                     }, label: {
                                                         Image(systemName: "list.clipboard.fill")
                                                             .frame(width: 20, height: 20, alignment: .center)
@@ -459,11 +480,13 @@ struct popover: View {
                                             }
                                         }
                                     } else {
-                                        Text("\(allDevices[index].batteryLevel)%")
-                                            .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .secondary)
-                                            .font(.system(size: 11))
-                                        BatteryView(item: allDevices[index])
-                                            .scaleEffect(0.8)
+                                        if allDevices[index].hasBattery {
+                                            Text("\(allDevices[index].batteryLevel)%")
+                                                .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
+                                                .font(.system(size: 11))
+                                            BatteryView(item: allDevices[index])
+                                                .scaleEffect(0.8)
+                                        }
                                     }
                                 }
                                 .padding(.vertical, 6)
@@ -472,6 +495,7 @@ struct popover: View {
                                 .clipShape(RoundedCornersShape(radius: 1.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
                                 .onHover{ hovering in
                                     overStack2 = -1
+                                    overStackNC = -1
                                     if overStack != index { overStack = index }
                                 }
                             }
@@ -510,6 +534,7 @@ struct popover: View {
                                             .background(overStack2 == index ? Color("black_white").opacity(0.15) : .clear).cornerRadius(2.5)
                                             .onHover{ hovering in
                                                 overStack = -1
+                                                overStackNC = -1
                                                 if overStack2 != index { overStack2 = index }
                                             }
                                     })
@@ -532,7 +557,78 @@ struct popover: View {
                         .opacity(0.23)
                 )
                 .offset(y: 2.5)
+                ForEach(allNearcast.indices, id: \.self) { index in
+                    let devices = AirBatteryModel.ncGetAll(url: allNearcast[index])
+                    if devices.count != 0 {
+                        nearcastView(devices: devices, mainIndex: index, overStackNC: $overStackNC)
+                            .onHover{ hovering in
+                                overStack = -1
+                                overStack2 = -1
+                            }
+                    }
+                }
             }
         }
     }
+}
+
+struct nearcastView: View {
+    var devices: [Device]
+    var mainIndex: Int
+    @Binding var overStackNC: Int
+    @State private var overStack = -1
+    
+    var body: some View {
+        Spacer().frame(height: 8)
+        VStack(spacing: 0){
+            ForEach(devices.indices, id: \.self) { index in
+                VStack(spacing: 0){
+                    HStack {
+                        Image(getDeviceIcon(devices[index]))
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Color("black_white"))
+                            .frame(width: 22, height: 22, alignment: .center)
+                        Text("\(((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(devices[index].deviceName)")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color("black_white"))
+                            .frame(height: 24, alignment: .center)
+                            .padding(.horizontal, 7)
+                        if overStackNC == mainIndex && overStack == index {
+                            Spacer()
+                            Text("\(Int((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60))"+" mins ago".local)
+                                .font(.system(size: 11))
+                                //.foregroundColor(.secondary)
+                        } else {
+                            Spacer()
+                        }
+                        if devices[index].hasBattery {
+                            Text("\(devices[index].batteryLevel)%")
+                                .foregroundColor((devices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
+                                .font(.system(size: 11))
+                            BatteryView(item: devices[index])
+                                .scaleEffect(0.8)
+                        }
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .onHover{ hovering in overStack = index }
+                }
+                .background((overStackNC == mainIndex && overStack == index) ? Color("black_white").opacity(0.15) : .clear)
+                .clipShape(RoundedCornersShape(radius: 1.9, corners: index == devices.count - 1 ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
+                if index != devices.count-1 { Divider() }
+            }
+        }
+        .onHover{ hovering in overStackNC = mainIndex }
+        .padding(.horizontal, 6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 3)
+                .strokeBorder(Color.secondary, lineWidth: 1)
+                .padding(.vertical, -1)
+                .padding(.horizontal, 5)
+                .opacity(0.23)
+        )
+        .offset(y: 2.5)
+    }
+
 }

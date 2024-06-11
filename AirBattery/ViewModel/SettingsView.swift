@@ -32,7 +32,7 @@ public extension View {
 struct SettingsView: View {
     @State private var blockedItems = [String]()
     @State private var editingIndex: Int?
-    @State private var ib = getPowerState()
+    @State private var ib = getMacDeviceType().lowercased().contains("book")
     
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("appearance") var appearance = "auto"
@@ -60,11 +60,13 @@ struct SettingsView: View {
     @AppStorage("updateInterval") var updateInterval = 1.0
     @AppStorage("widgetInterval") var widgetInterval = 0
     @AppStorage("twsMerge") var twsMerge = 5
+    @AppStorage("nearCast") var nearCast = false
+    @AppStorage("ncGroupID") var ncGroupID = ""
     @State var devices = [String]()
     
     var body: some View {
         TabView {
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
                 HStack(spacing: 0){
                     VStack(alignment:.trailing, spacing: 16){
                         Text("Launch at Login")
@@ -123,7 +125,7 @@ struct SettingsView: View {
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("General", systemImage: "gearshape") }
             
-            VStack(spacing: 10){
+            VStack(spacing: 16){
                 /*Text("Data Source:")
                     .font(.system(size: 14, weight: .bold))
                     .offset(y:-2)*/
@@ -185,8 +187,8 @@ struct SettingsView: View {
                     Spacer()
                     HStack(spacing: 2) {
                         Picker("Update Interval", selection: $updateInterval) {
-                            Text("Default".local).tag(1.0)
-                            Text("Custom".local).tag(updateInterval == 1.0 ? 2.0 : updateInterval)
+                            Text("Default").tag(1.0)
+                            Text("Custom").tag(updateInterval == 1.0 ? 2.0 : updateInterval)
                         }
                         .pickerStyle(.segmented)
                         .onChange(of: updateInterval) { _ in
@@ -205,7 +207,7 @@ struct SettingsView: View {
                     }.fixedSize()
                     Spacer()
                     HStack(spacing: 2) {
-                        Text("Merge Limits".local).padding(.trailing, 5)
+                        Text("Merge Limits").padding(.trailing, 5)
                         TextField("", value: $twsMerge, formatter: NumberFormatter())
                             .textFieldStyle(.squareBorder)
                             .frame(width: 26)
@@ -227,13 +229,69 @@ struct SettingsView: View {
                 Text("Nearbility")
             }
             
+            VStack {
+                Form(){
+                    HStack{
+                        Text("Enable Nearcast")
+                        Toggle(isOn: $nearCast) {}
+                            .toggleStyle(.switch)
+                            .onChange(of: nearCast) { newValue in
+                                if newValue {
+                                    if ncGroupID != "" && isGroudIDValid(id: ncGroupID) {
+                                        if let server = netcastService {
+                                            server.resume()
+                                        } else {
+                                            netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
+                                            netcastService?.resume()
+                                        }
+                                    } else {
+                                        DispatchQueue.main.async { nearCast = false; ncGroupID = "" }
+                                        _ = createAlert(
+                                            title: "Invalid group ID".local,
+                                            message: "Please create or enter a valid Group ID before use!",
+                                            button1: "OK".local
+                                        ).runModal()
+                                    }
+                                } else {
+                                    if let server = netcastService { server.stop() }
+                                }
+                            }
+                    }
+                    HStack {
+                        Text("Group ID").padding(.trailing, -8)
+                        TextField("", text: $ncGroupID)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 220)
+                            .disabled(nearCast)
+                        Button(action: {
+                            ncGroupID = "nc-" + randomString(length: 12) + randomString(type: 2, length: 8)
+                        }, label: {
+                            Text("New")
+                        }).disabled(nearCast)
+                    }
+                }
+                Text("Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others.")
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .opacity(0.5)
+                    .padding(.top, 10).padding(.bottom, 1)
+                Text("Do not add too many Macs to a group, this can be tiring for the router!")
+                    .foregroundColor(.orange)
+                    .opacity(0.5)
+            }
+            .navigationTitle("AirBattery Settings")
+            .tabItem {
+                Image("Nearcast")
+                Text("Nearcast")
+            }
+            
             HStack(spacing: 0){
                 VStack(alignment:.trailing, spacing: 18){
                     Text("Appearance:")
                     HStack(spacing: 2) {
                         SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Show or hide this Mac's built-in battery in the Dock icon".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                             .frame(width: 19, height: 19)
-                        Text("Built-in Battery:").foregroundColor(ib.hasBattery ? Color.primary : Color.secondary)
+                        Text("Built-in Battery:").foregroundColor(ib ? Color.primary : Color.secondary)
                     }
                     HStack(spacing: 2) {
                         SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Cycle through all found devices in the Dock icon".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
@@ -254,7 +312,7 @@ struct SettingsView: View {
                         Text("Hidden").tag("hidden")
                     }
                     .pickerStyle(.segmented)
-                    .disabled(!ib.hasBattery)
+                    .disabled(!ib)
                     Picker("", selection: $rollingMode) {
                         Text("Automatic").tag("auto")
                         Text("On").tag("on")
@@ -273,25 +331,25 @@ struct SettingsView: View {
                             .onChange(of: intBattOnStatusBar) { _ in
                                 _ = createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
                             }
-                        Text("Dynamic Battery Icon").foregroundColor(ib.hasBattery ? Color.primary : Color.secondary)
+                        Text("Dynamic Battery Icon").foregroundColor(ib ? Color.primary : Color.secondary)
                     }
                     HStack{
                         Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)
-                        Text("Show Battery Percentage").foregroundColor(ib.hasBattery ? Color.primary : Color.secondary)
+                        Text("Show Battery Percentage").foregroundColor(ib ? Color.primary : Color.secondary)
                     }
                     HStack{
                         Toggle(isOn: $hidePercentWhenFull) {}.toggleStyle(.switch)
-                        Text("Hidden Percentage above 90%").foregroundColor(ib.hasBattery ? Color.primary : Color.secondary)
+                        Text("Hidden Percentage above 90%").foregroundColor(statusBarBattPercent ? Color.primary : Color.secondary)
                     }.disabled(!statusBarBattPercent)
-                }.disabled(!ib.hasBattery)
+                }.disabled(!ib)
             }
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
             
             VStack(alignment:.center, spacing: 14){
                 HStack{
-                    Toggle(isOn: $showMacOnWidget) {}.toggleStyle(.switch).disabled(!ib.hasBattery)
-                    Text("Show Mac Built-in Battery").foregroundColor(ib.hasBattery ? Color.primary : Color.secondary)
+                    Toggle(isOn: $showMacOnWidget) {}.toggleStyle(.switch).disabled(!ib)
+                    Text("Show Mac Built-in Battery").foregroundColor(ib ? Color.primary : Color.secondary)
                     Spacer()
                     Toggle(isOn: $revListOnWidget) {}.toggleStyle(.switch)
                     Text("Reverse the Device List")
@@ -312,7 +370,7 @@ struct SettingsView: View {
                 if #unavailable(macOS 14) {
                     Picker("Single Device Widget", selection: $deviceOnWidget) {
                         Text("Not Set").tag("")
-                        if ib.hasBattery { Text(deviceName).tag(deviceName) }
+                        if ib { Text(deviceName).tag(deviceName) }
                         ForEach(devices, id: \.self) { device in
                             Text(device).tag(device)
                         }
@@ -410,6 +468,6 @@ struct SettingsView: View {
             }
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("Blacklist", systemImage: "eye.slash") }
-        }.frame(width: 500, height: 160)
+        }.frame(width: 520, height: 160)
     }
 }

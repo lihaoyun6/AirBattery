@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "beats.powerbeats.right.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "Nearbility.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

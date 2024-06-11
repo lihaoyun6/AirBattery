@@ -179,6 +179,9 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard let name = peripheral.name else { return }
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if blockedItems.contains(name) { return }
         guard let services = peripheral.services else { return }
         for service in services {
             peripheral.discoverCharacteristics(nil, for: service)
@@ -186,6 +189,9 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let name = peripheral.name else { return }
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if blockedItems.contains(name) { return }
         guard let characteristics = service.characteristics else { return }
         var clear = true
         if service.uuid == CBUUID(string: "180F") || service.uuid == CBUUID(string: "180A") {
@@ -202,6 +208,10 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     //电量信息
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard let name = peripheral.name else { return }
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if blockedItems.contains(name) { return }
+        
         if characteristic.uuid == CBUUID(string: "2A19"){
             if let data = characteristic.value, let deviceName = peripheral.name {
                 let now = Date().timeIntervalSince1970
@@ -290,6 +300,10 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func getAirpods(peripheral: CBPeripheral, data: Data, messageType: String) {
+        guard let name = peripheral.name else { return }
+        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if blockedItems.contains(name) { return }
+        
         if let deviceName = peripheral.name{
             let now = Date().timeIntervalSince1970
             let dataHex = data.hexEncodedString()
@@ -320,7 +334,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 rightLevel = (rightLevel ^ 128) & rightLevel
             }else{ rightLevel = getLevel(deviceName, "Right") }
             
-            if !["Airpods Max", "Beats Solo Pro", "Beats Solo3"].contains(model) {
+            if !["Airpods Max", "Beats Solo Pro", "Beats Solo 3", "Beats Studio Pro"].contains(model) {
                 if caseLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName + " (Case)".local, deviceModel: model, batteryLevel: Int(caseLevel), isCharging: caseCharging, lastUpdate: now)) }
                 
                 if leftLevel != 255 && rightLevel != 255 && (abs(Int(leftLevel) - Int(rightLevel)) < twsMerge) && leftCharging == rightCharging {
@@ -333,9 +347,13 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     if rightLevel != 255 { AirBatteryModel.updateDevice(Device(deviceID: deviceID + "_Right", deviceType: "ap_pod_right", deviceName: deviceName + " 🅁", deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, isHidden: false, parentName: deviceName + " (Case)".local, lastUpdate: now)) }
                 }
             } else {
-                leftLevel = leftLevel != 255 ? leftLevel : 0
-                rightLevel = rightLevel != 255 ? rightLevel : 0
-                AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName, deviceModel: model, batteryLevel: Int(max(rightLevel, leftLevel)), isCharging: rightCharging + leftCharging > 0 ? 1 : 0, lastUpdate: now))
+                if model == "Beats Studio Pro" {
+                    AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName, deviceModel: model, batteryLevel: Int(rightLevel), isCharging: rightCharging, lastUpdate: now))
+                } else {
+                    leftLevel = leftLevel != 255 ? leftLevel : 0
+                    rightLevel = rightLevel != 255 ? rightLevel : 0
+                    AirBatteryModel.updateDevice(Device(deviceID: deviceID, deviceType: "ap_case", deviceName: deviceName, deviceModel: model, batteryLevel: Int(max(rightLevel, leftLevel)), isCharging: rightCharging + leftCharging > 0 ? 1 : 0, lastUpdate: now))
+                }
             }
             //print("Type: \(messageType), C:\(caseLevel), L:\(leftLevel), R:\(rightLevel), Flip:\(messageType == "open" ? "\(flip)" : "none")")
             //print("Raw Data: \(data.hexEncodedString())")
