@@ -273,11 +273,11 @@ struct SettingsView: View {
                 Text("Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others.")
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .opacity(0.5)
+                    .opacity(0.6)
                     .padding(.top, 10).padding(.bottom, 1)
                 Text("Do not add too many Macs to a group, this can be tiring for the router!")
                     .foregroundColor(.orange)
-                    .opacity(0.5)
+                    .opacity(0.7)
             }
             .navigationTitle("AirBattery Settings")
             .tabItem {

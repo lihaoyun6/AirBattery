@@ -14,7 +14,7 @@ class IDeviceBattery {
     @AppStorage("updateInterval") var updateInterval = 1.0
     
     func startScan() {
-        let interval = TimeInterval(10.0 * updateInterval)
+        let interval = TimeInterval(20.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning iDevice devices...")
         Thread.detachNewThread {
@@ -41,14 +41,14 @@ class IDeviceBattery {
         }
         for id in usbDevices {
             if let d = AirBatteryModel.getByID(id) {
-                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 50 * updateInterval { writeBatteryInfo(id, "") }
+                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 * updateInterval { writeBatteryInfo(id, "") }
             } else {
                 writeBatteryInfo(id, "")
             }
         }
         for id in netDevices {
             if let d = AirBatteryModel.getByID(id) {
-                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 50 * updateInterval { writeBatteryInfo(id, "-n") }
+                if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 * updateInterval { writeBatteryInfo(id, "-n") }
             } else {
                 writeBatteryInfo(id, "-n")
             }

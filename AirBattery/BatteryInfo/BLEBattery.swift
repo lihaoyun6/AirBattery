@@ -120,7 +120,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func startScan() {
         // 每隔一段时间启动一次扫描
-        let interval = TimeInterval(10.0 * updateInterval)
+        let interval = TimeInterval(20.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scan), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning BLE devices...")
         // 立即启动一次扫描

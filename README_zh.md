@@ -35,11 +35,11 @@ brew install lihaoyun6/tap/airbattery
 - 如有需要, 可以在 Dock 栏菜单或状态栏菜单中隐藏某些设备, 亦可随时解除隐藏.  
 
 ## 常见问题
-**1. 为什么我的 iPhone/iPad 并没有显示?**  
-> 请确保 iPhone/iPad 已信任此 Mac ***(且至少在 AirBattery 运行状态下使用数据线连接 Mac 一次以进行配对)***. 之后只需确保其与 Mac 处于同一局域网中即可.  
+**1. 为什么我的 iPhone / iPad / Apple Watch 没有显示出来?**  
+> 请确保 iPhone / iPad 已信任此 Mac ***(且至少在 AirBattery 运行状态下使用数据线连接 Mac 一次以进行配对)***. 之后只需确保其与 Mac 处于同一局域网中即可.  
 
 **2. 我的 Apple Watch 也需要进行预连接吗?**  
-> 不需要, 一旦 AirBattery 通过 WiFi 或数据线检测到您的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息 **(通过蓝牙发现的 iPhone 不支持读取手表电量!)**
+> 不需要, 一旦 AirBattery 通过 WiFi 或 USB 发现任何已配对的 iPhone, 将会自动读取与其配对的 Apple Watch 的电量信息 **(通过蓝牙发现的 iPhone 不支持读取手表电量!)**
 
 **3. 为什么某些设备名称前有一个⚠️符号?**
 > 出现这个符号, 说明此设备已经超过十分钟以上没有更新过电量信息, 可能已离线或关闭.

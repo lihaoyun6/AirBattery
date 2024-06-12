@@ -175,7 +175,12 @@ struct MultiBatteryView: View {
         }
         .frame(width: 128, height: 128, alignment: .center)
         .onReceive(alertTimer) {_ in batteryAlert() }
-        .onReceive(widgetDataTimer) {_ in AirBatteryModel.writeData() }
+        .onReceive(widgetDataTimer) {_ in
+            if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) {
+                SPBluetoothDataModel.data = result
+            }
+            AirBatteryModel.writeData()
+        }
         .onReceive(widgetViewTimer) {_ in if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }}
         .onReceive(nearCastTimer) {_ in
             if nearCast && ncGroupID != ""{
@@ -193,37 +198,37 @@ struct MultiBatteryView: View {
             }
         }
         .onReceive(dockTimer) { t in
-            if showOn == "both" || showOn == "dock" { NSApp.dockTile.display() }
             InternalBattery.status = getPowerState()
-            let windows = NSApplication.shared.windows
-            for w in windows { if w.level.rawValue == 0 || w.level.rawValue == 3 { w.level = .floating } }
+            //for w in NSApplication.shared.windows { if w.level.rawValue == 0 || w.level.rawValue == 3 { w.level = .floating } }
             
-            if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
-            
-            darkMode = getDarkMode()
-            var list = AirBatteryModel.getAll()
-            let ibStatus = InternalBattery.status
-            let now = Double(t.timeIntervalSince1970)
-            
-            if rollingMode == "off" { rollCount = 1 }
-            if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ib2ab(ibStatus), at: 0) }
-
-            batteryList = sliceList(data: list, length: 4, count: rollCount)
-            if batteryList == []{
-                rollCount = 1
+            if showOn == "both" || showOn == "dock" {
+                darkMode = getDarkMode()
+                var list = AirBatteryModel.getAll()
+                let ibStatus = InternalBattery.status
+                let now = Double(t.timeIntervalSince1970)
+                
+                if rollingMode == "off" { rollCount = 1 }
+                if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ib2ab(ibStatus), at: 0) }
+                
                 batteryList = sliceList(data: list, length: 4, count: rollCount)
-            }
-            
-            if now - lastTime >= 20 && (rollingMode == "on" || rollingMode == "auto") {
-                if rollingMode == "auto" {
-                    if list.count > 4 {
+                if batteryList == []{
+                    rollCount = 1
+                    batteryList = sliceList(data: list, length: 4, count: rollCount)
+                }
+                
+                if now - lastTime >= 20 && (rollingMode == "on" || rollingMode == "auto") {
+                    if rollingMode == "auto" {
+                        if list.count > 4 {
+                            lastTime = now
+                            rollCount = rollCount + 1
+                        }
+                    } else {
                         lastTime = now
                         rollCount = rollCount + 1
                     }
-                } else {
-                    lastTime = now
-                    rollCount = rollCount + 1
                 }
+                
+                NSApp.dockTile.display()
             }
         }
     }
@@ -288,7 +293,7 @@ struct popover: View {
                         .onHover{ hovering in overQuitButton = hovering }
                     } else {
                         Button(action: {
-                            if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                            AppDelegate.shared.dockWindow.orderOut(nil)
                         }, label: {
                             Image(systemName: "minus.circle")
                                 .font(.system(size: 14, weight: .light))
@@ -301,8 +306,8 @@ struct popover: View {
                     }
                     
                     Button(action: {
-                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
-                        NSApp.orderFrontStandardAboutPanel(nil)
+                        AppDelegate.shared.dockWindow.orderOut(nil)
+                        AppDelegate.shared.openAboutPanel()
                     }, label: {
                         Image(systemName: "info.circle")
                             .font(.system(size: 14, weight: .light))
@@ -314,16 +319,7 @@ struct popover: View {
                     .onHover{ hovering in overInfoButton = hovering }
                     
                     Button(action: {
-                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
-                        NSApp.activate(ignoringOtherApps: true)
-                        if #available(macOS 14, *) {
-                            NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
-                        }else if #available(macOS 13, *) {
-                            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                        } else {
-                            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-                        }
-                        NSApp.activate(ignoringOtherApps: true)
+                        AppDelegate.shared.openSettingPanel()
                     }, label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 13.6, weight: .light))

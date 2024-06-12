@@ -35,11 +35,11 @@ brew install lihaoyun6/tap/airbattery
 - If necessary, you can hide certain devices in the Dock menu or status bar menu, and unhide them at any time.  
 
 ## Q&A
-**1. Why isn't my iPhone/iPad displayed?**
-> Please make sure the iPhone/iPad has trusted this Mac ***(and connected the Mac with a data cable at least once while AirBattery is running to pair)***. Then just make sure it is on the same LAN as the Mac.  
+**1. Why is my iPhone / iPad / Apple Watch not showing up?**
+> Please make sure the iPhone / iPad has trusted this Mac ***(and connected the Mac with a data cable at least once while AirBattery is running to pair)***. Then just make sure it is on the same LAN as the Mac.  
 
 **2. Does my Apple Watch need to be pre-connected?**
-> No, when AirBattery detects your iPhone via WiFi or cable, it will automatically read the battery information of the Apple Watch paired with it **(iPhone discovered via Bluetooth does not support reading the watch battery!)** 
+> No, when AirBattery detects a paired iPhone via WiFi or USB, it will automatically read the battery data of the Apple Watch paired with it **(iPhone discovered via Bluetooth does not support reading the watch battery!)** 
 
 **3. Why do some device name have a ⚠️ symbol?**
 > If this symbol appears, it means that the device has not updated its battery information for more than ten minutes, and may be offline or turned off.  

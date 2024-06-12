@@ -34,7 +34,7 @@ struct AirBatteryApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    //static let shared = AppDelegate()
+    static let shared = AppDelegate()
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -219,7 +219,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.dockTile.display()
     }
     
-    @objc func blank() {}
+    func setStatusBar(width: Double) {
+        let iconView = NSHostingView(rootView: mainBatteryView())
+        iconView.frame = NSRect(x: 0, y: 0, width: width, height: 21.5)
+        statusBarItem.button?.subviews.removeAll()
+        statusBarItem.button?.addSubview(iconView)
+        statusBarItem.button?.frame = iconView.frame
+    }
     
     /*@objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
         let event = NSApp.currentEvent!
@@ -300,6 +306,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     @objc func openSettingPanel() {
+        dockWindow.orderOut(nil)
         NSApp.activate(ignoringOtherApps: true)
         if #available(macOS 14, *) {
             NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
@@ -307,6 +314,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
         } else {
             NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            NSApp.windows.first(where: { $0.title == "AirBattery Settings".local })?.level = .floating
         }
     }
     
