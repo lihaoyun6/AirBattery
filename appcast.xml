@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.3.8</title>
+            <pubDate>Sat, 15 Jun 2024 00:46:12 +0800</pubDate>
+            <sparkle:version>138</sparkle:version>
+            <sparkle:shortVersionString>1.3.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>修复了在 macOS 15 系统中无法搜索到 iOS 设备的bug</li>
+                  <li>为小组件添加了读取 Nearcast 设备信息的能力</li>
+                  </ul><ul>
+                  <li>Fixed: Unable to search for iOS devices in macOS 15</li>
+                  <li>Widgets now support displaying Nearcast devices</li>
+                  </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/AirBattery_v1.3.8.dmg" length="8357619" type="application/octet-stream" sparkle:edSignature="m7n1rm9ab78KGcub0lWX9kFUgfzJYs9Ehn+iG5ZpIjGD9OhBeX/m9X0hCOaybifUYLDQbu/l95GQrWvoWoWcBg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-137.delta" sparkle:deltaFrom="137" length="254906" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="U0EDK8OJUficmoZL7drkA4CGlT445Cmuq6iGO4c342o4PEkmJImYX+vXvEPWBs5ch9qedkIhVRQ0d5YHwum3Cg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-136.delta" sparkle:deltaFrom="136" length="271842" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="KpLr+y7ZAlGtmqBfZCrNBp0vaYfLOsxvoPYGKA74+soV852KRKHBHNE2u4J4MkEXRN5dOQpZxwbmD6pHrpcIBA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-135.delta" sparkle:deltaFrom="135" length="706666" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="xeEEH5e7AJ0GNwK8e3AraVZ18ecVj3vWtL93jTiRkTTJd8hEZ6AhaHcMDLd40hdhvIIMk851Xq5YCEGj25VfBw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.3.7</title>
             <pubDate>Thu, 13 Jun 2024 00:49:10 +0800</pubDate>
             <sparkle:version>137</sparkle:version>
