@@ -573,6 +573,7 @@ struct nearcastView: View {
     var mainIndex: Int
     @Binding var overStackNC: Int
     @State private var overStack = -1
+    @State private var overCopyButton = false
     
     var body: some View {
         Spacer().frame(height: 8)
@@ -594,16 +595,29 @@ struct nearcastView: View {
                             Spacer()
                             Text("\(Int((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60))"+" mins ago".local)
                                 .font(.system(size: 11))
-                                //.foregroundColor(.secondary)
+                            if #available(macOS 14, *) {
+                                Button(action: {
+                                    copyToClipboard(devices[index].deviceName)
+                                    _ = createAlert(title: "Device Name Copied".local,
+                                                    message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
+                                                    button1: "OK".local).runModal()
+                                }, label: {
+                                    Image(systemName: "list.clipboard.fill")
+                                        .frame(width: 20, height: 20, alignment: .center)
+                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                })
+                                .buttonStyle(PlainButtonStyle())
+                                .onHover{ hovering in overCopyButton = hovering }
+                            }
                         } else {
                             Spacer()
-                        }
-                        if devices[index].hasBattery {
-                            Text("\(devices[index].batteryLevel)%")
-                                .foregroundColor((devices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
-                                .font(.system(size: 11))
-                            BatteryView(item: devices[index])
-                                .scaleEffect(0.8)
+                            if devices[index].hasBattery {
+                                Text("\(devices[index].batteryLevel)%")
+                                    .foregroundColor((devices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
+                                    .font(.system(size: 11))
+                                BatteryView(item: devices[index])
+                                    .scaleEffect(0.8)
+                            }
                         }
                     }
                     .padding(.vertical, 6)

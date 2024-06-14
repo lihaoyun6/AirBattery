@@ -7,6 +7,7 @@
 
 import WidgetKit
 import SwiftUI
+let ncPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
 
 @available(macOS 14, *)
 struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
@@ -19,6 +20,11 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
+        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        for ncFile in ncFiles {
+            let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
+            data += ncData
+        }
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
         } else if context.family ==  .systemLarge {
@@ -32,6 +38,11 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
+        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        for ncFile in ncFiles {
+            let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
+            data += ncData
+        }
         let entry: SimpleEntry
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
@@ -54,11 +65,16 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
+        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        for ncFile in ncFiles {
+            let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
+            data += ncData
+        }
         let entry: SimpleEntry
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
         } else if context.family ==  .systemLarge {
-            if data.count >= 8 { data = Array(data[0..<8]) }
+            if data.count >= 11 { data = Array(data[0..<11]) }
         }
         entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
         completion(entry)
@@ -69,11 +85,16 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
+        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        for ncFile in ncFiles {
+            let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
+            data += ncData
+        }
         let entry: SimpleEntry
         if context.family == .systemSmall || context.family == .systemMedium {
             while data.count < 8 { data.append(Device(hasBattery: false, deviceID: "", deviceType: "blank", deviceName: "", batteryLevel: 0, isCharging: 0, lastUpdate: 0.0)) }
         } else if context.family ==  .systemLarge {
-            if data.count >= 8 { data = Array(data[0..<8]) }
+            if data.count >= 11 { data = Array(data[0..<11]) }
         }
         entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
         let entries: [SimpleEntry] = [entry]

@@ -79,7 +79,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 let count = AirBatteryModel.ncGetAll(url: jsonUrl).count
                 if count != 0 {
                     ncCount += 7
-                    ncDeviceCount += AirBatteryModel.ncGetAll(url: jsonUrl).count
+                    ncDeviceCount += count
                 }
             }
             let mouse = NSEvent.mouseLocation
@@ -275,7 +275,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let count = AirBatteryModel.ncGetAll(url: jsonUrl).count
             if count != 0 {
                 ncCount += 7
-                ncDeviceCount += AirBatteryModel.ncGetAll(url: jsonUrl).count
+                ncDeviceCount += count
             }
         }
         contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count+ncDeviceCount,1)+hiddenRow)*37+20+ncCount)

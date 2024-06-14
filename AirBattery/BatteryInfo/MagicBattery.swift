@@ -74,6 +74,25 @@ class MagicBattery {
         return def
     }
     
+    func getDeviceType(_ mac: String, _ def: String) -> String {
+            if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+               let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
+               let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
+                if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
+                    for device in device_connected{
+                        let d = device as! [String: Any]
+                        if let n = d.keys.first, let info = d[n] as? [String: Any] {
+                            if let id = info["device_address"] as? String,
+                               let type = info["device_minorType"] as? String{
+                                if id == mac { return type }
+                            }
+                        }
+                    }
+                }
+            }
+            return def
+        }
+    
     func readMagicBattery(object: io_object_t) {
         var mac = ""
         var type = "hid"
@@ -96,7 +115,11 @@ class MagicBattery {
             if productName.contains("Trackpad") { type = "Trackpad" }
             if productName.contains("Keyboard") { type = "Keyboard" }
             if productName.contains("Mouse") { type = "MMouse" }
-            productName = getDeviceName(mac, productName)
+            if type == "hid" {
+                type = getDeviceType(mac, type)
+            } else {
+                productName = getDeviceName(mac, productName)
+            }
         }
         if !productName.contains("Internal"){
             AirBatteryModel.updateDevice(Device(deviceID: mac, deviceType: type, deviceName: productName, batteryLevel: percent, isCharging: status, parentName: deviceName, lastUpdate: lastUpdate))

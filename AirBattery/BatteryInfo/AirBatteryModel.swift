@@ -158,11 +158,12 @@ class AirBatteryModel {
         return []
     }
     
-    static func ncGetAll(url: URL) -> [Device] {
+    static func ncGetAll(url: URL, fromWidget: Bool = false) -> [Device] {
         let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
         let devices = readData(url: url)
         let now = Double(Date().timeIntervalSince1970)
-        let localDevices = getAll().map({ $0.deviceName })
+        var localDevices = getAll().map({ $0.deviceName })
+        if fromWidget { localDevices = readData().map({ $0.deviceName }) }
         var list = devices.filter{(now - $0.lastUpdate < Double(disappearTime * 60))}.filter({!localDevices.contains($0.deviceName)})
         if let first = devices.first { if !list.contains(first) && list.count != 0 { list.insert(first, at: 0) }}
         if let first = list.first { if list.count == 1 && !first.hasBattery { return [] }}
