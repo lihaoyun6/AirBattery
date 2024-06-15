@@ -17,12 +17,7 @@
                   <li>Widgets now support displaying Nearcast devices</li>
                   </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
             ]]></description>
-            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/AirBattery_v1.3.8.dmg" length="8357619" type="application/octet-stream" sparkle:edSignature="m7n1rm9ab78KGcub0lWX9kFUgfzJYs9Ehn+iG5ZpIjGD9OhBeX/m9X0hCOaybifUYLDQbu/l95GQrWvoWoWcBg=="/>
-            <sparkle:deltas>
-                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-137.delta" sparkle:deltaFrom="137" length="254906" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="U0EDK8OJUficmoZL7drkA4CGlT445Cmuq6iGO4c342o4PEkmJImYX+vXvEPWBs5ch9qedkIhVRQ0d5YHwum3Cg=="/>
-                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-136.delta" sparkle:deltaFrom="136" length="271842" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="KpLr+y7ZAlGtmqBfZCrNBp0vaYfLOsxvoPYGKA74+soV852KRKHBHNE2u4J4MkEXRN5dOQpZxwbmD6pHrpcIBA=="/>
-                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/Update138-135.delta" sparkle:deltaFrom="135" length="706666" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="xeEEH5e7AJ0GNwK8e3AraVZ18ecVj3vWtL93jTiRkTTJd8hEZ6AhaHcMDLd40hdhvIIMk851Xq5YCEGj25VfBw=="/>
-            </sparkle:deltas>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.8/AirBattery_v1.3.8.dmg" length="8358664" type="application/octet-stream" sparkle:edSignature="S8Z2qsAPPk+bH2A6gW9BomrCQ8mACq3JY6T0EVib5WCElUZ715g/1ahE+d9/QGfztSzTO2O0VYRgEO6j8YeRCw=="/>
         </item>
         <item>
             <title>v1.3.7</title>
