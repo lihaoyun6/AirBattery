@@ -293,7 +293,7 @@ struct popover: View {
                         .onHover{ hovering in overQuitButton = hovering }
                     } else {
                         Button(action: {
-                            AppDelegate.shared.dockWindow.orderOut(nil)
+                            if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
                         }, label: {
                             Image(systemName: "minus.circle")
                                 .font(.system(size: 14, weight: .light))
@@ -306,7 +306,7 @@ struct popover: View {
                     }
                     
                     Button(action: {
-                        AppDelegate.shared.dockWindow.orderOut(nil)
+                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
                         AppDelegate.shared.openAboutPanel()
                     }, label: {
                         Image(systemName: "info.circle")
