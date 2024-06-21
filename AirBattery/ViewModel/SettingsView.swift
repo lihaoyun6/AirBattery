@@ -47,7 +47,7 @@ struct SettingsView: View {
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
     @AppStorage("readIDevice") var readIDevice = true
-    @AppStorage("readAirpods") var readAirpods = true
+    @AppStorage("readBTHID") var readBTHID = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
@@ -163,18 +163,32 @@ struct SettingsView: View {
                             Toggle(isOn: $readBTDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
                                 Text("Bluetooth Scanner")
-                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: Some devices cannot be listed even though macOS knows their battery usage".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: If you have Logitech devices, please try to enable \"Enhanced HID Scanner\"".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
                         }
                         HStack{
-                            Toggle(isOn: $readAirpods) {}.toggleStyle(.switch)
-                            Text("Find AirPods / Beats")
+                            Toggle(isOn: $readBTHID) {}.toggleStyle(.switch)
+                                .onChange(of: readBTHID) { newValue in
+                                    if newValue {
+                                        if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
+                                            let alert = createAlert(title: "Permission Required".local, message: "AirBattery does not log any of your input! This permission is only used to read battery info from HID devices.".local, button1: "Open Settings")
+                                            if alert.runModal() == .alertFirstButtonReturn {
+                                                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
+                                            }
+                                        }
+                                    }
+                                }
+                            HStack(spacing: 2) {
+                                Text("Enhanced HID Scanner")
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of more third-party Bluetooth HID devices\n\n(Currently only supports some Logitech keyboards and mice)".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                    .frame(width: 19, height: 19)
+                            }
                         }
                         HStack{
                             Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
-                                Text("Non-Apple BLE Devices")
+                                Text("Enhanced BLE Scanner")
                                 SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!".local, primaryColor: NSColor(named: "my_yellow") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }

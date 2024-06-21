@@ -44,6 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
+    @AppStorage("readBTHID") var readBTHID = false
     //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
     
     var statusMenu: NSMenu = NSMenu()
@@ -182,6 +183,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         bleBattery.startScan()
         magicBattery.startScan()
         ideviceBattery.startScan()
+        
+        if readBTHID {
+            if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
+                let alert = createAlert(title: "Permission Required".local, message: "AirBattery does not log any of your input! This permission is only used to read battery info from HID devices.".local, button1: "Open Settings")
+                if alert.runModal() == .alertFirstButtonReturn {
+                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
+                }
+            }
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             AirBatteryModel.writeData()

@@ -90,7 +90,6 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @AppStorage("cStatusOfBLE") var cStatusOfBLE = false
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
-    @AppStorage("readAirpods") var readAirpods = true
     @AppStorage("updateInterval") var updateInterval = 1.0
     @AppStorage("twsMerge") var twsMerge = 5
     
@@ -165,9 +164,9 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                             if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
                         }
                         //获取Airpods合盖状态消息
-                        if data.count == 25 && data[2] == 18 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "close") }
+                        if data.count == 25 && data[2] == 18 && readBTDevice { getAirpods(peripheral: peripheral, data: data, messageType: "close") }
                         //获取Airpods开盖状态消息
-                        if data.count == 29 && data[2] == 7 && readAirpods { getAirpods(peripheral: peripheral, data: data, messageType: "open") }
+                        if data.count == 29 && data[2] == 7 && readBTDevice { getAirpods(peripheral: peripheral, data: data, messageType: "open") }
                     }
                 }
             }

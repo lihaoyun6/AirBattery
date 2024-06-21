@@ -14,7 +14,7 @@ class SPBluetoothDataModel {
 class MagicBattery {
     var scanTimer: Timer?
     @AppStorage("readBTDevice") var readBTDevice = true
-    @AppStorage("readAirpods") var readAirpods = true
+    @AppStorage("readBTHID") var readBTHID = false
     @AppStorage("updateInterval") var updateInterval = 1.0
     @AppStorage("deviceName") var deviceName = "Mac"
     
@@ -25,10 +25,16 @@ class MagicBattery {
         Thread.detachNewThread {
             if self.readBTDevice {
                 self.getMagicBattery()
-                //self.getMagicBattery_old()
+                self.getOldMagicKeyboard()
+                self.getOldMagicTrackpad()
+                self.getOldMagicMouse()
                 self.getOtherBTBattery()
+                if self.readBTHID {
+                    DispatchQueue.global().async {
+                        self.getLogiDevice()
+                    }
+                }
             }
-            //if self.readAirpods { self.getAirpods() }
         }
     }
     
@@ -39,8 +45,12 @@ class MagicBattery {
             self.getOldMagicTrackpad()
             self.getOldMagicMouse()
             self.getOtherBTBattery()
+            if self.readBTHID {
+                DispatchQueue.global().async {
+                    self.getLogiDevice()
+                }
+            }
         }
-        //if self.readAirpods { self.getAirpods() }
     }}
     
     func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
@@ -75,23 +85,42 @@ class MagicBattery {
     }
     
     func getDeviceType(_ mac: String, _ def: String) -> String {
-            if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
-               let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
-               let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
-                if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
-                    for device in device_connected{
-                        let d = device as! [String: Any]
-                        if let n = d.keys.first, let info = d[n] as? [String: Any] {
-                            if let id = info["device_address"] as? String,
-                               let type = info["device_minorType"] as? String{
-                                if id == mac { return type }
-                            }
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+           let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
+           let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
+            if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
+                for device in device_connected{
+                    let d = device as! [String: Any]
+                    if let n = d.keys.first, let info = d[n] as? [String: Any] {
+                        if let id = info["device_address"] as? String,
+                           let type = info["device_minorType"] as? String{
+                            if id == mac { return type }
                         }
                     }
                 }
             }
-            return def
         }
+        return def
+    }
+    
+    func getDeviceTypeWithPID(_ pid: String, _ def: String) -> String {
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+           let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
+           let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
+            if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
+                for device in device_connected{
+                    let d = device as! [String: Any]
+                    if let n = d.keys.first, let info = d[n] as? [String: Any] {
+                        if let id = info["device_productID"] as? String,
+                           let type = info["device_minorType"] as? String{
+                            if id == pid { return type }
+                        }
+                    }
+                }
+            }
+        }
+        return def
+    }
     
     func readMagicBattery(object: io_object_t) {
         var mac = ""
@@ -197,6 +226,23 @@ class MagicBattery {
             IOObjectRelease(object)
         }
         IOObjectRelease(serialPortIterator)
+    }
+    
+    func getLogiDevice() {
+        guard let result = process(path: "\(Bundle.main.resourcePath!)/hidpp/bin/hidpp-list-devices", arguments: []) else { return }
+        let devices = result.components(separatedBy: "\n")
+        for device in devices {
+            if let json = try? JSONSerialization.jsonObject(with: Data(device.utf8), options: []) as? [String: Any] {
+                if var name = json["name"] as? String, let pid = json["pid"] as? String,
+                   let status = json["status"] as? Int, let level = json["level"] as? Int {
+                    if name == "" { name = getDeviceName("0x\(pid.uppercased())", "Logitech Device") }
+                    let type = getDeviceTypeWithPID("0x\(pid.uppercased())", "hid")
+                    if !(status == 1 && level == 0) {
+                        AirBatteryModel.updateDevice(Device(deviceID: pid, deviceType: type, deviceName: name, batteryLevel: min(100, max(0, level)), isCharging: status, parentName: deviceName, lastUpdate: Date().timeIntervalSince1970))
+                    }
+                }
+            }
+        }
     }
     
     func getAirpods() {
