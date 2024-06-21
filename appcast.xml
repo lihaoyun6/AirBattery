@@ -3,6 +3,24 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.3.9</title>
+            <pubDate>Fri, 21 Jun 2024 20:51:56 +0800</pubDate>
+            <sparkle:version>139</sparkle:version>
+            <sparkle:shortVersionString>1.3.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>为部分罗技键鼠添加了支持<br>(如需启用, 请在设置 > Nearbility 中启用"扫描更多蓝牙 HID 设备")</li>
+                  </ul><ul>
+                  <li>Added support for some Logitech device<br>(enable "Enhanced HID Scanner" in Settings > Nearbility)</li>
+                  </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.9/AirBattery_v1.3.9.dmg" length="9240590" type="application/octet-stream" sparkle:edSignature="CGQrleH1k0f2FhujJa++7xxQ9Xwq4DlizIBLPNgnBIDeBw7tnp02yPnzYrNqi0EvJkcRKyew4CpW29E7Wh+5AQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.3.9/Update139-138.delta" sparkle:deltaFrom="138" length="638426" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="YoccK51mN7yGVnIZpSWpkaUE8/1f+lPhHW/a3C6QWycBEaolp2Dn6ssiGeHYtO8BGla5orprV7ZVp/VkOW1HBA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.3.8</title>
             <pubDate>Sat, 15 Jun 2024 00:46:12 +0800</pubDate>
             <sparkle:version>138</sparkle:version>
