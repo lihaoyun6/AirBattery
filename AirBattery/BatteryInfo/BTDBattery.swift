@@ -86,11 +86,12 @@ class BTDBattery {
         }
         for d in list {
             let mac = d["mac"] as! String
-            let name = d["name"] as! String
+            var name = d["name"] as! String
             let type = d["type"] as! String
             let time = d["time"] as! String
             let level = d["level"] as! Int
             let status = (d["status"] as! String) == "+" ? 1 : 0
+            if name == "" { name = "\(type) (\(mac))" }
             if connected.contains(mac) {
                 if let index = allDevices.firstIndex(of: name) { allDevices[index] = name } else { allDevices.append(name) }
                 AirBatteryModel.updateDevice(Device(deviceID: mac, deviceType: type, deviceName: name, batteryLevel: min(100, max(0, level)), isCharging: status, parentName: parent, lastUpdate: Date().timeIntervalSince1970, realUpdate: isoFormatter.date(from: time)?.timeIntervalSince1970 ?? 0.0))
