@@ -103,8 +103,8 @@
 "Scan your iPhone and iPad(Cellular) via Bluetooth" = "尝试通过蓝牙扫描周边属于您的 iPhone 或蜂窝版 iPad";
 "Guess if the iPhone / iPad or BLE device found by Bluetooth is charging" = "利用电量变化来推测通过蓝牙发现的 iPhone / iPad 或其他 BLE 设备";
 //"Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: Some devices cannot be listed even though macOS knows their battery usage" = "获取某些受支持的蓝牙设备的电量信息 (鼠标、键盘、耳机等)\n\n请注意: 有些设备无法被列出, 即使你可以在 macOS 内置的小组件中看到它";
-"Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: If you have Logitech devices, please try to enable \"Enhanced HID Scanner\"" = "获取某些受支持的蓝牙设备的电量信息 (鼠标、键盘、耳机等)\n\n请注意: 罗技键鼠用户请尝试启用\"扫描更多蓝牙 HID 设备\"";
-"Get the battery usage of more third-party Bluetooth HID devices\n\n(Currently only supports some Logitech keyboards and mice)" = "获取更多第三方蓝牙 HID 设备的电量信息\n\n\(目前暂时仅支持部分罗技蓝牙键鼠)";
+"Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nIf some of your device is not shown, try enabling \"Enhanced HID Scanner\"" = "获取某些受支持的蓝牙设备的电量信息 (鼠标、键盘、耳机等)\n\n如果部分设备没有显示出来, 请尝试启用\"扫描更多蓝牙 HID 设备\"";
+ "Get the battery usage of more third-party Bluetooth HID devices\n\nBattery data will be updated when devices are reconnected to the Mac or the Mac wakes up" = "获取更多第三方蓝牙 HID 设备的电量信息\n\n\仅当这些设备刚被连接时或 Mac 被唤醒时, 电池数据才会更新";
 "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!" = "尝试扫描周边所有的 BLE 设备, 即使它可能不属于您\n\n请注意: 这是一项测试版功能, 可能会导致未知的错误!";
 "Show or hide this Mac's built-in battery in the Dock icon" = "在 Dock 图标中显示此 Mac 的内置电池, 或将其从 Dock 图标上隐藏";
 "Cycle through all found devices in the Dock icon" = "在 Dock 图标中循环显示所有已发现的设备";
@@ -129,6 +129,9 @@
 "Group ID copied. Please enter it on your other Mac to join this group." = "小组 ID 已复制到剪贴板, 请在您的其他 Mac 上输入它以加入此 Nearcast 小组";
 "Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others." = "Nearcast 将会按照与 Nearbility 引擎相同的更新频率在局域网中发送电量信息.\n所有被发送的电量数据都已经过加密, 所以请不要将你的小组 ID 告诉其他人.";
 "Do not add too many Macs to a group, this can be tiring for the router!" = "请不要将太多 Mac 加入同一个 Nearcast 小组, 这可能会加重路由器的负担!";
-"AirBattery does not log any of your input! This permission is only used to read battery info from HID devices." = "AirBattery 不会记录您的任何输入!\n此权限仅用于从 HID 设备获取电量信息";
-"Permission Required" = "需要授权";
-"Open Settings" = "打开系统设置";
+//"AirBattery does not log any of your input! This permission is only used to read battery info from HID devices." = "AirBattery 不会记录您的任何输入!\n此权限仅用于从 HID 设备获取电量信息";
+//"Permission Required" = "需要授权";
+//"Open Settings" = "打开系统设置";
+"If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes." = "如果某些设备在系统蓝牙菜单显示电量\n但在 AirBattery 中没有显示的话\n请尝试断开然后重新连接它们并等待几分钟";
+"AirBattery Tips" = "AirBattery 小贴士";
+"Don't remind me again" = "不再提醒";

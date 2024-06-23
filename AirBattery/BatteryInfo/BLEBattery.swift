@@ -119,11 +119,11 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func startScan() {
         // 每隔一段时间启动一次扫描
-        let interval = TimeInterval(20.0 * updateInterval)
+        let interval = TimeInterval(30.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scan), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning BLE devices...")
         // 立即启动一次扫描
-        //scan(longScan: true)
+        scan(longScan: true)
     }
 
     @objc func scan(longScan: Bool = false) {
@@ -379,25 +379,5 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         }
         return paired
-    }
-    
-    func getConnected() -> [String]{
-        //let now = Date().timeIntervalSince1970
-        //if now - lastCheck < 8 { return connected }
-        //lastCheck = now
-        //connected.removeAll()
-        var connected:[String] = []
-        //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return connected }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
-        let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
-        let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
-            if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
-                for device in device_connected{
-                    let d = device as! [String: Any]
-                    if let key = d.keys.first { connected.append(key) }
-                }
-            }
-        }
-        return connected
     }
 }

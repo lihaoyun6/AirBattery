@@ -44,19 +44,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
-    @AppStorage("readBTHID") var readBTHID = false
+    @AppStorage("readBTHID") var readBTHID = true
     //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
     
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
     var dockWindow = NSWindow()
     let bleBattery = BLEBattery()
+    let btdBattery = BTDBattery()
     let magicBattery = MagicBattery()
     let ideviceBattery = IDeviceBattery()
-    
-    func application(_ application: NSApplication, open urls: [URL]) {
-        print(urls)
-    }
+    let nc = NSWorkspace.shared.notificationCenter
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
@@ -132,6 +130,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds, .withTimeZone]
         menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
         menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
         UserDefaults.standard.register( // default defaults (used if not set)
@@ -146,7 +145,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 "deviceOnWidget": "",
                 "updateInterval": 1.0,
                 "widgetInterval": 0,
-                "nearCast": false
+                "nearCast": false,
+                "readBTHID": true,
+                "neverRemindMe": [String]()
             ]
         )
         
@@ -164,6 +165,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        nc.addObserver(self, selector: #selector(onDisplayWake), name: NSWorkspace.screensDidWakeNotification, object: nil)
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(_:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
@@ -181,16 +183,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         
         bleBattery.startScan()
+        btdBattery.startScan()
         magicBattery.startScan()
         ideviceBattery.startScan()
         
         if readBTHID {
-            if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
+            let tipID = "ab.third-party-device.note"
+            let never = UserDefaults.standard.object(forKey: "neverRemindMe") as! [String]
+            if !never.contains(tipID) {
+                let alert = createAlert(title: "AirBattery Tips".local, message: "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes.".local, button1: "Don't remind me again", button2: "OK")
+                if alert.runModal() == .alertFirstButtonReturn {
+                    UserDefaults.standard.setValue(never + [tipID], forKey: "neverRemindMe")
+                }
+            }
+            /*if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
                 let alert = createAlert(title: "Permission Required".local, message: "AirBattery does not log any of your input! This permission is only used to read battery info from HID devices.".local, button1: "Open Settings")
                 if alert.runModal() == .alertFirstButtonReturn {
                     NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
                 }
-            }
+            }*/
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -251,6 +262,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             statusBarItem.menu = nil
         }
     }*/
+    
+    @objc func onDisplayWake() {
+        if readBTHID {
+            DispatchQueue.global().asyncAfter(deadline: .now() + 20) {
+                BTDBattery.getOtherDevice(last: "5m")
+            }
+        }
+        //print("\(Date(timeIntervalSinceNow: 0)) -> Display wake")
+    }
     
     @objc func addToBlackList(_ sender: NSMenuItem) {
         var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]

@@ -47,7 +47,7 @@ struct SettingsView: View {
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
     @AppStorage("readIDevice") var readIDevice = true
-    @AppStorage("readBTHID") var readBTHID = false
+    @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
@@ -163,13 +163,13 @@ struct SettingsView: View {
                             Toggle(isOn: $readBTDevice) {}.toggleStyle(.switch)
                             HStack(spacing: 2) {
                                 Text("Bluetooth Scanner")
-                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: If you have Logitech devices, please try to enable \"Enhanced HID Scanner\"".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nIf some of your device is not shown, try enabling \"Enhanced HID Scanner\"".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
                         }
                         HStack{
                             Toggle(isOn: $readBTHID) {}.toggleStyle(.switch)
-                                .onChange(of: readBTHID) { newValue in
+                                /*.onChange(of: readBTHID) { newValue in
                                     if newValue {
                                         if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
                                             let alert = createAlert(title: "Permission Required".local, message: "AirBattery does not log any of your input! This permission is only used to read battery info from HID devices.".local, button1: "Open Settings")
@@ -178,10 +178,10 @@ struct SettingsView: View {
                                             }
                                         }
                                     }
-                                }
+                                }*/
                             HStack(spacing: 2) {
                                 Text("Enhanced HID Scanner")
-                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of more third-party Bluetooth HID devices\n\n(Currently only supports some Logitech keyboards and mice)".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Get the battery usage of more third-party Bluetooth HID devices\n\nBattery data will be updated when devices are reconnected to the Mac or the Mac wakes up".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
                         }

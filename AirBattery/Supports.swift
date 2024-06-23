@@ -19,6 +19,7 @@ let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Doub
 let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? Double(abs(widgetInterval)) : updateInterval)), on: .main, in: .common).autoconnect()
 let macList = ["MacBookPro1,1":"macbook.gen1", "MacBookPro1,2":"macbook.gen1", "MacBookPro2,1":"macbook.gen1", "MacBookPro2,2":"macbook.gen1", "MacBookPro3,1":"macbook.gen1", "MacBookPro4,1":"macbook.gen1", "MacBookPro5,1":"macbook.gen1", "MacBookPro5,2":"macbook.gen1", "MacBookPro5,3":"macbook.gen1", "MacBookPro5,4":"macbook.gen1", "MacBookPro5,5":"macbook.gen1", "MacBookPro6,1":"macbook.gen1", "MacBookPro6,2":"macbook.gen1", "MacBookPro7,1":"macbook.gen1", "MacBookPro8,1":"macbook.gen1", "MacBookPro8,2":"macbook.gen1", "MacBookPro8,3":"macbook.gen1", "MacBookPro9,1":"macbook.gen1", "MacBookPro9,2":"macbook.gen1", "MacBookPro10,1":"macbook.gen1", "MacBookPro10,2":"macbook.gen1", "MacBookPro11,1":"macbook.gen1", "MacBookPro11,2":"macbook.gen1", "MacBookPro11,3":"macbook.gen1", "MacBookPro11,4":"macbook.gen1", "MacBookPro11,5":"macbook.gen1", "MacBookPro12,1":"macbook.gen1", "MacBookPro13,1":"macbook.gen1", "MacBookPro13,2":"macbook.gen1", "MacBookPro13,3":"macbook.gen1", "MacBookPro14,1":"macbook.gen1", "MacBookPro14,2":"macbook.gen1", "MacBookPro14,3":"macbook.gen1", "MacBookPro15,1":"macbook.gen1", "MacBookPro15,2":"macbook.gen1", "MacBookPro15,3":"macbook.gen1", "MacBookPro15,4":"macbook.gen1", "MacBookPro16,1":"macbook.gen1", "MacBookPro16,2":"macbook.gen1", "MacBookPro16,3":"macbook.gen1", "MacBookPro16,4":"macbook.gen1", "MacBookPro17,1":"macbook.gen1", "MacBookPro18,1":"macbook", "MacBookPro18,2":"macbook", "MacBookPro18,3":"macbook", "MacBookPro18,4":"macbook", "Mac14,5":"macbook", "Mac14,6":"macbook", "Mac14,7":"macbook.gen1", "Mac14,9":"macbook", "Mac14,10":"macbook", "Mac15,3":"macbook", "Mac15,6":"macbook", "Mac15,7":"macbook", "Mac15,8":"macbook", "Mac15,9":"macbook", "Mac15,10":"macbook", "Mac15,11":"macbook"]
 let macID = getMacModelIdentifier()
+let isoFormatter = ISO8601DateFormatter()
 
 struct dayAndWeek {
     var day: String
@@ -277,7 +278,10 @@ func batteryAlert() {
     @AppStorage("fullyLevel") var fullyLevel = 100
     @AppStorage("alertSound") var alertSound = true
     let alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-    for device in AirBatteryModel.getAll().filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
+    var allDevices = AirBatteryModel.getAll()
+    let ibStatus = InternalBattery.status
+    allDevices.insert(ib2ab(ibStatus), at: 0)
+    for device in allDevices.filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
         let content = UNMutableNotificationContent()
         content.title = "Low Battery".local
         content.body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
@@ -288,7 +292,7 @@ func batteryAlert() {
             if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
         }
     }
-    for device in AirBatteryModel.getAll().filter({ $0.batteryLevel >= fullyLevel && $0.isCharging != 0 && alertList.contains($0.deviceName) }) {
+    for device in allDevices.filter({ $0.batteryLevel >= fullyLevel && $0.isCharging != 0 && alertList.contains($0.deviceName) }) {
         let content = UNMutableNotificationContent()
         content.title = "Fully Charged".local
         content.body = String(format: "\"%@\" battery has reached %d%%".local, device.deviceName, device.batteryLevel)

@@ -17,16 +17,15 @@ class IDeviceBattery {
         let interval = TimeInterval(20.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning iDevice devices...")
+        scanDevices()
+    }
+    
+    @objc func scanDevices() {
         Thread.detachNewThread {
             if !self.readIDevice { return }
             self.getIDeviceBattery()
         }
     }
-    
-    @objc func scanDevices() { Thread.detachNewThread {
-        if !self.readIDevice { return }
-        self.getIDeviceBattery()
-    } }
     
     func getIDeviceBattery() {
         var netDevices: [String] = []

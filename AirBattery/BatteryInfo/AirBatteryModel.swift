@@ -7,6 +7,16 @@
 
 import Foundation
 
+struct btdDevice: Codable, Equatable {
+    let time: Date
+    let vid: String
+    let pid: String
+    let type: String
+    let mac: String
+    let name: String
+    let level: Int
+}
+
 struct Device: Hashable, Codable {
     var hasBattery: Bool = true
     var deviceID: String
@@ -21,6 +31,7 @@ struct Device: Hashable, Codable {
     var isHidden: Bool = false
     var parentName: String = ""
     var lastUpdate: Double
+    var realUpdate: Double = 0.0
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(hasBattery)
@@ -35,6 +46,7 @@ struct Device: Hashable, Codable {
         hasher.combine(acPowered)
         hasher.combine(isHidden)
         hasher.combine(lastUpdate)
+        hasher.combine(realUpdate)
         hasher.combine(parentName)
     }
 }

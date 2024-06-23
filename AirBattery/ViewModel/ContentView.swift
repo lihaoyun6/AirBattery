@@ -39,6 +39,7 @@ struct MultiBatteryView: View {
     @AppStorage("widgetInterval") var widgetInterval = 0
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("ncGroupID") var ncGroupID = ""
+    @AppStorage("readBTHID") var readBTHID = true
     
     //@State var statusBarItem: NSStatusItem
 
@@ -392,75 +393,64 @@ struct popover: View {
                                     }
                                     Spacer()
                                     if overStack == index {
-                                        if allDevices[index].deviceID == "@MacInternalBattery" {
-                                            if allDevices[index].hasBattery {
-                                                //Image(systemName: "clock").font(.system(size: 10))
-                                                Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
-                                                    .font(.system(size: 11))
-                                                    //.foregroundColor(.secondary)
-                                                Text(InternalBattery.status.timeLeft)
-                                                    .font(.system(size: 11))
-                                                    //.foregroundColor(.secondary)
-                                                if #available(macOS 14, *) {
-                                                    Button(action: {
-                                                        copyToClipboard(allDevices[index].deviceName)
-                                                        _ = createAlert(title: "Device Name Copied".local,
-                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                        button1: "OK".local).runModal()
-                                                    }, label: {
-                                                        Image(systemName: "list.clipboard.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overCopyButton = hovering }
+                                        HStack(spacing: 4){
+                                            if allDevices[index].deviceID == "@MacInternalBattery" {
+                                                if allDevices[index].hasBattery {
+                                                    //Image(systemName: "clock").font(.system(size: 10))
+                                                    Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
+                                                        .font(.system(size: 11))
+                                                    Text(InternalBattery.status.timeLeft)
+                                                        .font(.system(size: 11))
+                                                }
+                                            }else{
+                                                if allDevices[index].realUpdate != 0.0 {
+                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
+                                                        .font(.system(size: 11))
+                                                } else {
+                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
+                                                        .font(.system(size: 11))
                                                 }
                                             }
-                                        }else{
-                                            HStack(spacing: 2) {
-                                                //Image(systemName: "arrow.clockwise").font(.system(size: 10))
-                                                Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                                    .font(.system(size: 11))
-                                                    //.foregroundColor(.secondary)
-                                                if !alertList.contains(allDevices[index].deviceName) {
-                                                    Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.append(allDevices[index].deviceName)
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                    }, label: {
-                                                        Image(systemName: "bell")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overAlertButton = hovering }
-                                                } else {
-                                                    Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                    }, label: {
-                                                        Image(systemName: "bell.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overAlertButton = hovering }
-                                                }
-                                                if #available(macOS 14, *) {
-                                                    Button(action: {
-                                                        copyToClipboard(allDevices[index].deviceName)
-                                                        _ = createAlert(title: "Device Name Copied".local,
-                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                        button1: "OK".local).runModal()
-                                                    }, label: {
-                                                        Image(systemName: "list.clipboard.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overCopyButton = hovering }
-                                                }
+                                            if !alertList.contains(allDevices[index].deviceName) {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.append(allDevices[index].deviceName)
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            } else {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.removeAll { $0 == allDevices[index].deviceName }
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            }
+                                            if #available(macOS 14, *) {
+                                                Button(action: {
+                                                    copyToClipboard(allDevices[index].deviceName)
+                                                    _ = createAlert(title: "Device Name Copied".local,
+                                                                    message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                    button1: "OK".local).runModal()
+                                                }, label: {
+                                                    Image(systemName: "list.clipboard.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overCopyButton = hovering }
+                                            }
+                                            if allDevices[index].deviceID != "@MacInternalBattery" {
                                                 Button(action: {
                                                     hidden.append(index)
                                                     var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
