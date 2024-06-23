@@ -3,6 +3,27 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.0</title>
+            <pubDate>Sun, 23 Jun 2024 23:09:55 +0800</pubDate>
+            <sparkle:version>140</sparkle:version>
+            <sparkle:shortVersionString>1.4.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>改进了第三方设备电量的获取方法, 支持更多设备, 且无需任何特殊权限</li>
+                  <li>支持为本机 Mac 设置电量提醒, 并修复了部分模糊的图标.</li>
+                  </ul><ul>
+                  <li>Use new way to get third-party device data, which supports more devices and doesn't require any special permissions.</li>
+                  <li>Support setting battery notification for your Mac, and fixed blurry icons.</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="270"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.0/AirBattery_v1.4.0.dmg" length="8199568" type="application/octet-stream" sparkle:edSignature="oGDw+UlbZy52miGJSIgD1Lhrff3Sy7ZHs8Unv2J3PiWnI0X3sVXuK0/A6XhgvBo8Lt6k2Z25//wHSZHdBMZbBA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.0/Update140-139.delta" sparkle:deltaFrom="139" length="423602" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="FqeJVWN/Sovnq0w8jGKAMemk15bF9Vc7Gb/PV9KQlkfnwQsoTTfgykIzA+IPVqVp3jTevFrDApEhUTv9GLBJBg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.0/Update140-138.delta" sparkle:deltaFrom="138" length="428786" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="Uh31DqtfhBKJSIM+XwtfcwkV2+uDdxd7at6WoHVIFDOxuVcO72xREVSOk3krC4tJGgjtCagf3xBY2PSryvipDw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.3.9</title>
             <pubDate>Fri, 21 Jun 2024 20:51:56 +0800</pubDate>
             <sparkle:version>139</sparkle:version>
