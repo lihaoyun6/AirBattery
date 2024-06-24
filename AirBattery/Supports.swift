@@ -426,6 +426,8 @@ func getDeviceIcon(_ d: Device) -> String {
         return "magicmouse.fill"
     case "Mouse":
         return "computermouse.fill"
+    case "Gamepad":
+        return "gamecontroller.fill"
     case "Headphones":
         return "headphones"
     case "Headset":

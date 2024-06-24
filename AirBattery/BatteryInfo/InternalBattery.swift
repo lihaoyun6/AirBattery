@@ -63,9 +63,7 @@ class InternalBattery {
             if let isCharging = self.isCharging {
                 if let isCharged = self.isCharged { if isCharged { return "∞" } }
                 if let minutes = isCharging ? self.timeToFull : self.timeToEmpty {
-                    if minutes <= 0 {
-                        return "…"
-                    }
+                    if minutes <= 0 { return "…" }
                     return String(format: "%.2d:%.2d", minutes / 60, minutes % 60)
                 }
             }

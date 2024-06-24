@@ -14,7 +14,7 @@
 "No Battery!" = "未检测到电池!";
 "Time until full: " = "距充满还有: ";
 "Time until empty: " = "距用完还有: ";
-"Until Full:" = "距充满还剩:";
+"Until Full:" = "距离充满:";
 "Until Empty:" = "可用时长:";
 "Show" = "显示";
 "About AirBattery" = "关于 AirBattery";
@@ -135,3 +135,5 @@
 "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes." = "如果某些设备在系统蓝牙菜单显示电量\n但在 AirBattery 中没有显示的话\n请尝试断开然后重新连接它们并等待几分钟";
 "AirBattery Tips" = "AirBattery 小贴士";
 "Don't remind me again" = "不再提醒";
+"This list is only valid for BLE devices" = "此名单仅对 BLE 设备有过滤作用";
+"Whitelist Mode" = "白名单模式";

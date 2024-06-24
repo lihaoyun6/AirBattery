@@ -61,6 +61,7 @@ struct SettingsView: View {
     @AppStorage("widgetInterval") var widgetInterval = 0
     @AppStorage("twsMerge") var twsMerge = 5
     @AppStorage("nearCast") var nearCast = false
+    @AppStorage("whitelistMode") var whitelistMode = false
     @AppStorage("ncGroupID") var ncGroupID = ""
     @State var devices = [String]()
     
@@ -441,7 +442,15 @@ struct SettingsView: View {
             }
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("Notification", systemImage: "bell") }
-            VStack(alignment:.center, spacing: 15) {
+            VStack(alignment:.center, spacing: 0) {
+                HStack {
+                    Text("This list is only valid for BLE devices")
+                        .foregroundColor(.secondary)
+                        .opacity(0.6)
+                    Spacer()
+                    Toggle(isOn: $whitelistMode) { Text("Whitelist Mode") }
+                        .toggleStyle(.checkbox)
+                }.padding([.leading, .trailing], 27)
                 ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
                     List {
                         ForEach(0..<blockedItems.count, id: \.self) { index in
@@ -465,7 +474,7 @@ struct SettingsView: View {
                                 }
                             }
                         }
-                    }.padding(10)
+                    }.padding([.leading, .trailing, .bottom], 10).padding(.top, 5)
                     Button(action: {
                         blockedItems.append("Click to enter the device name".local)
                         //editingIndex = blockedItems.count - 1
@@ -481,7 +490,7 @@ struct SettingsView: View {
                 .onChange(of: blockedItems) { b in
                     UserDefaults.standard.setValue(b, forKey: "blockedDevices")
                 }
-            }
+            }.padding(.top, 5)
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("Blacklist", systemImage: "eye.slash") }
         }.frame(width: 520, height: 160)

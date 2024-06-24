@@ -58,11 +58,11 @@ class AirBatteryModel {
     static let key = "com.lihaoyun6.AirBattery.widget"
     
     static func updateDevice(_ device: Device) {
-        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
-        if blockedItems.contains(device.deviceName) { return }
+        //let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //if blockedItems.contains(device.deviceName) { return }
         if lock { return }
         lock = true
-        self.Devices.removeAll(where: {blockedItems.contains($0.deviceName)})
+        //self.Devices.removeAll(where: {blockedItems.contains($0.deviceName)})
         if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.Devices[index] = device } else { self.Devices.append(device) }
         lock = false
     }

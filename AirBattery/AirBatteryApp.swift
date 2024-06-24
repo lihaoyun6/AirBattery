@@ -170,6 +170,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
+        print("⚙️ Icon mode = \(showOn)")
         if ncGroupID != "" {
             netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
             if nearCast { netcastService?.resume() }
@@ -235,7 +236,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         }
         statusBarItem.isVisible = !(showOn == "dock" || showOn == "none")
-        print("⚙️ Icon mode = \(showOn)")
         NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView())
         NSApp.dockTile.display()
     }
