@@ -3,6 +3,27 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.1</title>
+            <pubDate>Mon, 24 Jun 2024 15:37:06 +0800</pubDate>
+            <sparkle:version>141</sparkle:version>
+            <sparkle:shortVersionString>1.4.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>添加了"BLE 白名单模式", 允许只扫描特定的 BLE 设备</li>
+                  <li>修复了部分 UI 错位. 添加了游戏手柄图标.</li>
+                  </ul><ul>
+                  <li>Added "Whitelist Mode", allowing scanning only specific BLE devices</li>
+                  <li>Fixed some UI misalignment. Added the Gamepad icon.</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.1/AirBattery_v1.4.1.dmg" length="8207761" type="application/octet-stream" sparkle:edSignature="ZrgANApLhRZH3QPz1dGW3vtOvgx70NjZZ2h3tCXRGTUbPZpuHw8I/TzcF/6gb+YvWVL+hT1R8ME8keIfQHf5Bg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.1/Update141-140.delta" sparkle:deltaFrom="140" length="318794" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="5DyGFz8osVnsvpu2MpDvqwUdXqO3nyng0rS4r+NamMXSob5Q6s0tClwcv36zEe54oW1ewZs47I7Gm5HDSoSYAQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.1/Update141-139.delta" sparkle:deltaFrom="139" length="458914" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="twBMNewqAmDyimM4pb7MGK7TUSKNyg/bx+S+WfOgaGWN9TAGAIcA03PWuetgCRJ089PkcixYbwIuSy2qMgdpBQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.0</title>
             <pubDate>Sun, 23 Jun 2024 23:09:55 +0800</pubDate>
             <sparkle:version>140</sparkle:version>
