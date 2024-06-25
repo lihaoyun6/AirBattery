@@ -19,7 +19,7 @@ class MagicBattery {
     @AppStorage("deviceName") var deviceName = "Mac"
     
     func startScan() {
-        let interval = TimeInterval(60.0 * updateInterval)
+        let interval = TimeInterval(59.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning Magic devices...")
         scanDevices()

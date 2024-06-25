@@ -8,6 +8,7 @@ import AppKit
 import SwiftUI
 import WidgetKit
 import UserNotifications
+import IOBluetooth
 import Sparkle
 
 var updaterController: SPUStandardUpdaterController!
@@ -50,6 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
     var dockWindow = NSWindow()
+    var startTime = Date()
     let bleBattery = BLEBattery()
     let btdBattery = BTDBattery()
     let magicBattery = MagicBattery()
@@ -165,7 +167,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        startTime = Date()
         nc.addObserver(self, selector: #selector(onDisplayWake), name: NSWorkspace.screensDidWakeNotification, object: nil)
+        IOBluetoothDevice.register(forConnectNotifications: self, selector: #selector(deviceIsConnected(notification:fromDevice:)))
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(_:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         //if let window = NSApplication.shared.windows.first { window.close() }
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
@@ -265,11 +269,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @objc func onDisplayWake() {
         if readBTHID {
-            DispatchQueue.global().asyncAfter(deadline: .now() + 20) {
-                BTDBattery.getOtherDevice(last: "5m")
+            DispatchQueue.global().asyncAfter(deadline: .now() + 10) {
+                BTDBattery.getOtherDevice(last: "2m")
             }
         }
         //print("\(Date(timeIntervalSinceNow: 0)) -> Display wake")
+    }
+    
+    @objc func deviceIsConnected(notification: IOBluetoothUserNotification, fromDevice device: IOBluetoothDevice) {
+        let now = Date()
+        if now.timeIntervalSince(startTime) >= 10 {
+            if let name = device.name, let macAdd = device.addressString {
+                print("ℹ️ \(name) (\(macAdd)) connected")
+                DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
+                    BTDBattery.getOtherDevice(last: "2m")
+                }
+            }
+        }
     }
     
     @objc func addToBlackList(_ sender: NSMenuItem) {

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Foundation
+import IOBluetooth
 
 class BTDBattery {
     var scanTimer: Timer?
@@ -14,7 +15,7 @@ class BTDBattery {
     @AppStorage("readBTHID") var readBTHID = true
     
     func startScan() {
-        let interval = TimeInterval(58.0 * updateInterval * 2)
+        let interval = TimeInterval(59.0 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning Bluetooth HID devices...")
         scanDevices(longScan: true)
@@ -23,11 +24,7 @@ class BTDBattery {
     @objc func scanDevices(longScan: Bool = false) {
         Thread.detachNewThread {
             if self.readBTHID {
-                if longScan {
-                    BTDBattery.getOtherDevice(last: "2h")
-                } else {
-                    BTDBattery.getOtherDevice(last: "\(Int(updateInterval * 2))m")
-                }
+                if longScan { BTDBattery.getOtherDevice(last: "2h") }
                 let connects = BTDBattery.getConnected()
                 let names = BTDBattery.allDevices.filter({ connects.contains($0) })
                 for name in names {
@@ -41,24 +38,13 @@ class BTDBattery {
     }
     
     static func getConnected(mac: Bool = false) -> [String]{
-        var connected:[String] = []
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
-        let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
-        let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
-            if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
-                for device in device_connected{
-                    let d = device as! [String: Any]
-                    if let key = d.keys.first, let info = d[key] as? [String: Any]  {
-                        if !mac {
-                            connected.append(key)
-                        } else {
-                            if let id = info["device_address"] as? String { connected.append(id) }
-                        }
-                    }
-                }
-            }
+        guard var bluetoothDevices = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] else { return [] }
+        bluetoothDevices = bluetoothDevices.filter({ $0.isConnected() })
+        if mac {
+            let devices = bluetoothDevices.map({ ($0.addressString ?? "").uppercased().replacingOccurrences(of: "-", with: ":") })
+            return devices.filter({ $0 != "" })
         }
-        return connected
+        return bluetoothDevices.map({ $0.name ?? "" }).filter({ $0 != "" })
     }
     
     static func getOtherDevice(last: String = "10m") {

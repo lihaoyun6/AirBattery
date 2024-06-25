@@ -68,7 +68,7 @@
 "StatusBar" = "状态栏图标";
 "Dynamic Battery Icon" = "显示动态电池图标";
 "Show Battery Percentage" = "显示电量百分比";
-"Hidden Percentage above 90%" = "高于 90% 时隐藏百分比";
+"Hidden Percentage when above: " = "高于此值时隐藏百分比: ";
 "Show Mac Built-in Battery" = "显示此 Mac 的内置电池";
 "Reverse the Device List" = "颠倒设备列表顺序";
 "Widget" = "小组件";
@@ -82,9 +82,9 @@
 "Fully Charged Threshold:" = "充电完成阈值:";
 "Select a Device in Preferences" = "请在设置中选择需要显示的设备";
 "Single Device Widget" = "单设备小组件";
-"Update Interval" = "数据更新间隔";
-"Refresh Interval" = "内容刷新间隔";
-"Merge Limits" = "耳机合并百分比";
+"Update Interval:" = "数据更新间隔:";
+"Refresh Interval:" = "内容刷新间隔:";
+"Merge Limits:" = "耳机合并百分比:";
 "Short" = "较短";
 "Medium" = "中等";
 "Long" = "较长";
@@ -135,5 +135,6 @@
 "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes." = "如果某些设备在系统蓝牙菜单显示电量\n但在 AirBattery 中没有显示的话\n请尝试断开然后重新连接它们并等待几分钟";
 "AirBattery Tips" = "AirBattery 小贴士";
 "Don't remind me again" = "不再提醒";
-"This list is only valid for BLE devices" = "此名单仅对 BLE 设备有过滤作用";
 "Whitelist Mode" = "白名单模式";
+"Only the following BLE devices will be connected:" = "AirBattery 仅会尝试读取下列 BLE 设备:";
+"The following BLE devices will be ignored:" = "AirBattery 将会忽略下列所有 BLE 设备:";

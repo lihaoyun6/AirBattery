@@ -50,6 +50,7 @@ struct mainBatteryView: View {
     @State var item: iBattery = InternalBattery.status
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
+    @AppStorage("hideLevel") var hideLevel = 90
     
     var body: some View {
         let width = round(max(2, min(19, Double(item.batteryLevel)/100*19)))
@@ -84,7 +85,7 @@ struct mainBatteryView: View {
                 let width = statusBarItem.button?.frame.size.width
                 
                 if statusBarBattPercent {
-                    if hidePercentWhenFull && item.batteryLevel >= 90 {
+                    if hidePercentWhenFull && item.batteryLevel > hideLevel {
                         if width != 42 { AppDelegate.shared.setStatusBar(width: 42) }
                     } else {
                         if width != 76 { AppDelegate.shared.setStatusBar(width: 76) }

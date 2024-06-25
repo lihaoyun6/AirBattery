@@ -54,6 +54,7 @@ struct SettingsView: View {
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("alertLevel") var alertLevel = 10
     @AppStorage("fullyLevel") var fullyLevel = 100
+    @AppStorage("hideLevel") var hideLevel = 90
     @AppStorage("alertSound") var alertSound = true
     @AppStorage("deviceOnWidget") var deviceOnWidget = ""
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -201,7 +202,7 @@ struct SettingsView: View {
                 HStack {
                     Spacer()
                     HStack(spacing: 2) {
-                        Picker("Update Interval", selection: $updateInterval) {
+                        Picker("Update Interval:", selection: $updateInterval) {
                             Text("Default").tag(1.0)
                             Text("Custom").tag(updateInterval == 1.0 ? 2.0 : updateInterval)
                         }
@@ -217,12 +218,14 @@ struct SettingsView: View {
                                 if newValue < 1.0 { updateInterval = 1.0 }
                             }
                             .disabled(updateInterval == 1.0)
+                        Stepper("", value: $updateInterval)
+                            .padding(.leading, -10)
                         Text("min")
                             .foregroundColor(updateInterval == 1.0 ? .secondary : .primary)
                     }.fixedSize()
                     Spacer()
                     HStack(spacing: 2) {
-                        Text("Merge Limits").padding(.trailing, 5)
+                        Text("Merge Limits:").padding(.trailing, 5)
                         TextField("", value: $twsMerge, formatter: NumberFormatter())
                             .textFieldStyle(.squareBorder)
                             .frame(width: 26)
@@ -232,6 +235,7 @@ struct SettingsView: View {
                             }
                         Stepper("", value: $twsMerge)
                             .padding(.leading, -10)
+                        Text("%")
                         SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "If the difference in battery usage between the left and right earbuds is less than this value, AirBattery will show them as one device".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
                             .frame(width: 19, height: 19)
                     }.fixedSize()
@@ -354,7 +358,19 @@ struct SettingsView: View {
                     }
                     HStack{
                         Toggle(isOn: $hidePercentWhenFull) {}.toggleStyle(.switch)
-                        Text("Hidden Percentage above 90%").foregroundColor(statusBarBattPercent ? Color.primary : Color.secondary)
+                        HStack(spacing: 2){
+                            Text("Hidden Percentage when above: ").foregroundColor(statusBarBattPercent ? Color.primary : Color.secondary)
+                            TextField("", value: $hideLevel, formatter: NumberFormatter())
+                                .textFieldStyle(.squareBorder)
+                                .frame(width: 26)
+                                .onChange(of: hideLevel) { newValue in
+                                    if newValue > 99 { hideLevel = 99 }
+                                    if newValue < 1 { hideLevel = 1 }
+                                }.disabled(!statusBarBattPercent)
+                            Stepper("", value: $hideLevel)
+                                .padding(.leading, -10)
+                            Text("%").foregroundColor(statusBarBattPercent ? .primary : .secondary)
+                        }
                     }.disabled(!statusBarBattPercent)
                 }.disabled(!ib)
             }
@@ -370,9 +386,9 @@ struct SettingsView: View {
                     Text("Reverse the Device List")
                 }
                 HStack(spacing: 3) {
-                    Text("Refresh Interval")
                     SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "System Default: Determined by macOS\n\nNearbility: Same as Nearbility setting".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .maxX)
                         .frame(width: 19, height: 19)
+                    Text("Refresh Interval:")
                     Picker("", selection: $widgetInterval) {
                         Text("System Default").tag(-1)
                         Text("Nearbility").tag(0)
@@ -444,13 +460,13 @@ struct SettingsView: View {
             .tabItem { Label("Notification", systemImage: "bell") }
             VStack(alignment:.center, spacing: 0) {
                 HStack {
-                    Text("This list is only valid for BLE devices")
+                    Text(whitelistMode ? "Only the following BLE devices will be connected:" : "The following BLE devices will be ignored:")
                         .foregroundColor(.secondary)
                         .opacity(0.6)
                     Spacer()
                     Toggle(isOn: $whitelistMode) { Text("Whitelist Mode") }
                         .toggleStyle(.checkbox)
-                }.padding([.leading, .trailing], 27)
+                }.padding([.leading, .trailing], 11)
                 ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
                     List {
                         ForEach(0..<blockedItems.count, id: \.self) { index in
@@ -468,9 +484,7 @@ struct SettingsView: View {
                                     })
                                 } else {
                                     Text(blockedItems[index])
-                                        .onTapGesture {
-                                            editingIndex = index
-                                        }
+                                        .onTapGesture { editingIndex = index }
                                 }
                             }
                         }
@@ -484,13 +498,10 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }.buttonStyle(.plain).padding([.trailing, .bottom], 10)
                 }
-                .onAppear {
-                    blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
-                }
-                .onChange(of: blockedItems) { b in
-                    UserDefaults.standard.setValue(b, forKey: "blockedDevices")
-                }
-            }.padding(.top, 5)
+                .onAppear { blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]() }
+                .onChange(of: blockedItems) { b in UserDefaults.standard.setValue(b, forKey: "blockedDevices") }
+            }
+            .padding(.top, 5)
             .navigationTitle("AirBattery Settings")
             .tabItem { Label("Blacklist", systemImage: "eye.slash") }
         }.frame(width: 520, height: 160)
