@@ -46,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     @AppStorage("readBTHID") var readBTHID = true
+    @AppStorage("hideLevel") var hideLevel = 90
     //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
     
     var statusMenu: NSMenu = NSMenu()
@@ -60,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
-        if showOn == "sbar" {
+        if showOn == "sbar" || showOn == "none" {
             openSettingPanel()
             return false
         }
@@ -147,6 +148,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 "deviceOnWidget": "",
                 "updateInterval": 1.0,
                 "widgetInterval": 0,
+                "hideLevel": 90,
                 "nearCast": false,
                 "readBTHID": true,
                 "neverRemindMe": [String]()
@@ -228,7 +230,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if ib.hasBattery && intBattOnStatusBar {
                 let iconView = NSHostingView(rootView: mainBatteryView())
                 iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
-                if hidePercentWhenFull && ib.batteryLevel >= 90 {
+                if hidePercentWhenFull && ib.batteryLevel >= hideLevel {
                     iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
                 }
                 button.addSubview(iconView)

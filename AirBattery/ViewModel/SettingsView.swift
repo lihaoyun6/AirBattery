@@ -31,6 +31,8 @@ public extension View {
 
 struct SettingsView: View {
     @State private var blockedItems = [String]()
+    @State private var temp = ""
+    @State private var showSheet = false
     @State private var editingIndex: Int?
     @State private var ib = getMacDeviceType().lowercased().contains("book")
     
@@ -475,28 +477,40 @@ struct SettingsView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.red)
                                     .onTapGesture { if editingIndex == nil { blockedItems.remove(at: index) } }
-                                if editingIndex == index {
-                                    TextField("Enter text", text: Binding(
-                                        get: { blockedItems[index] },
-                                        set: { blockedItems[index] = $0 }
-                                    ), onCommit: {
-                                        editingIndex = nil
-                                    })
-                                } else {
-                                    Text(blockedItems[index])
-                                        .onTapGesture { editingIndex = index }
-                                }
+                                Text(blockedItems[index])
                             }
                         }
                     }.padding([.leading, .trailing, .bottom], 10).padding(.top, 5)
                     Button(action: {
-                        blockedItems.append("Click to enter the device name".local)
-                        //editingIndex = blockedItems.count - 1
+                        showSheet = true
+                        //blockedItems.append("Click to enter the device name".local)
                     }) {
                         Image(systemName: "plus.square.fill")
                             .font(.system(size: 20))
                             .foregroundColor(.secondary)
-                    }.buttonStyle(.plain).padding([.trailing, .bottom], 10)
+                    }
+                    .buttonStyle(.plain)
+                    .padding([.trailing, .bottom], 10)
+                    .sheet(isPresented: $showSheet){
+                        VStack {
+                            TextField("Enter Device Name".local, text: $temp).frame(width: 300)
+                            HStack(spacing: 20) {
+                                Button {
+                                    if temp == "" { return }
+                                    if !blockedItems.contains(temp) { blockedItems.append(temp) }
+                                    temp = ""
+                                    showSheet = false
+                                } label: {
+                                    Text("Add to List")
+                                }.keyboardShortcut(.defaultAction)
+                                Button {
+                                    showSheet = false
+                                } label: {
+                                    Text("Cancel")
+                                }
+                            }.padding(.top, 10)
+                        }.padding()
+                    }
                 }
                 .onAppear { blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]() }
                 .onChange(of: blockedItems) { b in UserDefaults.standard.setValue(b, forKey: "blockedDevices") }

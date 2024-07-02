@@ -98,7 +98,7 @@
 "Automatically download updates" = "自动下载程序更新";
 "Not Set" = "未指定";
 "Click Dock icon again to hide this panel" = "再次点击 Dock 图标收起此面板";
-"Click to enter the device name" = "点此输入需要屏蔽的设备名称";
+//"Click to enter the device name" = "点此输入需要屏蔽的设备名称";
 "Scan your iPhone / iPad / Apple Watch / VisionPro and other iDevices under the same router" = "尝试扫描当前局域网中所有属于您的 iPhone / iPad / Apple Watch / VisionPro 等设备";
 "Scan your iPhone and iPad(Cellular) via Bluetooth" = "尝试通过蓝牙扫描周边属于您的 iPhone 或蜂窝版 iPad";
 "Guess if the iPhone / iPad or BLE device found by Bluetooth is charging" = "利用电量变化来推测通过蓝牙发现的 iPhone / iPad 或其他 BLE 设备";
@@ -129,7 +129,10 @@
 "Group ID copied. Please enter it on your other Mac to join this group." = "小组 ID 已复制到剪贴板, 请在您的其他 Mac 上输入它以加入此 Nearcast 小组";
 "Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others." = "Nearcast 将会按照与 Nearbility 引擎相同的更新频率在局域网中发送电量信息.\n所有被发送的电量数据都已经过加密, 所以请不要将你的小组 ID 告诉其他人.";
 "Do not add too many Macs to a group, this can be tiring for the router!" = "请不要将太多 Mac 加入同一个 Nearcast 小组, 这可能会加重路由器的负担!";
-//"AirBattery does not log any of your input! This permission is only used to read battery info from HID devices." = "AirBattery 不会记录您的任何输入!\n此权限仅用于从 HID 设备获取电量信息";
+"Enter text" = "请输入文本";
+"Add to List" = "添加到列表";
+"Cancel" = "取消";
+
 //"Permission Required" = "需要授权";
 //"Open Settings" = "打开系统设置";
 "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes." = "如果某些设备在系统蓝牙菜单显示电量\n但在 AirBattery 中没有显示的话\n请尝试断开然后重新连接它们并等待几分钟";
