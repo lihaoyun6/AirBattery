@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.3</title>
+            <pubDate>Wed, 03 Jul 2024 01:14:26 +0800</pubDate>
+            <sparkle:version>143</sparkle:version>
+            <sparkle:shortVersionString>1.4.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>修复了状态栏电池图标某些情况下错位的 bug</li>
+                  <li>使用 macOS 15 SDK 进行编译</li>
+                  </ul><ul>
+                  <li>Fixed: the status bar battery icon was misplaced in some cases</li>
+                  <li>Building with macOS 15 SDK</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.3/AirBattery_v1.4.3.dmg" length="8196749" type="application/octet-stream" sparkle:edSignature="C8dyKcxJRGpQlqkJruCG9zlkJsqCCCg1M4BxDFrRKIY4WA9YPzUU087SvmARMm+RJyVdi0+qK7+ClFQYMl/PCQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.3/Update143-142.delta" sparkle:deltaFrom="142" length="595886" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="fgXVCviX1K4UKyqKwQf/u8G4LAtqwKecxPfEEsQyS8ZzppKz2MWkfpvWhD/ET72/RhPxwhq74bwGyiR3Jsk4AA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.3/Update143-141.delta" sparkle:deltaFrom="141" length="613926" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="B8MI02Sk9Iezcnt31cfBPa9wD+bAT+dRsyBikFLvgvSew5Hk4GxhPfEtBz0JfiMlp9zLfQoEC2z+WPRfjGmuBg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.3/Update143-140.delta" sparkle:deltaFrom="140" length="735590" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="WQoZhkgd6yygEPxtiOS0yIl6Qhfd/iQD8DBrAus1CGxeeugkp9tvBxaxzWXuWzvTS2F/PeBnvaBYASW9JzsqAA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.2</title>
             <pubDate>Tue, 25 Jun 2024 15:03:31 +0800</pubDate>
             <sparkle:version>142</sparkle:version>
