@@ -117,6 +117,9 @@
 "Right click to configure" = "右键单击以配置此小组件";
 "Device Name Copied" = "设备名复制成功";
 "Device name: \"%@\" has been copied to the clipboard." = "设备名 \"%@\" 已成功拷贝至剪贴板";
+"Copy" = "拷贝";
+"Group ID Copied" = "小组 ID 复制成功";
+"Group ID has been copied to the clipboard." = "小组 ID 已成功拷贝至剪贴板";
 "Reload All Widgets" = "刷新所有小组件";
 "Default" = "默认";
 "Custom" = "自定义";

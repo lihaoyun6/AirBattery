@@ -289,6 +289,23 @@ struct SettingsView: View {
                         }, label: {
                             Text("New")
                         }).disabled(nearCast)
+                        Button(action: {
+                            if ncGroupID != "" && isGroudIDValid(id: ncGroupID) {
+                                copyToClipboard(ncGroupID)
+                                _ = createAlert(title: "Group ID Copied".local,
+                                                message: String(format: "Group ID has been copied to the clipboard.".local, ncGroupID),
+                                                button1: "OK".local).runModal()
+                            } else {
+                                DispatchQueue.main.async { ncGroupID = "" }
+                                _ = createAlert(
+                                    title: "Invalid group ID".local,
+                                    message: "Please create or enter a valid Group ID before use!",
+                                    button1: "OK".local
+                                ).runModal()
+                            }
+                        }, label: {
+                            Text("Copy")
+                        })
                     }
                 }
                 Text("Nearcast will send data in the LAN at the same interval as the Nearbility engine.\nYour data has been encrypted, so please do not tell your Group ID to others.")
