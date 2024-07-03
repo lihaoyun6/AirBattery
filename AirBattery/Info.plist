@@ -13,6 +13,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
+	<key>OSAScriptingDefinition</key>
+	<string>Scriptable</string>
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/lihaoyun6/AirBattery/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>

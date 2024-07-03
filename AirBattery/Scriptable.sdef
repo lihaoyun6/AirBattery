@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+<dictionary title="AirBattery Scriptable">
+    <suite name="AirBattery Scripting" code="AIrb" description="AirBattery commands">
+        
+        <command name="list all devices" code="AIrbLsAl" description="List all devices">
+            <cocoa class="AirBattery.listAll"/>
+            <result description="An array containing the name of all devices">
+                <type type="text" list="yes"/>
+            </result>
+        </command>
+        
+        <command name="reload all widgets" code="AIrbRlAl" description="Reload all widgets">
+            <cocoa class="AirBattery.reloadAll"/>
+        </command>
+        
+        <command name="get usage" code="AIrbGtLv" description="Get the battery usage of the device by its name">
+            <cocoa class="AirBattery.getUsage"/>
+            <parameter name="of" code="NAMe" type="text" description="Device Name">
+                <cocoa key="name"/>
+            </parameter>
+            <result type="integer" description="Battery Usage"/>
+        </command>
+        
+        <command name="get status" code="AIrbGtSt" description="Get the charging status of the device by its name">
+            <cocoa class="AirBattery.getStatus"/>
+            <parameter name="of" code="NAMe" type="text" description="Device Name">
+                <cocoa key="name"/>
+            </parameter>
+            <result type="integer" description="Battery Usage"/>
+        </command>
+    </suite>
+</dictionary>

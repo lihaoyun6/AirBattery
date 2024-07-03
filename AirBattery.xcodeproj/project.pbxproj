@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		180A51B82B84DC3700CF2D15 /* libimobiledevice in Resources */ = {isa = PBXBuildFile; fileRef = 180A51B72B84DC3700CF2D15 /* libimobiledevice */; };
 		180B1C0E2C1204E400DDB570 /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180B1C0D2C12017400DDB570 /* AppIntent.swift */; };
+		181225182C3580D60063CD64 /* Scriptable.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 181225172C3580D60063CD64 /* Scriptable.sdef */; };
+		1812251C2C358ABA0063CD64 /* AppleScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1812251B2C358ABA0063CD64 /* AppleScript.swift */; };
 		18283DA42B854776009B1B13 /* AirBatteryHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18283DA32B854776009B1B13 /* AirBatteryHelperApp.swift */; };
 		18283DA82B854779009B1B13 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18283DA72B854779009B1B13 /* Assets.xcassets */; };
 		18283DAB2B854779009B1B13 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18283DAA2B854779009B1B13 /* Preview Assets.xcassets */; };
@@ -87,6 +89,8 @@
 /* Begin PBXFileReference section */
 		180A51B72B84DC3700CF2D15 /* libimobiledevice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = libimobiledevice; path = AirBattery/libimobiledevice; sourceTree = "<group>"; };
 		180B1C0D2C12017400DDB570 /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
+		181225172C3580D60063CD64 /* Scriptable.sdef */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Scriptable.sdef; sourceTree = "<group>"; };
+		1812251B2C358ABA0063CD64 /* AppleScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleScript.swift; sourceTree = "<group>"; };
 		18283DA12B854776009B1B13 /* AirBatteryHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirBatteryHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18283DA32B854776009B1B13 /* AirBatteryHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirBatteryHelperApp.swift; sourceTree = "<group>"; };
 		18283DA72B854779009B1B13 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -207,8 +211,10 @@
 				1841D44E2AA6071C0022A1BE /* AirBatteryApp.swift */,
 				18F615FA2B7676D200873AA4 /* Supports.swift */,
 				18E6E36F2C0BA7D200A666CE /* Sparkle.swift */,
-				182CD1092C0ED4650048D924 /* InfoButton.swift */,
 				18BBC05E2C16E7C900D9FE76 /* Multipeer.swift */,
+				182CD1092C0ED4650048D924 /* InfoButton.swift */,
+				1812251B2C358ABA0063CD64 /* AppleScript.swift */,
+				181225172C3580D60063CD64 /* Scriptable.sdef */,
 				18F615F72B763FC900873AA4 /* ViewModel */,
 				18F615F62B763FAB00873AA4 /* BatteryInfo */,
 				18A0A9CD2AAE07EA00975B81 /* Credits.rtf */,
@@ -396,6 +402,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				181225182C3580D60063CD64 /* Scriptable.sdef in Resources */,
 				1841D4562AA6071D0022A1BE /* Preview Assets.xcassets in Resources */,
 				189BD5E92BDE69660056D06C /* InfoPlist.strings in Resources */,
 				1841D4782AA8DEF20022A1BE /* Localizable.strings in Resources */,
@@ -436,6 +443,7 @@
 				1841D44F2AA6071C0022A1BE /* AirBatteryApp.swift in Sources */,
 				18F615F32B763DD800873AA4 /* BLEBattery.swift in Sources */,
 				1895851B2B724DCD00108E5C /* IDeviceBattery.swift in Sources */,
+				1812251C2C358ABA0063CD64 /* AppleScript.swift in Sources */,
 				18F615F92B76439300873AA4 /* AirBatteryModel.swift in Sources */,
 				185E382D2C2733B9005578EC /* BTDBattery.swift in Sources */,
 				18BBC05F2C16E7C900D9FE76 /* Multipeer.swift in Sources */,
@@ -697,7 +705,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 144;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
@@ -731,7 +739,7 @@
 				CODE_SIGN_ENTITLEMENTS = AirBattery/AirBattery.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 144;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"AirBattery/Preview Content\"";
 				DEVELOPMENT_TEAM = L4T783637F;
