@@ -279,14 +279,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     @objc func deviceIsConnected(notification: IOBluetoothUserNotification, fromDevice device: IOBluetoothDevice) {
-        let now = Date()
-        if now.timeIntervalSince(startTime) >= 10 {
-            if let name = device.name, let macAdd = device.addressString {
-                if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
-                    if !appleMacPrefix.contains(prefix) {
-                        print("ℹ️ \(name) (\(macAdd)) connected")
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                            BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+        if readBTHID {
+            let now = Date()
+            if now.timeIntervalSince(startTime) >= 10 {
+                if let name = device.name, let macAdd = device.addressString {
+                    if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
+                        if !appleMacPrefix.contains(prefix) {
+                            print("ℹ️ \(name) (\(macAdd)) connected")
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
+                                BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                            }
                         }
                     }
                 }
