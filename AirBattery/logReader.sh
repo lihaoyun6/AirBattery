@@ -1,5 +1,5 @@
 IFS=$'\n'
-data=`log show --process bluetoothd --info --last $1|grep -E "com.apple.bluetooth:Server.GATT|com.apple.bluetooth:CBStackDeviceMonitor"`
+data=`log show --process bluetoothd --info --last $1|grep -E "com.apple.bluetooth:Server.GATT.*statedump|com.apple.bluetooth:CBStackDeviceMonitor.*Battery"`
 for i in `echo "$data"|grep "Battery"|grep -v "VID 0x004C"`
 do
 	time=`echo $i|awk '{print $1"T"$2}'`
@@ -14,7 +14,7 @@ do
 		echo "{\"time\": \"$time\", \"vid\": \"$vid\", \"pid\": \"$pid\", \"type\": \"$type\", \"mac\": \"$mac\", \"name\": \"$name\", \"level\": $batt, \"status\": \"$stat\"}"
 	fi
 done
-devData=`echo "$data"|grep -E "statedump: 0x001A Characteristic Value|statedump: 0x001D Characteristic Value"|grep -o "\[[A-z0-9 ]*\]"|sed 's/\[ //g;s/ \]//g'|awk '{if (NR%2==1) {line=$0} else {print line, $0}}'`
+devData=`echo "$data"|grep -E "statedump: 0x001A Characteristic Value|statedump: 0x001D Characteristic Value"|grep -o "\[[A-z0-9 ]*\]"|sed 's/\[ //g;s/ \]//g'|awk '{if (NR%2==1) {line=$0} else {print line, $0}}'|awk 'length($0) == 23'`
 times=`echo "$data"|grep -E "statedump: 0x001D Characteristic Value"|awk '{print $1"T"$2}'`
 if [ `echo "$devData"|wc -l` = `echo "$times"|wc -l` ];then
     btData=`/usr/sbin/system_profiler SPBluetoothDataType`

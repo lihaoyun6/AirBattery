@@ -24,7 +24,7 @@ class BTDBattery {
     @objc func scanDevices(longScan: Bool = false) {
         Thread.detachNewThread {
             if self.readBTHID {
-                if longScan { BTDBattery.getOtherDevice(last: "2h") }
+                if longScan { BTDBattery.getOtherDevice(last: "2h", timeout: 25) }
                 let connects = BTDBattery.getConnected()
                 let names = BTDBattery.allDevices.filter({ connects.contains($0) })
                 for name in names {
@@ -47,9 +47,9 @@ class BTDBattery {
         return bluetoothDevices.map({ $0.name ?? "" }).filter({ $0 != "" })
     }
     
-    static func getOtherDevice(last: String = "10m") {
+    static func getOtherDevice(last: String = "10m", timeout: Double = 0) {
         let parent = UserDefaults.standard.string(forKey: "deviceName") ?? "Mac"
-        guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", last]) else { return }
+        guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", last], timeout: timeout) else { return }
         let connected = getConnected(mac: true)
         var list = [[String : Any]]()
         let devices = result.components(separatedBy: "\n")

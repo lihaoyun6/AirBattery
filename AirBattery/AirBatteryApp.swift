@@ -272,7 +272,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func onDisplayWake() {
         if readBTHID {
             DispatchQueue.global().asyncAfter(deadline: .now() + 10) {
-                BTDBattery.getOtherDevice(last: "2m")
+                BTDBattery.getOtherDevice(last: "2m", timeout: 2)
             }
         }
         //print("\(Date(timeIntervalSinceNow: 0)) -> Display wake")
@@ -282,9 +282,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let now = Date()
         if now.timeIntervalSince(startTime) >= 10 {
             if let name = device.name, let macAdd = device.addressString {
-                print("ℹ️ \(name) (\(macAdd)) connected")
-                DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                    BTDBattery.getOtherDevice(last: "2m")
+                if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
+                    if !appleMacPrefix.contains(prefix) {
+                        print("ℹ️ \(name) (\(macAdd)) connected")
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
+                            BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                        }
+                    }
                 }
             }
         }
