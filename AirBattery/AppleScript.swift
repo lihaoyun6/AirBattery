@@ -10,7 +10,10 @@ import WidgetKit
 
 class listAll: NSScriptCommand {
     override func performDefaultImplementation() -> Any? {
-        return AirBatteryModel.getAll(noFilter: true).map({ $0.deviceName })
+        var allDevices = AirBatteryModel.getAll(noFilter: true)
+        let ibStatus = InternalBattery.status
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+        return allDevices.map({ $0.deviceName })
     }
 }
 
@@ -27,9 +30,10 @@ class reloadAll: NSScriptCommand {
 class getUsage: NSScriptCommand {
     override func performDefaultImplementation() -> Any? {
         let device = self.evaluatedArguments!["name"] as! String
-        if let ret = AirBatteryModel.getByName(device)?.batteryLevel {
-            return ret
-        }
+        var allDevices = AirBatteryModel.getAll(noFilter: true)
+        let ibStatus = InternalBattery.status
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+        for d in allDevices { if d.deviceName == device { return d.batteryLevel } }
         return -1
     }
 }
@@ -37,9 +41,10 @@ class getUsage: NSScriptCommand {
 class getStatus: NSScriptCommand {
     override func performDefaultImplementation() -> Any? {
         let device = self.evaluatedArguments!["name"] as! String
-        if let ret = AirBatteryModel.getByName(device)?.isCharging {
-            return ret
-        }
+        var allDevices = AirBatteryModel.getAll(noFilter: true)
+        let ibStatus = InternalBattery.status
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+        for d in allDevices { if d.deviceName == device { return d.isCharging } }
         return -1
     }
 }
