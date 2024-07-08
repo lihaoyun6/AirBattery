@@ -55,7 +55,7 @@ struct mainBatteryView: View {
     var body: some View {
         let width = round(max(2, min(19, Double(item.batteryLevel)/100*19)))
         HStack(alignment: .center, spacing:4){
-            if statusBarBattPercent && !(hidePercentWhenFull && item.batteryLevel >= hideLevel) {
+            if statusBarBattPercent && !(hidePercentWhenFull && item.batteryLevel > hideLevel) {
                 ZStack{
                     Text("\(item.batteryLevel)%").font(.system(size: 11))
                 }

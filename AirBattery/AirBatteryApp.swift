@@ -230,7 +230,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if ib.hasBattery && intBattOnStatusBar {
                 let iconView = NSHostingView(rootView: mainBatteryView())
                 iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
-                if hidePercentWhenFull && ib.batteryLevel >= hideLevel {
+                if hidePercentWhenFull && ib.batteryLevel > hideLevel {
                     iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
                 }
                 button.addSubview(iconView)
