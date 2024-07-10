@@ -3,6 +3,26 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.6</title>
+            <pubDate>Wed, 10 Jul 2024 23:26:42 +0800</pubDate>
+            <sparkle:version>146</sparkle:version>
+            <sparkle:shortVersionString>1.4.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>可以识别更多设备的子版本信息, 使图标显示更准确</li>
+                  </ul><ul>
+                  <li>Added subversion icons for more devices</li>
+                  </ul><br><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.6/AirBattery_v1.4.6.dmg" length="8224905" type="application/octet-stream" sparkle:edSignature="x3OvI+gVYG4h3CzbGeMHGgBkka+UALA+TeEUgKqMsrq0i47AKyIi1Pq04pNbv/ZAV0R2+LBiOW8MqpiL9yViBA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.6/Update146-145.delta" sparkle:deltaFrom="145" length="121826" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="BdbCf5z47vwubgG2soXmmjp+G+ibf7YJhBG5GjeCzB67bruDGWY7dIKOezlBVC4r0a0TDKGMUEGeqis0O8VICg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.6/Update146-144.delta" sparkle:deltaFrom="144" length="122858" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="5CUvnoCEgJhxvHWDRmzdVkSg0qSleSZ2wvbKZ2x7DMCgXQ0pbCMmifmlCLsSuH4xteQM5/e9J5+eCVIAuZj5AA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.6/Update146-143.delta" sparkle:deltaFrom="143" length="291038" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="2DMLbZsnrmoEW6DT4X/o2qr87gog6TKK6GflWIBymNnshHIJH676mogoeqqRpf+QSUnEzgvnr0sZEhNz7/8HBw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.5</title>
             <pubDate>Mon, 08 Jul 2024 23:48:31 +0800</pubDate>
             <sparkle:version>145</sparkle:version>
