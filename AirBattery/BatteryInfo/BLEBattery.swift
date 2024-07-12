@@ -87,7 +87,7 @@ import CoreBluetooth
 
 class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
-    @AppStorage("cStatusOfBLE") var cStatusOfBLE = false
+    //@AppStorage("cStatusOfBLE") var cStatusOfBLE = false
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
     @AppStorage("whitelistMode") var whitelistMode = false
@@ -221,10 +221,11 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 let now = Date().timeIntervalSince1970
                 let level = Int(data[0])
                 if level > 100 { return }
-                var charging = -1
-                if let lastLevel = bleDevicesLevel[deviceName], cStatusOfBLE {
+                var charging = 0
+                //if let lastLevel = bleDevicesLevel[deviceName], cStatusOfBLE {
+                if let lastLevel = bleDevicesLevel[deviceName] {
                     if level > lastLevel { charging = 1 }
-                    if level < lastLevel { charging = 0 }
+                    //if level < lastLevel { charging = 0 }
                 }
                 bleDevicesLevel[deviceName] = data[0]
                 if var device = AirBatteryModel.getByName(deviceName) {
@@ -234,7 +235,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     if charging != -1 { device.isCharging = charging }
                     AirBatteryModel.updateDevice(device)
                 } else {
-                    let device = Device(deviceID: peripheral.identifier.uuidString, deviceType: getType(deviceName), deviceName: deviceName, batteryLevel: level, isCharging: (charging != -1) ? charging : 0, lastUpdate: now)
+                    let device = Device(deviceID: peripheral.identifier.uuidString, deviceType: getType(deviceName), deviceName: deviceName, batteryLevel: level, isCharging: charging, lastUpdate: now)
                     AirBatteryModel.updateDevice(device)
                 }
             }

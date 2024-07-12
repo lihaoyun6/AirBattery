@@ -136,7 +136,8 @@ public func process(path: String, arguments: [String], timeout: Double = 0) -> S
     if timeout != 0 {
         DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(timeout)) {
             if task.isRunning {
-                print("⚠️ Process Timeout! Killed")
+                //print("⚠️ Process Timeout! Killed")
+                //print("[\(path) \(arguments.joined(separator: " "))]")
                 task.terminate()
             }
         }
@@ -477,14 +478,12 @@ func getDeviceIcon(_ d: Device) -> String {
     case "iPhone":
         if let model = d.deviceModel, let m = model.components(separatedBy: ",").first, let id = m.components(separatedBy: "e").last {
             if (Int(id) ?? 0 < 10) || ["iPhone12,8", "iPhone14,6"].contains(model) { return "iphone.gen1" }
-            if (Int(id) ?? 0 > 14) { return "iphone.gen2" }
-            return "iphone"
+            if (Int(id) ?? 0 < 14) { return "iphone.gen2" }
         }
         return "iphone"
     case "iPad":
-        if let model = d.deviceModel, let m = model.components(separatedBy: ",").first, let id = m.components(separatedBy: "e").last {
+        if let model = d.deviceModel, let m = model.components(separatedBy: ",").first, let id = m.components(separatedBy: "d").last {
             if (Int(id) ?? 0 < 13) && !["iPad8"].contains(m) { return "ipad.gen1" }
-            return "ipad"
         }
         return  "ipad"
     case "iPod":
@@ -507,6 +506,14 @@ func getDeviceIcon(_ d: Device) -> String {
         return "headphones"
     case "Headset":
         return "headphones"
+    case "ApplePencil":
+        ///Model list: https://theapplewiki.com/wiki/List_of_Apple_Pencils
+        if let model = d.deviceModel {
+            if model == "222" { return "applepencil.gen1" }
+        }
+        return "applepencil.gen2"
+    case "Pencil":
+        return "pencil"
     case "ap_pod_right":
         if let model = d.deviceModel {
             switch model {

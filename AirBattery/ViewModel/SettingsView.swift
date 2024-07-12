@@ -44,10 +44,11 @@ struct SettingsView: View {
     @AppStorage("revListOnWidget") var revListOnWidget = false
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("ideviceOverBLE") var ideviceOverBLE = false
-    @AppStorage("cStatusOfBLE") var cStatusOfBLE = false
+    //@AppStorage("cStatusOfBLE") var cStatusOfBLE = false
     @AppStorage("disappearTime") var disappearTime = 20
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
+    @AppStorage("readPencil") var readPencil = false
     @AppStorage("readIDevice") var readIDevice = true
     @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
@@ -153,10 +154,10 @@ struct SettingsView: View {
                             }
                         }
                         HStack{
-                            Toggle(isOn: $cStatusOfBLE) {}.toggleStyle(.switch)
+                            Toggle(isOn: $readPencil) {}.toggleStyle(SwitchToggleStyle(tint: Color.orange)).disabled(!readIDevice)
                             HStack(spacing: 2) {
-                                Text("Guess Power Status")
-                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Guess if the iPhone / iPad or BLE device found by Bluetooth is charging".local, primaryColor: NSColor(named: "my_blue") ?? NSColor.systemGray, preferredEdge: .minY)
+                                Text("Read Apple Pencil").foregroundColor(.orange)
+                                SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Read the battery status of the connected Apple Pencil through your iPad\n(It may take 10 minutes or longer to discover the Pencil for the first time)\n\nWARNING: This is a BETA feature and may drain your iPad's battery faster!".local, primaryColor: NSColor(named: "my_yellow") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }
                         }
@@ -190,9 +191,9 @@ struct SettingsView: View {
                             }
                         }
                         HStack{
-                            Toggle(isOn: $readBLEDevice) {}.toggleStyle(.switch)
+                            Toggle(isOn: $readBLEDevice) {}.toggleStyle(SwitchToggleStyle(tint: Color.orange))
                             HStack(spacing: 2) {
-                                Text("Enhanced BLE Scanner")
+                                Text("Enhanced BLE Scanner").foregroundColor(.orange)
                                 SWInfoButton(showOnHover: false, fillMode: true, animatePopover: true, content: "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!".local, primaryColor: NSColor(named: "my_yellow") ?? NSColor.systemGray, preferredEdge: .minY)
                                     .frame(width: 19, height: 19)
                             }

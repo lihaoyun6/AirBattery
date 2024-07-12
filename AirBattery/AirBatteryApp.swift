@@ -246,6 +246,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.dockTile.display()
     }
     
+    func applicationWillTerminate(_ notification: Notification) {
+        _ = process(path: "/usr/bin/killall", arguments: ["idevicesyslog"])
+    }
+    
     func setStatusBar(width: Double) {
         let iconView = NSHostingView(rootView: mainBatteryView())
         iconView.frame = NSRect(x: 0, y: 0, width: width, height: 21.5)

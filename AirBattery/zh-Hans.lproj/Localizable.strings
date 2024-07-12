@@ -36,10 +36,11 @@
 "Off" = "关闭";
 "WiFi Scanner (iOS)" = "通过局域网扫描 iOS 设备";
 "BLE Scanner (iOS)" = "通过蓝牙扫描 iOS 设备";
+"Read Apple Pencil" = "获取 Apple Pencil 电量";
 "Bluetooth Scanner" = "扫描受支持的蓝牙设备";
 //"Find AirPods / Beats" = "扫描AirPods/Beats耳机";
 //"Non-Apple BLE Devices" = "扫描第三方 BLE 设备";
-"Guess Power Status" = "推测 BLE 设备充电状态";
+//"Guess Power Status" = "推测 BLE 设备充电状态";
 "Enhanced BLE Scanner" = "扫描所有蓝牙 BLE 设备";
 "Enhanced HID Scanner" = "扫描更多蓝牙 HID 设备";
 "after 20min" = "20分钟后";
@@ -101,7 +102,8 @@
 //"Click to enter the device name" = "点此输入需要屏蔽的设备名称";
 "Scan your iPhone / iPad / Apple Watch / VisionPro and other iDevices under the same router" = "尝试扫描当前局域网中所有属于您的 iPhone / iPad / Apple Watch / VisionPro 等设备";
 "Scan your iPhone and iPad(Cellular) via Bluetooth" = "尝试通过蓝牙扫描周边属于您的 iPhone 或蜂窝版 iPad";
-"Guess if the iPhone / iPad or BLE device found by Bluetooth is charging" = "利用电量变化来推测通过蓝牙发现的 iPhone / iPad 或其他 BLE 设备";
+"Read the battery status of the connected Apple Pencil through your iPad\n(It may take 10 minutes or longer to discover the Pencil for the first time)\n\nWARNING: This is a BETA feature and may drain your iPad's battery faster!" = "尝试读取已连接到 iPad 的 Apple Pencil 的电量信息\n(首次可能需要 10 分钟甚至更久才能读取到 Pencil)\n\n请注意: 这是一项测试版功能, 可能会加速 iPad 电池耗尽!";
+//"Guess if the iPhone / iPad or BLE device found by Bluetooth is charging" = "利用电量变化来推测通过蓝牙发现的 iPhone / iPad 或其他 BLE 设备";
 //"Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nPlease Note: Some devices cannot be listed even though macOS knows their battery usage" = "获取某些受支持的蓝牙设备的电量信息 (鼠标、键盘、耳机等)\n\n请注意: 有些设备无法被列出, 即使你可以在 macOS 内置的小组件中看到它";
 "Get the battery usage of some Bluetooth peripherals (mouse, keyboard, headphone, etc.)\n\nIf some of your device is not shown, try enabling \"Enhanced HID Scanner\"" = "获取某些受支持的蓝牙设备的电量信息 (鼠标、键盘、耳机等)\n\n如果部分设备没有显示出来, 请尝试启用\"扫描更多蓝牙 HID 设备\"";
  "Get the battery usage of more third-party Bluetooth HID devices\n\nBattery data will be updated when devices are reconnected to the Mac or the Mac wakes up" = "获取更多第三方蓝牙 HID 设备的电量信息\n\n\仅当这些设备刚被连接时或 Mac 被唤醒时, 电池数据才会更新";

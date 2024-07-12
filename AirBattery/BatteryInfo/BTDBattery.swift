@@ -49,7 +49,7 @@ class BTDBattery {
     
     static func getOtherDevice(last: String = "10m", timeout: Double = 0) {
         let parent = UserDefaults.standard.string(forKey: "deviceName") ?? "Mac"
-        guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", last], timeout: timeout) else { return }
+        guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", "mac", last], timeout: timeout) else { return }
         let connected = getConnected(mac: true)
         var list = [[String : Any]]()
         let devices = result.components(separatedBy: "\n")
@@ -62,7 +62,7 @@ class BTDBattery {
                     let nameNow = json["name"] as! String
                     let macNow = json["mac"] as! String
                     let typeNow = json["type"] as! String
-                    return ( name == nameNow && mac == macNow && type == typeNow)
+                    return (name == nameNow && mac == macNow && type == typeNow)
                 }) {
                     list[index] = json
                 } else {
