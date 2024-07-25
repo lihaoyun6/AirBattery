@@ -393,62 +393,61 @@ struct popover: View {
                                     }
                                     Spacer()
                                     if overStack == index {
-                                        HStack(spacing: 4){
-                                            if allDevices[index].hasBattery {
-                                                if allDevices[index].deviceID == "@MacInternalBattery" {
-                                                    Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
-                                                        .font(.system(size: 11))
-                                                    Text(InternalBattery.status.timeLeft)
+                                        HStack(spacing: 4) {
+                                            if allDevices[index].deviceID == "@MacInternalBattery" {
+                                                Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
+                                                    .font(.system(size: 11))
+                                                Text(InternalBattery.status.timeLeft)
+                                                    .font(.system(size: 11))
+                                            } else {
+                                                if allDevices[index].realUpdate != 0.0 {
+                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
                                                         .font(.system(size: 11))
                                                 } else {
-                                                    if allDevices[index].realUpdate != 0.0 {
-                                                        Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
-                                                            .font(.system(size: 11))
-                                                    } else {
-                                                        Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                                            .font(.system(size: 11))
-                                                    }
-                                                }
-                                                if !alertList.contains(allDevices[index].deviceName) {
-                                                    Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.append(allDevices[index].deviceName)
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                    }, label: {
-                                                        Image(systemName: "bell")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overAlertButton = hovering }
-                                                } else {
-                                                    Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                    }, label: {
-                                                        Image(systemName: "bell.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overAlertButton = hovering }
-                                                }
-                                                if #available(macOS 14, *) {
-                                                    Button(action: {
-                                                        copyToClipboard(allDevices[index].deviceName)
-                                                        _ = createAlert(title: "Device Name Copied".local,
-                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                        button1: "OK".local).runModal()
-                                                    }, label: {
-                                                        Image(systemName: "list.clipboard.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overCopyButton = hovering }
+                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
+                                                        .font(.system(size: 11))
                                                 }
                                             }
+                                            if !alertList.contains(allDevices[index].deviceName) {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.append(allDevices[index].deviceName)
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            } else {
+                                                Button(action: {
+                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                    alertList.removeAll { $0 == allDevices[index].deviceName }
+                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                }, label: {
+                                                    Image(systemName: "bell.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overAlertButton = hovering }
+                                            }
+                                            if #available(macOS 14, *) {
+                                                Button(action: {
+                                                    copyToClipboard(allDevices[index].deviceName)
+                                                    _ = createAlert(title: "Device Name Copied".local,
+                                                                    message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                    button1: "OK".local).runModal()
+                                                }, label: {
+                                                    Image(systemName: "list.clipboard.fill")
+                                                        .frame(width: 20, height: 20, alignment: .center)
+                                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                })
+                                                .buttonStyle(PlainButtonStyle())
+                                                .onHover{ hovering in overCopyButton = hovering }
+                                            }
+                                            
                                             if allDevices[index].deviceID != "@MacInternalBattery" {
                                                 Button(action: {
                                                     hidden.append(index)
@@ -584,19 +583,21 @@ struct nearcastView: View {
                             Spacer()
                             Text("\(Int((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60))"+" mins ago".local)
                                 .font(.system(size: 11))
-                            if #available(macOS 14, *) {
-                                Button(action: {
-                                    copyToClipboard(devices[index].deviceName)
-                                    _ = createAlert(title: "Device Name Copied".local,
-                                                    message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
-                                                    button1: "OK".local).runModal()
-                                }, label: {
-                                    Image(systemName: "list.clipboard.fill")
-                                        .frame(width: 20, height: 20, alignment: .center)
-                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                })
-                                .buttonStyle(PlainButtonStyle())
-                                .onHover{ hovering in overCopyButton = hovering }
+                            if devices[index].hasBattery {
+                                if #available(macOS 14, *) {
+                                    Button(action: {
+                                        copyToClipboard(devices[index].deviceName)
+                                        _ = createAlert(title: "Device Name Copied".local,
+                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
+                                                        button1: "OK".local).runModal()
+                                    }, label: {
+                                        Image(systemName: "list.clipboard.fill")
+                                            .frame(width: 20, height: 20, alignment: .center)
+                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                    })
+                                    .buttonStyle(PlainButtonStyle())
+                                    .onHover{ hovering in overCopyButton = hovering }
+                                }
                             }
                         } else {
                             Spacer()
