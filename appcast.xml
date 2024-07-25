@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.8</title>
+            <pubDate>Thu, 25 Jul 2024 10:05:12 +0800</pubDate>
+            <sparkle:version>148</sparkle:version>
+            <sparkle:shortVersionString>1.4.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>修复了 iMac 不显示图标的bug</li>
+                  <li>当本机不含内置电池时, 将会自动从设备列表中隐藏</li>
+                  </ul><ul>
+                  <li>Fixed: iMac icon not showing</li>
+                  <li>Hide the current Mac from the device list if it has no battery</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.8/AirBattery_v1.4.8.dmg" length="8283507" type="application/octet-stream" sparkle:edSignature="I20rDqdfnUmjMvV7mWDucTO4DUnHWKEViFyGTnxEENhK+I/CmCQbXMdHOFN0M1tZoHWo369oNTHQJczMPFxFAg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.8/Update148-147.delta" sparkle:deltaFrom="147" length="195578" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="QBnO+t/CrYdKacGN0AHM/7dIg4rvxecReJQ4t++kqraVDHlAyLZK60mRZhiou64OgogK6O+t8TB1hxCOXzDQDg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.8/Update148-146.delta" sparkle:deltaFrom="146" length="344890" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="Y03Gg7OwEuIfNnD36bD1OkDc2ajl2aUkJv0oS9D2kSGc3DT1JVWebXs0Xzy2zs76cwZ8N2MUBF4bZrSzYKWLCA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.8/Update148-145.delta" sparkle:deltaFrom="145" length="365646" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="Acp2cWCAX1jF7I0TNHBIbqMC1lPVqI4uibdR8sp5thDdslbqrh56JN6YhNGvblg6v706zap3WstvpOSgRFSXBQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.7</title>
             <pubDate>Fri, 12 Jul 2024 14:57:44 +0800</pubDate>
             <sparkle:version>147</sparkle:version>
