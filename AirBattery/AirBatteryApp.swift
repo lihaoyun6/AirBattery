@@ -322,7 +322,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
-        allDevices.insert(ib2ab(ibStatus), at: 0)
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
         let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
