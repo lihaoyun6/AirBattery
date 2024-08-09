@@ -106,7 +106,11 @@ class AirBatteryModel {
             }
         }
         for dd in list.filter({ !newList.contains($0) }) { newList.append(dd) }
-        return newList
+        //if UserDefaults.standard.bool(forKey: "fullBlockMode") {
+            let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+            return newList.filter({ !blockedItems.contains($0.deviceName) })
+        //}
+        //return newList
     }
     
     static func getByName(_ name: String) -> Device? {

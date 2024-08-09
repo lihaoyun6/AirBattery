@@ -311,13 +311,14 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         if !blockedItems.contains(name) && whitelistMode { return }
         
         if let deviceName = peripheral.name{
+            //NSLog("AirPods: \(messageType) message [\(data.hexEncodedString())]")
             let now = Date().timeIntervalSince1970
             let dataHex = data.hexEncodedString()
             let index = dataHex.index(dataHex.startIndex, offsetBy: 14)
             let flip = (strtoul(String(dataHex[index]), nil, 16) & 0x02) == 0
             let deviceID = peripheral.identifier.uuidString
-            let model = (messageType == "open" ? getHeadphoneModel(String(format: "%02x%02x", data[6], data[5])) : "Airpods Pro 2")
-            //if let d = AirBatteryModel.getByName(deviceName + " (Case)".local), (Double(now) - d.lastUpdate) < 1 { return }
+            var model = (messageType == "open" ? getHeadphoneModel(String(format: "%02x%02x", data[6], data[5])) : "Airpods Pro 2")
+            if let Case = AirBatteryModel.getByName(deviceName + " (Case)".local) { model = Case.deviceModel ?? model }
             
             var caseLevel = data[messageType == "open" ? 16 : 12]
             var caseCharging = 0

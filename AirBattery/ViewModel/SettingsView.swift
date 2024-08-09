@@ -66,6 +66,7 @@ struct SettingsView: View {
     @AppStorage("twsMerge") var twsMerge = 5
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("whitelistMode") var whitelistMode = false
+    //@AppStorage("fullBlockMode") var fullBlockMode = false
     @AppStorage("ncGroupID") var ncGroupID = ""
     @State var devices = [String]()
     
@@ -480,10 +481,17 @@ struct SettingsView: View {
             .tabItem { Label("Notification", systemImage: "bell") }
             VStack(alignment:.center, spacing: 0) {
                 HStack {
-                    Text(whitelistMode ? "Only the following BLE devices will be connected:" : "The following BLE devices will be ignored:")
+                    /*Text(fullBlockMode
+                         ? (whitelistMode ? "Only the following devices will be showed:" : "The following devices will be ignored:")
+                         : (whitelistMode ? "Only the following BLE devices will be connected:" : "The following BLE devices will be ignored:"))
+                        .foregroundColor(.secondary)
+                        .opacity(0.6)*/
+                    Text(whitelistMode ? "Only the following devices will be showed:" : "The following devices will be ignored:")
                         .foregroundColor(.secondary)
                         .opacity(0.6)
                     Spacer()
+                    /*Toggle(isOn: $fullBlockMode) { Text("Apply to All Devices") }
+                        .toggleStyle(.checkbox)*/
                     Toggle(isOn: $whitelistMode) { Text("Whitelist Mode") }
                         .toggleStyle(.checkbox)
                 }.padding([.leading, .trailing], 11)

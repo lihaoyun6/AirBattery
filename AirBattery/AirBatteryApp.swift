@@ -300,24 +300,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
-    @objc func addToBlackList(_ sender: NSMenuItem) {
-        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-        let deviceName = (sender.representedObject ?? "") as! String
-        if deviceName != "" {
-            blackList.append(deviceName)
-            UserDefaults.standard.set(blackList, forKey: "blackList")
-        }
-    }
-    
-    @objc func removeFromBlackList(_ sender: NSMenuItem) {
-        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-        let deviceName = (sender.representedObject ?? "") as! String
-        if deviceName != "" {
-            blackList.removeAll { $0 == deviceName }
-            UserDefaults.standard.set(blackList, forKey: "blackList")
-        }
-    }
-    
     func menuWillOpen(_ menu: NSMenu) {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
@@ -377,62 +359,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.windows.first(where: { $0.title == "AirBattery Settings".local })?.level = .floating
         }
     }
-    
-    /*func getMenu(fromDock: Bool = false) {
-        let now = Double(Date().timeIntervalSince1970)
-        let ibStatus = InternalBattery.status
-        menu.removeAllItems()
-        if ibStatus.hasBattery {
-            let level = ibStatus.batteryLevel
-            let batteryColor = getPowerColor(level, emoji: true)
-            var timeText = ""
-            if ibStatus.isCharging { timeText = "Time until full: ".local + "\(ibStatus.timeLeft)" } else { timeText = "Time until empty: ".local + "\(ibStatus.timeLeft)" }
-            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(level))\(ibStatus.isCharging ? " ⚡︎ " : "﹪")  \(machineType)", action: #selector(blank), keyEquivalent: "")
-            let alte = NSMenuItem(title: "[\(timeText)]  \(machineType)", action: nil, keyEquivalent: "")
-            alte.isAlternate = true
-            alte.keyEquivalentModifierMask = .option
-            menu.addItem(main)
-            menu.addItem(alte)
-        } else {
-            menu.addItem(withTitle: machineType, action: #selector(blank), keyEquivalent: "")
-        }
-        menu.addItem(NSMenuItem.separator())
-        for d in AirBatteryModel.getAll() {
-            let timePast = min(Int((now - d.lastUpdate) / 60), 99)
-            let batteryColor = getPowerColor(d.batteryLevel, emoji: true)
-            let main = NSMenuItem(title: "\(batteryColor) \(getMonoNum(d.batteryLevel))\(d.isCharging != 0 ? " ⚡︎ " : "﹪")  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
-            let alte = NSMenuItem(title: "[\(timePast == 99 ? " >" : "↻")\(getMonoNum(timePast,count:2))" + " mins ago".local + "]  \(timePast > 10 ? "⚠︎ " : "")\(d.deviceName)", action: nil, keyEquivalent: "")
-            alte.isAlternate = true
-            alte.keyEquivalentModifierMask = .option
-            
-            let submenu = NSMenu()
-            let subm = NSMenuItem(title: "Hide This".local, action: #selector(addToBlackList(_ :)), keyEquivalent: "")
-            subm.representedObject = d.deviceName
-            submenu.addItem(subm)
-            main.submenu = submenu
-            menu.addItem(main)
-            menu.addItem(alte)
-            menu.addItem(NSMenuItem.separator())
-        }
-        let submenu = NSMenu()
-        let hidden = NSMenuItem(title: "Hidden Device...".local, action: #selector(blank), keyEquivalent: "")
-        let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-        for d in blackList {
-            let hiddenDevice = NSMenuItem(title: d, action: #selector(removeFromBlackList(_ :)), keyEquivalent: "")
-            hiddenDevice.representedObject = d
-            submenu.addItem(hiddenDevice)
-            submenu.addItem(NSMenuItem.separator())
-        }
-        hidden.submenu = submenu
-        menu.addItem(hidden)
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
-        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
-        if !fromDock {
-            menu.addItem(NSMenuItem.separator())
-            menu.addItem(withTitle:"Quit AirBattery".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        }
-    }*/
     
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         dockWindow.orderOut(nil)
