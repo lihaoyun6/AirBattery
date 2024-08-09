@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.4.9</title>
+            <pubDate>Fri, 09 Aug 2024 16:09:17 +0800</pubDate>
+            <sparkle:version>149</sparkle:version>
+            <sparkle:shortVersionString>1.4.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>修复了某些情况下 AirPods 单侧图标识别错误的问题</li>
+                  <li>将黑名单生效范围扩展到所有设备</li>
+                  </ul><ul>
+                  <li>Fixed: AirPods single-side icon recognition error in some cases</li>
+                  <li>Extended blacklist scope to all devices</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.9/AirBattery_v1.4.9.dmg" length="8282450" type="application/octet-stream" sparkle:edSignature="mgEJ57lrh5nHPw7Mmrd1PbhVtrMcr3J9WagMa7yK5a20xYrEDDYDvG+QHPyOe3lrcqGUKIqt/lb/7/QTP6IeCw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.9/Update149-148.delta" sparkle:deltaFrom="148" length="256954" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="TjQk4Il9zcW0JkZPvy2JB48q3PTgPBNprcXtmSwsetZeir4Nvhj6Q8MeBBzGDLyiMXvbCMD9dFyo3CX+Ae1eBw=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.9/Update149-147.delta" sparkle:deltaFrom="147" length="334026" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="S9I6yrvVIc3nX7EXTnFTJ6F57S8kfcy4SnKvN3qQ0GBg1m2ogi011xcKokHipthJkqON73XX4t9hipE2FDfHBA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.4.9/Update149-146.delta" sparkle:deltaFrom="146" length="406818" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="8I40hYuwRmtr3wi2kgmEHwZ/zMqDzZoB3/BUfPNY5PwxDSxlIHZ5UFBGjdu9LXpPR3CSuxl/856k2qnd/lz0Ag=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.8</title>
             <pubDate>Thu, 25 Jul 2024 10:05:12 +0800</pubDate>
             <sparkle:version>148</sparkle:version>
