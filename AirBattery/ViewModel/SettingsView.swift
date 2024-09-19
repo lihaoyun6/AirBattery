@@ -66,6 +66,7 @@ struct SettingsView: View {
     @AppStorage("twsMerge") var twsMerge = 5
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("whitelistMode") var whitelistMode = false
+    @AppStorage("colorfulBattery") var colorfulBattery = false
     //@AppStorage("fullBlockMode") var fullBlockMode = false
     @AppStorage("ncGroupID") var ncGroupID = ""
     @State var devices = [String]()
@@ -372,6 +373,10 @@ struct SettingsView: View {
                                 _ = createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
                             }
                         Text("Dynamic Battery Icon").foregroundColor(ib ? Color.primary : Color.secondary)
+                    }
+                    HStack{
+                        Toggle(isOn: $colorfulBattery) {}.toggleStyle(.switch)
+                        Text("Colorful Battery Icon").foregroundColor(ib ? Color.primary : Color.secondary)
                     }
                     HStack{
                         Toggle(isOn: $statusBarBattPercent) {}.toggleStyle(.switch)

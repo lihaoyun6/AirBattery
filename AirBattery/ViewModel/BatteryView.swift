@@ -50,6 +50,7 @@ struct mainBatteryView: View {
     @State var item: iBattery = InternalBattery.status
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
+    @AppStorage("colorfulBattery") var colorfulBattery = false
     @AppStorage("hideLevel") var hideLevel = 90
     
     var body: some View {
@@ -63,9 +64,12 @@ struct mainBatteryView: View {
             ZStack(alignment: .leading){
                 ZStack(alignment: .leading) {
                     Image("batt_outline")
+                    if colorfulBattery {
+                        Image("batt_outline").opacity(0.5)
+                    }
                     Group{
                         Rectangle()
-                            .fill(item.batteryLevel <= 10 ? .red : .primary)
+                            .fill(colorfulBattery ? Color(getPowerColor(item.batteryLevel)) : (item.batteryLevel <= 10 ? .red : .primary))
                             .frame(width: width, height: 8, alignment: .leading)
                             .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                     }.offset(x:2)
@@ -88,7 +92,11 @@ struct mainBatteryView: View {
                     if hidePercentWhenFull && item.batteryLevel > hideLevel {
                         if width != 42 { AppDelegate.shared.setStatusBar(width: 42) }
                     } else {
-                        if width != 76 { AppDelegate.shared.setStatusBar(width: 76) }
+                        if #available(macOS 15.0, *) {
+                            if width != 70 { AppDelegate.shared.setStatusBar(width: 69) }
+                        } else {
+                            if width != 76 { AppDelegate.shared.setStatusBar(width: 76) }
+                        }
                     }
                 } else {
                     if width != 42 { AppDelegate.shared.setStatusBar(width: 42) }

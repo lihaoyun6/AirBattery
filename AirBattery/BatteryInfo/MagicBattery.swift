@@ -130,6 +130,9 @@ class MagicBattery {
             if productName.contains("Mouse") { type = "MMouse" }
             if type == "hid" {
                 type = getDeviceType(mac, type)
+                if type.contains("Trackpad") { type = "Trackpad" }
+                if type.contains("Keyboard") { type = "Keyboard" }
+                if type.contains("Mouse") { type = "MMouse" }
             } else {
                 productName = getDeviceName(mac, productName)
             }
