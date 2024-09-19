@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.0</title>
+            <pubDate>Thu, 19 Sep 2024 10:49:39 +0800</pubDate>
+            <sparkle:version>150</sparkle:version>
+            <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                  <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                  <li>修复了某些情况下 Magic TrackPad 图标显示为问号的问题</li>
+                  <li>添加了"使用多彩电池图标"选项, 可使菜单栏图标颜色随电量变化</li>
+                  </ul><ul>
+                  <li>Fixed: Magic TrackPad icon displayed as question mark in some cases.</li>
+                  <li>Added "Colorful Battery Icon" option to make the menu bar icon color change according to battery level.</li>
+                  </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.0/AirBattery_v1.5.0.dmg" length="8285940" type="application/octet-stream" sparkle:edSignature="GSakmTUIurzixD5yYykXjvhhJtjZW+ZSqbHG8g2PiAokhKSaG3K34Nd4KpdXuEB7y4oxwEi3jZhJQEBZk9DpAw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.0/Update150-149.delta" sparkle:deltaFrom="149" length="172370" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="sGk6RTdO7LEWrnvG2M6CUIYo9SYJmv4QSpgu059h5eig5GtPoU9qYYaLv+ub/pqXMpj40RZWOlb6ABr0PbfbAg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.0/Update150-148.delta" sparkle:deltaFrom="148" length="286902" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="WpDU18zwdYEnUunfHt+CMoMCf0CRwutv6oX86smorGZWSB6fTGI5StN49Fbz1WvLF4OCtGWrYyaXbS2mAu2VDQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.0/Update150-147.delta" sparkle:deltaFrom="147" length="360250" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="hdpN6tkbbgm3d1VGybnTu9arVS3g5I18Mmy2ECiVdM+2tC67fyQLCczfe4g0M2tM6bvxDLWNee14URWkedUfCA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.4.9</title>
             <pubDate>Fri, 09 Aug 2024 16:09:17 +0800</pubDate>
             <sparkle:version>149</sparkle:version>
