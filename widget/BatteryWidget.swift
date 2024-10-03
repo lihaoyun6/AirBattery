@@ -12,7 +12,7 @@ let ncPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMa
 @available(macOS 14, *)
 struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, configuration: nil)
+        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, deviceName: "")
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
@@ -30,7 +30,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 11 { data = Array(data[0..<11]) }
         }
-        return SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
+        return SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, deviceName: configuration.deviceName)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
@@ -49,7 +49,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 11 { data = Array(data[0..<11]) }
         }
-        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: configuration)
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, deviceName: configuration.deviceName)
         let entries: [SimpleEntry] = [entry]
         return Timeline(entries: entries, policy: .atEnd)
     }
@@ -57,7 +57,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
 
 struct ViewSizeTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, configuration: nil)
+        SimpleEntry(date: Date(), data: [],family: context.family, mainApp: true, deviceName: "")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> Void) {
@@ -76,7 +76,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 11 { data = Array(data[0..<11]) }
         }
-        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, deviceName: "")
         completion(entry)
     }
     
@@ -96,7 +96,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         } else if context.family ==  .systemLarge {
             if data.count >= 11 { data = Array(data[0..<11]) }
         }
-        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, configuration: nil)
+        entry = SimpleEntry(date: Date(), data: data, family: context.family, mainApp: mainApp, deviceName: "")
         let entries: [SimpleEntry] = [entry]
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
@@ -108,7 +108,8 @@ struct SimpleEntry: TimelineEntry {
     let data: [Device]
     let family: WidgetFamily
     let mainApp: Bool
-    let configuration: Any?
+    let deviceName: String
+    //let configuration: Any?
 }
 
 struct batteryWidgetEntryView : View {
@@ -274,7 +275,7 @@ struct SmallWidgetView : View {
                                         Circle()
                                             .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                             .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                             .clipShape(
                                                 Circle()
@@ -285,7 +286,7 @@ struct SmallWidgetView : View {
                                         Circle()
                                             .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                     }.rotationEffect(Angle(degrees: 129.6))
                                     
                                     Image(getDeviceIcon(item))
@@ -328,7 +329,7 @@ struct SmallWidgetView : View {
                                         Circle()
                                             .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                             .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                             .clipShape(
                                                 Circle()
@@ -339,7 +340,7 @@ struct SmallWidgetView : View {
                                         Circle()
                                             .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                     }.rotationEffect(Angle(degrees: 129.6))
                                     
                                     Image(getDeviceIcon(item))
@@ -413,17 +414,17 @@ struct MediumWidgetView : View {
                                         Circle()
                                             .trim(from: 0.0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 0.5)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                         Circle()
                                             .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0, 1.0))-0.0005)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                             .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                             .clipShape( Circle().stroke(lineWidth: lineWidth) )
                                         Circle()
                                             .trim(from: item.batteryLevel > 50 ? 0.25 : 0, to: CGFloat(min(Double(item.batteryLevel)/100.0, 1.0)))
                                             .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                            .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                            .foregroundColor(Color(getPowerColor(item)))
                                     }.rotationEffect(Angle(degrees: 270.0))
                                     
                                     Image(getDeviceIcon(item))
@@ -472,7 +473,7 @@ struct BatteryView: View {
                 Image("batt_outline_bold")
                 Group{
                     Rectangle()
-                        .fill(Color(getPowerColor(item.batteryLevel)))
+                        .fill(Color(getPowerColor(item)))
                         .frame(width: width, height: 8, alignment: .leading)
                         .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                 }.offset(x:2)

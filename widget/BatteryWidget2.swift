@@ -148,7 +148,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                             Circle()
                                                 .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
                                                 .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .foregroundColor(Color(getPowerColor(item)))
                                                 .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                                 .clipShape(
                                                     Circle()
@@ -159,7 +159,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                             Circle()
                                                 .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
                                                 .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .foregroundColor(Color(getPowerColor(item)))
                                         }.rotationEffect(Angle(degrees: 129.6))
                                         Image(getDeviceIcon(item))
                                             .resizable()
@@ -202,7 +202,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                             Circle()
                                                 .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.78, 0.78))-0.0005)))
                                                 .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .foregroundColor(Color(getPowerColor(item)))
                                                 .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                                 .clipShape(
                                                     Circle()
@@ -213,7 +213,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                             Circle()
                                                 .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.78)
                                                 .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                                .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                                .foregroundColor(Color(getPowerColor(item)))
                                         }.rotationEffect(Angle(degrees: 129.6))
                                         
                                         Image(getDeviceIcon(item))
@@ -276,7 +276,7 @@ struct singleBatteryWidgetEntryView: View {
                                 Circle()
                                     .trim(from: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.8, 0.8))-0.001)), to: CGFloat(abs((min(Double(item.batteryLevel)/100.0*0.8, 0.8))-0.0005)))
                                     .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                    .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    .foregroundColor(Color(getPowerColor(item)))
                                     .shadow(color: .black, radius: lineWidth*0.76, x: 0, y: 0)
                                     .clipShape(
                                         Circle()
@@ -287,7 +287,7 @@ struct singleBatteryWidgetEntryView: View {
                                 Circle()
                                     .trim(from: 0.0, to: Double(item.batteryLevel)/100.0*0.8)
                                     .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-                                    .foregroundColor(Color(getPowerColor(item.batteryLevel)))
+                                    .foregroundColor(Color(getPowerColor(item)))
                             }.rotationEffect(Angle(degrees: 126))
                             Image(getDeviceIcon(item))
                                 .resizable()
@@ -353,9 +353,8 @@ struct batteryWidgetEntryView2: View {
             switch entry.family {
             case .systemSmall:
                 if #available(macOS 14, *) {
-                    let deviceName = (entry.configuration as! ConfigurationAppIntent).deviceName
-                    let item = deviceName != "" ? entry.data.first(where: { $0.deviceName == deviceName }) : nil
-                    singleBatteryWidgetEntryView(entry: entry, item: item, deviceName: deviceName, warringText: "Right click to configure".local)
+                    let item = entry.deviceName != "" ? entry.data.first(where: { $0.deviceName == entry.deviceName }) : nil
+                    singleBatteryWidgetEntryView(entry: entry, item: item, deviceName: entry.deviceName, warringText: "Right click to configure".local)
                 } else {
                     let deviceName = AirBatteryModel.singleDeviceName()
                     let item = deviceName != "" ? entry.data.first(where: { $0.deviceName == deviceName }) : nil

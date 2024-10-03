@@ -208,23 +208,23 @@ func getPowerState() -> iBattery {
     let internalFinder = InternalFinder()
     if let internalBattery = internalFinder.getInternalBattery() {
         if let level = internalBattery.charge {
-            return iBattery(hasBattery: true, isCharging: internalBattery.isCharging ?? false, isCharged :internalBattery.isCharged ?? false, acPowered: internalBattery.acPowered ?? false, timeLeft: internalBattery.timeLeft, batteryLevel: Int(level))
+            var ib = iBattery(hasBattery: true, isCharging: internalBattery.isCharging ?? false, isCharged :internalBattery.isCharged ?? false, acPowered: internalBattery.acPowered ?? false, timeLeft: internalBattery.timeLeft, batteryLevel: Int(level))
+            if #available(macOS 12.0, *) { ib.lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled }
+            return ib
         }
     }
     return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0)
 }
 
-func getPowerColor(_ level: Int, emoji: Bool = false) -> String {
+func getPowerColor(_ device: Device) -> String {
+    if device.lowPower { return "my_yellow" }
+    
     var colorName = "my_green"
-    var colorEmoji = "🟩"
-    if level <= 10 {
+    if device.batteryLevel <= 10 {
         colorName = "my_red"
-        colorEmoji = "🟥"
-    } else if level <= 20 {
+    } else if device.batteryLevel <= 20 {
         colorName = "my_yellow"
-        colorEmoji = "🟨"
     }
-    if emoji { return colorEmoji }
     return colorName
 }
 
@@ -243,7 +243,7 @@ func getMonoNum(_ num: Int, count: Int = 3, bold: Bool = false) -> String {
 func ib2ab(_ ib: iBattery) -> Device {
     @AppStorage("machineType") var machineType = "Mac"
     @AppStorage("deviceName") var deviceName = "Mac"
-    return Device(hasBattery: ib.hasBattery, deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: deviceName, deviceModel: machineType, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged, acPowered: ib.acPowered, lastUpdate: Double(Date().timeIntervalSince1970))
+    return Device(hasBattery: ib.hasBattery, deviceID: "@MacInternalBattery", deviceType: "Mac", deviceName: deviceName, deviceModel: machineType, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged, acPowered: ib.acPowered, lowPower: ib.lowPower, lastUpdate: Double(Date().timeIntervalSince1970))
 }
 
 func sliceList(data: [Device], length: Int, count: Int) -> [Device] {

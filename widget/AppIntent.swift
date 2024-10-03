@@ -10,10 +10,17 @@ import AppIntents
 
 @available(macOS 14.0, *)
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "Configuration"
-    static var description = IntentDescription("AirBattery battery usage widget")
-
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Configuration"
+    nonisolated(unsafe) static var description = IntentDescription("AirBattery battery usage widget")
+    
     @Parameter(title: LocalizedStringResource("Enter Device Name"), default: "")
     var deviceName: String
     
+    init(deviceName: String) {
+        self.deviceName = deviceName
+    }
+    
+    init() {
+        self.deviceName = ""
+    }
 }

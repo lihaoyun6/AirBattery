@@ -15,6 +15,7 @@ struct iBattery {
     var acPowered: Bool
     var timeLeft: String
     var batteryLevel: Int
+    var lowPower: Bool = false
 }
 
 class InternalBattery {

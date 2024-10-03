@@ -29,6 +29,7 @@ struct Device: Hashable, Codable {
     var isPaused: Bool = false
     var acPowered: Bool = false
     var isHidden: Bool = false
+    var lowPower: Bool = false
     var parentName: String = ""
     var lastUpdate: Double
     var realUpdate: Double = 0.0
@@ -45,6 +46,7 @@ struct Device: Hashable, Codable {
         hasher.combine(isPaused)
         hasher.combine(acPowered)
         hasher.combine(isHidden)
+        hasher.combine(lowPower)
         hasher.combine(lastUpdate)
         hasher.combine(realUpdate)
         hasher.combine(parentName)

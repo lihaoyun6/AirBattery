@@ -16,7 +16,7 @@ struct BatteryView: View {
                 Image("batt_outline_bold")
                 Group{
                     Rectangle()
-                        .fill(Color(getPowerColor(item.batteryLevel)))
+                        .fill(Color(getPowerColor(item)))
                         .frame(width: width, height: 8, alignment: .leading)
                         .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                 }.offset(x:2)
@@ -69,7 +69,7 @@ struct mainBatteryView: View {
                     }
                     Group{
                         Rectangle()
-                            .fill(colorfulBattery ? Color(getPowerColor(item.batteryLevel)) : (item.batteryLevel <= 10 ? .red : .primary))
+                            .fill(colorfulBattery ? Color(getPowerColor(ib2ab(item))) : (item.batteryLevel <= 10 ? .red : .primary))
                             .frame(width: width, height: 8, alignment: .leading)
                             .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                     }.offset(x:2)
