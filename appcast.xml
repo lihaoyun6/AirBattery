@@ -3,6 +3,26 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.1</title>
+            <pubDate>Thu, 03 Oct 2024 21:37:34 +0800</pubDate>
+            <sparkle:version>151</sparkle:version>
+            <sparkle:shortVersionString>1.5.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>支持识别 Mac 是否处于低电量模式并在菜单栏或小组件中以黄色显示.<br><b>注: 使用 NearCast 功能的用户请将所有 Mac 上的 AirBattery 一并更新.</b></li>
+                </ul><ul>
+                <li>Supports detecting if the Mac is in low power mode and mark it yellow.<br><b>PS: If you use NearCast, please update AirBattery on all your Macs.</b></li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.1/AirBattery_v1.5.1.dmg" length="8288788" type="application/octet-stream" sparkle:edSignature="lfox/sfzvB2OxRV09WKUK9vkruT6kzSbERwxNi/IvIromcvYsOV87J0nT30etkkBpfWDoN4cq/hOFvko2g5MAQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.1/Update151-150.delta" sparkle:deltaFrom="150" length="249118" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="IM4qJLql16GuwUDaJBPNuCdNZhDzawkJCx3JKn4sZQDBP8PIcEo4CprUPzkAcRYWoRlFqYCNJDFFL3+tX6PmCQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.1/Update151-149.delta" sparkle:deltaFrom="149" length="277366" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="/KHo/1Glne2VoP33T8QUfToU/WH/dD/1ffi5yaQouSHzxdfwr0euiR4x5DkHPeb+EpzHXp35ggGONfk5JDxLDA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.1/Update151-148.delta" sparkle:deltaFrom="148" length="320026" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="SNV0uswEhvE/+guugnJfacwGRbcglHSiSfiujQ2WNkgG/PBIkzbHKf5yW5cWUEQC1hAdAhVzfGHyjdqkupedCQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.0</title>
             <pubDate>Thu, 19 Sep 2024 10:49:39 +0800</pubDate>
             <sparkle:version>150</sparkle:version>
