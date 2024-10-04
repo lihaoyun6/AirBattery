@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.2</title>
+            <pubDate>Fri, 04 Oct 2024 14:58:10 +0800</pubDate>
+            <sparkle:version>152</sparkle:version>
+            <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>添加了对 <b>AirPods 4</b> 的支持</li>
+                <li>修复了部分耳机图标方向错误的问题</li>
+                </ul><ul>
+                <li>Added support for <b>AirPods 4</b>.</li>
+                <li>Fixed: Some airpod were showed as the wrong side.</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.2/AirBattery_v1.5.2.dmg" length="8283638" type="application/octet-stream" sparkle:edSignature="dAONMrGsRp9EOv9DBSOvnoXiSwdoNhyr/U+4lzOMhL/XYBiKwA5yM1Owq7ylADkTasV5IfXonjvlCVkWLH4nCQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.2/Update152-151.delta" sparkle:deltaFrom="151" length="176626" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="LJYKATCkp+73gR3xPk2rMCmMPzD8I0OvGUhylO4S4OBaViJQdR8x2GHk2uKpkrWSuG0V+TTB6OkfLHrNF3xFBA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.2/Update152-150.delta" sparkle:deltaFrom="150" length="333510" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="UD44L4hCkRo8FH6FavllqcCNHLG8llU5WOH7fQfA/DSZL5b9Ex0v2j0kzhnkiOoyPn4sXpdWmb324kcU+Q9wBA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.2/Update152-149.delta" sparkle:deltaFrom="149" length="374010" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="QG3LmFDbVYRs6f0dwGX350MiezxVDd7Ejgq2ahu9cCn3vSwCCnVQthUuujW8n2LMfS3KBDE3g5qPkyBEaUL/Cg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.1</title>
             <pubDate>Thu, 03 Oct 2024 21:37:34 +0800</pubDate>
             <sparkle:version>151</sparkle:version>
