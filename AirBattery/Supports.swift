@@ -436,6 +436,12 @@ func getHeadphoneModel(_ model: String) -> String {
         return "Airpods 2"
     case "2013":
         return "Airpods 3"
+    case "201B":
+        ///with ANC
+        return "Airpods 4"
+    case "2019":
+        ///without ANC
+        return "Airpods 4"
     case "2014":
         return "Airpods Pro 2"
     case "2003":
@@ -527,6 +533,8 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpod.right"
             case "Airpods 3":
                 return "airpod3.right"
+            case "Airpods 4":
+                return "airpod4.right"
             case "Airpods Pro 2":
                 return "airpodpro.right"
             case "PowerBeats 3":
@@ -570,7 +578,9 @@ func getDeviceIcon(_ d: Device) -> String {
             case "Airpods 2":
                 return "airpod.left"
             case "Airpods 3":
-                return "airpod3.right"
+                return "airpod3.left"
+            case "Airpods 4":
+                return "airpod4.left"
             case "Airpods Pro 2":
                 return "airpodpro.left"
             case "PowerBeats 3":
@@ -615,6 +625,8 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpods"
             case "Airpods 3":
                 return "airpods3"
+            case "Airpods 4":
+                return "airpods4"
             case "Airpods Pro 2":
                 return "airpodspro"
             case "PowerBeats 3":
@@ -659,6 +671,8 @@ func getDeviceIcon(_ d: Device) -> String {
                 return "airpods.case.fill"
             case "Airpods 3":
                 return "airpods3.case.fill"
+            case "Airpods 4":
+                return "airpods4.case.fill"
             case "Airpods Pro 2":
                 return "airpodspro.case.fill"
             case "PowerBeats 3":
