@@ -191,8 +191,8 @@ struct MultiBatteryView: View {
                     let jsonData = try JSONEncoder().encode(allDevices)
                     guard let jsonString = String(data: jsonData, encoding: .utf8) else { return }
                     guard let data = encryptString(jsonString, password: ncGroupID) else { return }
-                    let message = NCMessage(sender: systemUUID ?? deviceName, content: data)
-                    netcastService?.sendMessage(message)
+                    let message = NCMessage(id: String(ncGroupID.prefix(15)), sender: systemUUID ?? deviceName, command: "", content: data)
+                    netcastService.sendMessage(message)
                 } catch {
                     print("Write JSON error：\(error)")
                 }

@@ -262,12 +262,7 @@ struct SettingsView: View {
                             .onChange(of: nearCast) { newValue in
                                 if newValue {
                                     if ncGroupID != "" && isGroudIDValid(id: ncGroupID) {
-                                        if let server = netcastService {
-                                            server.resume()
-                                        } else {
-                                            netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
-                                            netcastService?.resume()
-                                        }
+                                        netcastService.resume()
                                     } else {
                                         DispatchQueue.main.async { nearCast = false; ncGroupID = "" }
                                         _ = createAlert(
@@ -277,7 +272,7 @@ struct SettingsView: View {
                                         ).runModal()
                                     }
                                 } else {
-                                    if let server = netcastService { server.stop() }
+                                    netcastService.stop()
                                 }
                             }
                     }

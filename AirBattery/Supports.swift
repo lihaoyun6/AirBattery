@@ -17,7 +17,7 @@ let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetDataTimer = Timer.publish(every: TimeInterval(24 * updateInterval), on: .main, in: .common).autoconnect()
 let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Double(arc4random_uniform(10)) - Double(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
 let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? Double(abs(widgetInterval)) : updateInterval)), on: .main, in: .common).autoconnect()
-let macID = getMacModelIdentifier()
+//let macID = getMacModelIdentifier()
 let isoFormatter = ISO8601DateFormatter()
 
 struct dayAndWeek {
@@ -432,6 +432,9 @@ func getHeadphoneModel(_ model: String) -> String {
         return "Airpods Pro"
     case "200a":
         return "Airpods Max"
+    case "201f":
+        ///USB-C
+        return "Airpods Max"
     case "200f":
         return "Airpods 2"
     case "2013":
@@ -443,6 +446,9 @@ func getHeadphoneModel(_ model: String) -> String {
         ///without ANC
         return "Airpods 4"
     case "2014":
+        return "Airpods Pro 2"
+    case "2024":
+        ///USB-C Case
         return "Airpods Pro 2"
     case "2003":
         return "PowerBeats 3"
@@ -705,9 +711,9 @@ func getDeviceIcon(_ d: Device) -> String {
         }
         return "airpodspro.case.fill"
     case "Mac":
-        let m = (d.deviceModel ?? "").lowercased().replacingOccurrences(of: " ", with: "")
+        let m = (d.deviceModel ?? "").lowercased()//.replacingOccurrences(of: " ", with: "")
         if m.contains("macbook") {
-            if let icon = macList[macID] { return icon }
+            if let icon = macList[d.deviceModel!] { return icon }
             return "macbook"
         }
         if m.contains("macmini") { return "macmini.fill" }

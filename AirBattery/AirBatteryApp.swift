@@ -13,7 +13,7 @@ import Sparkle
 
 var updaterController: SPUStandardUpdaterController!
 var statusBarItem: NSStatusItem!
-var netcastService: MultipeerService?
+var netcastService: MultipeerService = MultipeerService(serviceType: "airbattery-nc")
 let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
 let systemUUID = getMacDeviceUUID()
 
@@ -178,10 +178,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
         print("⚙️ Icon mode = \(showOn)")
         if ncGroupID != "" {
-            netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
-            if nearCast { netcastService?.resume() }
+            //netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
+            if nearCast { netcastService.resume() }
         }
-        machineType = getMacDeviceType()
+        //machineType = getMacDeviceType()
+        machineType = getMacModelIdentifier()
         deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
         
