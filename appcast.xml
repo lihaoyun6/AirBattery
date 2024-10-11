@@ -3,6 +3,30 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.3</title>
+            <pubDate>Fri, 11 Oct 2024 10:51:28 +0800</pubDate>
+            <sparkle:version>153</sparkle:version>
+            <sparkle:shortVersionString>1.5.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>添加了对 <b>AirPods Max (USB-C)</b> 型号的支持</li>
+                <li>添加了对 iOS 客户端的支持, <b><a href="https://github.com/lihaoyun6/AirBattery-Mobile/releases/latest">点此前往</a></b>下载 iOS 客户端</li>
+                <li>改进了 NearCast 功能架构 (将导致无法与旧版 App 兼容)<br><b>注: 使用 NearCast 功能的用户请将所有 Mac 上的 AirBattery 一并更新.</b></li>
+                </ul><ul>
+                <li>Added support for <b>AirPods Max (USB-C)</b></li>
+                <li>Added support for iOS client, <b><a href="https://github.com/lihaoyun6/AirBattery-Mobile/releases/latest">click here</a></b> to download the iOS client</li>
+                <li>Improve NearCast stability (but breaks compatibility with older versions)<br><b>PS: If you use NearCast, please update AirBattery on all your Macs.</b></li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.3/AirBattery_v1.5.3.dmg" length="8306921" type="application/octet-stream" sparkle:edSignature="CtQk12PnNlZEs9YBK6I1a15DYuLtWyVZz4Ck/A/1TIzALSSjXXkesgg/Hb61eJ5m+DKr8+f3AqJ5RtXO9XVrCg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.3/Update153-152.delta" sparkle:deltaFrom="152" length="239062" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="uP9xiEE0R1LBh4e9kF5XDv63571NW608xe6zOsBOBXzvsp4XZOMIHNK70DWqRu67Yywn3J62hS1hHW57WiFyCw=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.3/Update153-151.delta" sparkle:deltaFrom="151" length="334390" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="ndiIzBQrcKCx9o0xp9S0jc+YtH8lRDJbJmzXGvcahRHbcCxC02ypfK2QIaH+c5Cz2e8S53avZDTFgE+CD06YDg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.3/Update153-150.delta" sparkle:deltaFrom="150" length="398218" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="pZrgFtI+dd593BRv7XZxXCJUEcp6DYEifcOkkMbXKtRdEqBun1yX6syLm85Cy+fsrVE/PiIhAtATYscuFL/ODg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.2</title>
             <pubDate>Fri, 04 Oct 2024 14:58:10 +0800</pubDate>
             <sparkle:version>152</sparkle:version>
