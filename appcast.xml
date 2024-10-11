@@ -3,6 +3,31 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.4</title>
+            <pubDate>Fri, 11 Oct 2024 18:44:18 +0800</pubDate>
+            <sparkle:version>154</sparkle:version>
+            <sparkle:shortVersionString>1.5.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>修复了某些情况下从菜单栏展开设备列表时显示不全的问题</li>
+                <li>添加了对 iOS 客户端的支持, <b><a href="https://github.com/lihaoyun6/AirBattery-Mobile/releases/latest">点此前往</a></b>下载 iOS 客户端</li>
+                <li>改进了 Nearcast 架构, 为 Nearcast 添加了拉取按钮 (与旧版不兼容)<br><b style="color: orange;">注: 使用 Nearcast 功能的用户请将所有 Mac 上的 AirBattery 一并更新.</b></li>
+                </ul><ul>
+                <li>Fixed: Device list window was cut off sometimes</li>
+                <li>Added support for iOS client, <b><a href="https://github.com/lihaoyun6/AirBattery-Mobile/releases/latest">click here</a></b> to download the iOS client</li>
+                <li>Add a refresh button for Nearcast (incompatible with older versions)<br><b style="color: orange;">PS: If you use Nearcast, please update AirBattery on all your Macs.</b></li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.4/AirBattery_v1.5.4.dmg" length="8303944" type="application/octet-stream" sparkle:edSignature="AB9COZGZ3fr+r7qA0PEloSc2lUFhlJGd000zjAbDcs+G5CDjCwnyHPtpbrI3wI5rU3xxdzM0gpijTGPa82dEBw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.4/Update154-153.delta" sparkle:deltaFrom="153" length="158250" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="CXfUwYwMkhgHBaXOodSve3K8zibmfCIsinFBjeA9yRiqiTppwRB5EkhsVdET7/q5vTxqu0+FlBB9aWoNYwQJCw=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.4/Update154-152.delta" sparkle:deltaFrom="152" length="270634" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="9LKznto6IRtZIBEzKEtQCOwjdWdM22MQnFkNKPJyGHveDWObJ5P+MP1CEeuyP3mYfHFq7GyfFQ1NgDH5VVymCQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.4/Update154-151.delta" sparkle:deltaFrom="151" length="368662" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="b2uSgB5nRGrmWHZznFxJY7yAu+n8O9TAgwEKzv/ykydO/BXeTsSk5/AfQ2nUh1YE84MPZ/l8xE48iIEAodcqCA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.4/Update154-150.delta" sparkle:deltaFrom="150" length="419342" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="k6ByulXRRZXREFzW0rJWIM6BOSWNqFIfIWtD/NmT/L2aHRGBUjAKFXmvLAPDu2316FcuYQk3dwnHV52bCwxeDg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.3</title>
             <pubDate>Fri, 11 Oct 2024 10:51:28 +0800</pubDate>
             <sparkle:version>153</sparkle:version>
