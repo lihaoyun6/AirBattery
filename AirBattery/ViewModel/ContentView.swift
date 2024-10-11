@@ -260,6 +260,7 @@ struct popover: View {
     var fromDock: Bool = false
     var allDevices: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
+    @AppStorage("nearCast") var nearCast = false
     @State private var overReloadButton = false
     @State private var overCopyButton = false
     @State private var overHideButton = false
@@ -267,6 +268,7 @@ struct popover: View {
     @State private var overInfoButton = false
     @State private var overQuitButton = false
     @State private var overSettButton = false
+    @State private var overReloButton = false
     @State private var overStack = -1
     @State private var overStack2 = -1
     @State private var overStackNC = -1
@@ -337,6 +339,19 @@ struct popover: View {
                             .foregroundColor(.secondary)
                             .opacity(0.7).offset(y: 0.5)
                     }
+                    if nearCast {
+                        Button(action: {
+                            netcastService.refeshAll()
+                        }, label: {
+                            Image(systemName: "arrow.clockwise.circle")
+                                .font(.system(size: 14, weight: .light))
+                                .frame(width: 14, height: 14, alignment: .center)
+                                .foregroundColor(overReloButton ? .accentColor : .secondary)
+                                .opacity(overReloButton ? 1 : 0.7)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .onHover{ hovering in overReloButton = hovering }
+                    }
                 }
                 .offset(y: -3.5)
                 .padding(.horizontal, 5)
@@ -392,79 +407,79 @@ struct popover: View {
                                             .padding(.leading, -10)
                                     }
                                     Spacer()
-                                    if overStack == index {
-                                        HStack(spacing: 4) {
-                                            if allDevices[index].deviceID == "@MacInternalBattery" {
-                                                Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
-                                                    .font(.system(size: 11))
-                                                Text(InternalBattery.status.timeLeft)
-                                                    .font(.system(size: 11))
-                                            } else {
-                                                if allDevices[index].realUpdate != 0.0 {
-                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
+                                    if allDevices[index].hasBattery {
+                                        if overStack == index {
+                                            HStack(spacing: 4) {
+                                                if allDevices[index].deviceID == "@MacInternalBattery" {
+                                                    Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
+                                                        .font(.system(size: 11))
+                                                    Text(InternalBattery.status.timeLeft)
                                                         .font(.system(size: 11))
                                                 } else {
-                                                    Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                                        .font(.system(size: 11))
+                                                    if allDevices[index].realUpdate != 0.0 {
+                                                        Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
+                                                            .font(.system(size: 11))
+                                                    } else {
+                                                        Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
+                                                            .font(.system(size: 11))
+                                                    }
+                                                }
+                                                if !alertList.contains(allDevices[index].deviceName) {
+                                                    Button(action: {
+                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                        alertList.append(allDevices[index].deviceName)
+                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                    }, label: {
+                                                        Image(systemName: "bell")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overAlertButton = hovering }
+                                                } else {
+                                                    Button(action: {
+                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+                                                        alertList.removeAll { $0 == allDevices[index].deviceName }
+                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                    }, label: {
+                                                        Image(systemName: "bell.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overAlertButton = hovering }
+                                                }
+                                                if #available(macOS 14, *) {
+                                                    Button(action: {
+                                                        copyToClipboard(allDevices[index].deviceName)
+                                                        _ = createAlert(title: "Device Name Copied".local,
+                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                        button1: "OK".local).runModal()
+                                                    }, label: {
+                                                        Image(systemName: "list.clipboard.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overCopyButton = hovering }
+                                                }
+                                                
+                                                if allDevices[index].deviceID != "@MacInternalBattery" {
+                                                    Button(action: {
+                                                        hidden.append(index)
+                                                        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                                        blackList.append(allDevices[index].deviceName)
+                                                        UserDefaults.standard.set(blackList, forKey: "blackList")
+                                                    }, label: {
+                                                        Image(systemName: "eye.slash.fill")
+                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                            .foregroundColor(overHideButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overHideButton = hovering }
                                                 }
                                             }
-                                            if !alertList.contains(allDevices[index].deviceName) {
-                                                Button(action: {
-                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                    alertList.append(allDevices[index].deviceName)
-                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                }, label: {
-                                                    Image(systemName: "bell")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overAlertButton = hovering }
-                                            } else {
-                                                Button(action: {
-                                                    alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                    alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                    UserDefaults.standard.set(alertList, forKey: "alertList")
-                                                }, label: {
-                                                    Image(systemName: "bell.fill")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overAlertButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overAlertButton = hovering }
-                                            }
-                                            if #available(macOS 14, *) {
-                                                Button(action: {
-                                                    copyToClipboard(allDevices[index].deviceName)
-                                                    _ = createAlert(title: "Device Name Copied".local,
-                                                                    message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
-                                                                    button1: "OK".local).runModal()
-                                                }, label: {
-                                                    Image(systemName: "list.clipboard.fill")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overCopyButton = hovering }
-                                            }
-                                            
-                                            if allDevices[index].deviceID != "@MacInternalBattery" {
-                                                Button(action: {
-                                                    hidden.append(index)
-                                                    var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
-                                                    blackList.append(allDevices[index].deviceName)
-                                                    UserDefaults.standard.set(blackList, forKey: "blackList")
-                                                }, label: {
-                                                    Image(systemName: "eye.slash.fill")
-                                                        .frame(width: 20, height: 20, alignment: .center)
-                                                        .foregroundColor(overHideButton ? .accentColor : .secondary)
-                                                })
-                                                .buttonStyle(PlainButtonStyle())
-                                                .onHover{ hovering in overHideButton = hovering }
-                                            }
-                                        }
-                                    } else {
-                                        if allDevices[index].hasBattery {
+                                        } else {
                                             Text("\(allDevices[index].batteryLevel)%")
                                                 .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
                                                 .font(.system(size: 11))

@@ -42,7 +42,7 @@ class MultipeerService: ObservableObject {
                         let jsonData = try JSONEncoder().encode(allDevices)
                         guard let jsonString = String(data: jsonData, encoding: .utf8) else { return }
                         guard let data = encryptString(jsonString, password: self.ncGroupID) else { return }
-                        let message = NCMessage(id: String(self.ncGroupID.prefix(15)), sender: self.transceiver.localPeerId ?? self.deviceName, command: "", content: data)
+                        let message = NCMessage(id: String(self.ncGroupID.prefix(15)), sender: systemUUID ?? self.deviceName, command: "", content: data)
                         netcastService.sendMessage(message, peerID: peer.id)
                     } catch {
                         print("Write JSON error：\(error)")
@@ -89,6 +89,12 @@ class MultipeerService: ObservableObject {
         } else {
             for peer in peers { transceiver.send(data, to: [peer]) }
         }
+    }
+    
+    func refeshAll() {
+        print("ℹ️ Pulling data...")
+        let message = NCMessage(id: String(ncGroupID.prefix(15)), sender: systemUUID ?? self.deviceName, command: "resend", content: "")
+        self.sendMessage(message)
     }
 }
 
