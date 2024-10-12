@@ -100,7 +100,7 @@ struct MultiBatteryView: View {
                                             .foregroundColor(Color(getPowerColor(item)))
                                     }.rotationEffect(Angle(degrees: 135))
                                     
-                                    if item.deviceType == "Mac" && showThisMac == "percent"{
+                                    if item.deviceType.contains("mac") && showThisMac == "percent"{
                                         Text(String(item.batteryLevel))
                                             .colorScheme(darkMode ? .dark : .light)
                                             .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : Color("black_white"))
@@ -342,8 +342,9 @@ struct popover: View {
                     if nearCast {
                         Button(action: {
                             netcastService.refeshAll()
+                            statusBarItem.menu?.cancelTracking()
                         }, label: {
-                            Image(systemName: "arrow.clockwise.circle")
+                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
                                 .font(.system(size: 14, weight: .light))
                                 .frame(width: 14, height: 14, alignment: .center)
                                 .foregroundColor(overReloButton ? .accentColor : .secondary)

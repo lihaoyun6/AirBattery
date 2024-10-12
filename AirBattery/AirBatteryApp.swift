@@ -181,8 +181,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             //netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
             if nearCast { netcastService.resume() }
         }
-        //machineType = getMacDeviceType()
-        machineType = getMacModelIdentifier()
+        machineType = getMacDeviceType()
+        //machineType = getMacModelIdentifier()
         deviceName = getMacDeviceName()
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
         
