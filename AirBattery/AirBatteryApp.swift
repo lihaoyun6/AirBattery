@@ -37,7 +37,7 @@ struct AirBatteryApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     static let shared = AppDelegate()
     @AppStorage("showOn") var showOn = "both"
-    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("machineType") var machineType = "mac"
     @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("ncGroupID") var ncGroupID = ""
     @AppStorage("nearCast") var nearCast = false
@@ -70,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             var allDevices = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
-            allDevices.insert(ib2ab(ibStatus), at: 0)
+            if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
             let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
             let contentView = NSHostingView(rootView: contentViewSwiftUI)
             let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
@@ -84,6 +84,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     ncDeviceCount += count
                 }
             }
+            let menuHeight = CGFloat((max(max(allDevices.count,1)+ncDeviceCount,1)+hiddenRow)*37+30+ncCount)
             let mouse = NSEvent.mouseLocation
             var menuX = mouse.x
             var menuY = mouse.y
@@ -106,17 +107,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "right":
                     // Dock 位于屏幕右侧
                     menuX = menuX + 352 > visibleFrame.maxX ? visibleFrame.maxX - 372 : menuX + 10
-                    menuY = max(menuY - CGFloat((max(allDevices.count,1)+hiddenRow)*37+25)/2, visibleFrame.origin.y)
+                    menuY = max(menuY - menuHeight/2, visibleFrame.origin.y)
                 case "left":
                     // Dock 位于屏幕左侧
                     menuX = menuX + 352 > visibleFrame.maxX ? visibleFrame.maxX - 372 : menuX
                     menuX = menuX < visibleFrame.origin.x ? visibleFrame.origin.x + 20 : menuX + 10
-                    menuY = max(menuY - CGFloat((max(allDevices.count,1)+hiddenRow)*37+25)/2, visibleFrame.origin.y)
+                    menuY = max(menuY - menuHeight/2, visibleFrame.origin.y)
                 default:
                     print("⚠️ Failed to get Dock orientation!")
                 }
             }
-            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: CGFloat((max(allDevices.count+ncDeviceCount,1)+hiddenRow)*37+30+ncCount))
+            contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: menuHeight)
             dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
             dockWindow.title = "AirBattery Dock Window"
             dockWindow.level = .popUpMenu
@@ -139,7 +140,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         UserDefaults.standard.register( // default defaults (used if not set)
             defaults: [
                 "showOn": "both",
-                "machineType": "Mac",
+                "machineType": "mac",
                 "deviceName": "Mac",
                 "launchAtLogin": false,
                 "intBattOnStatusBar": true,
@@ -305,7 +306,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
-        allDevices.insert(ib2ab(ibStatus), at: 0)
+        if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
         let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
@@ -319,7 +320,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 ncDeviceCount += count
             }
         }
-        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(allDevices.count+ncDeviceCount,1)+hiddenRow)*37+20+ncCount)
+        contentView.frame = NSRect(x: 0, y: 0, width: 352, height: (max(max(allDevices.count,1)+ncDeviceCount,1)+hiddenRow)*37+20+ncCount)
         let menuItem = NSMenuItem()
         menuItem.view = contentView
         statusMenu.removeAllItems()

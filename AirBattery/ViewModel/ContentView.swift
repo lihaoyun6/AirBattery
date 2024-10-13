@@ -32,7 +32,7 @@ struct BarChartView: View {
 
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
-    //@AppStorage("machineType") var machineType = "Mac"
+    //@AppStorage("machineType") var machineType = "mac"
     @AppStorage("rollingMode") var rollingMode = "auto"
     @AppStorage("showOn") var showOn = "both"
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -314,13 +314,30 @@ struct popover: View {
                     }, label: {
                         Image(systemName: "info.circle")
                             .font(.system(size: 14, weight: .light))
-                            .frame(width: 16, height: 14, alignment: .center)
+                            .frame(width: 14, height: 14, alignment: .center)
                             .foregroundColor(overInfoButton ? .accentColor : .secondary)
                             .opacity(overInfoButton ? 1 : 0.7)
                     })
                     .buttonStyle(PlainButtonStyle())
                     .onHover{ hovering in overInfoButton = hovering }
-                    
+                    if nearCast {
+                        Button(action: {
+                            if fromDock {
+                                if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                            } else {
+                                netcastService.refeshAll()
+                                statusBarItem.menu?.cancelTracking()
+                            }
+                        }, label: {
+                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
+                                .font(.system(size: 14, weight: .light))
+                                .frame(width: 14, height: 14, alignment: .center)
+                                .foregroundColor(overReloButton ? .accentColor : .secondary)
+                                .opacity(overReloButton ? 1 : 0.7)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .onHover{ hovering in overReloButton = hovering }
+                    }
                     Button(action: {
                         AppDelegate.shared.openSettingPanel()
                     }, label: {
@@ -339,41 +356,44 @@ struct popover: View {
                             .foregroundColor(.secondary)
                             .opacity(0.7).offset(y: 0.5)
                     }
-                    if nearCast {
-                        Button(action: {
-                            netcastService.refeshAll()
-                            statusBarItem.menu?.cancelTracking()
-                        }, label: {
-                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
-                                .font(.system(size: 14, weight: .light))
-                                .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overReloButton ? .accentColor : .secondary)
-                                .opacity(overReloButton ? 1 : 0.7)
-                        })
-                        .buttonStyle(PlainButtonStyle())
-                        .onHover{ hovering in overReloButton = hovering }
-                    }
                 }
                 .offset(y: -3.5)
                 .padding(.horizontal, 5)
                 .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
                 VStack(alignment:.leading,spacing: 0) {
-                    if allDevices.count < 1 {
+                    if allDevices.count < 1 && hiddenDevices.count < 1{
                         HStack{
-                            Image(systemName: "exclamationmark.circle")
+                            /*Image(systemName: "exclamationmark.circle")
+                             .resizable()
+                             .aspectRatio(contentMode: .fit)
+                             .foregroundColor(Color("black_white"))
+                             .frame(width: 20, height: 20, alignment: .center)
+                             Text("No Device Found!")
+                             .font(.system(size: 12))
+                             .foregroundColor(Color("black_white"))
+                             .frame(height: 24, alignment: .center)
+                             .padding(.horizontal, 8)*/
+                            let ib = ib2ab(InternalBattery.status)
+                            Image(getDeviceIcon(ib))
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .foregroundColor(Color("black_white"))
-                                .frame(width: 20, height: 20, alignment: .center)
-                            Text("No Device Found!")
+                                .frame(width: 22, height: 22, alignment: .center)
+                            Text("\(ib.deviceName)")
                                 .font(.system(size: 12))
                                 .foregroundColor(Color("black_white"))
                                 .frame(height: 24, alignment: .center)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, 7)
                             Spacer()
                         }
                         .padding(.vertical, 6)
                         .padding(.horizontal, 11)
+                        .onHover{ hovering in
+                            overStack2 = -1
+                            overStackNC = -1
+                            if hovering { overStack = 0 }
+                        }
+                        .background(overStack == 0 ? Color("black_white").opacity(0.15) : .clear)
                         if hiddenDevices.count > 0 { Divider() }
                     }
                     ForEach(allDevices.indices, id: \.self) { index in
@@ -557,14 +577,16 @@ struct popover: View {
                         .opacity(0.23)
                 )
                 .offset(y: 2.5)
-                ForEach(allNearcast.indices, id: \.self) { index in
-                    let devices = AirBatteryModel.ncGetAll(url: allNearcast[index])
-                    if devices.count != 0 {
-                        nearcastView(devices: devices, mainIndex: index, overStackNC: $overStackNC)
-                            .onHover{ hovering in
-                                overStack = -1
-                                overStack2 = -1
-                            }
+                if nearCast {
+                    ForEach(allNearcast.indices, id: \.self) { index in
+                        let devices = AirBatteryModel.ncGetAll(url: allNearcast[index])
+                        if devices.count != 0 {
+                            nearcastView(devices: devices, mainIndex: index, overStackNC: $overStackNC)
+                                .onHover{ hovering in
+                                    overStack = -1
+                                    overStack2 = -1
+                                }
+                        }
                     }
                 }
             }

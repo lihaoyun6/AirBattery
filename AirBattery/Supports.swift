@@ -203,7 +203,7 @@ func randomString(type: Int = 1, length: Int) -> String {
 }
 
 func getPowerState() -> iBattery {
-    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("machineType") var machineType = "mac"
     if !machineType.lowercased().contains("book") { return iBattery(hasBattery: false, isCharging: false, isCharged: false, acPowered: false, timeLeft: "", batteryLevel: 0) }
     let internalFinder = InternalFinder()
     if let internalBattery = internalFinder.getInternalBattery() {
@@ -241,7 +241,7 @@ func getMonoNum(_ num: Int, count: Int = 3, bold: Bool = false) -> String {
 }
 
 func ib2ab(_ ib: iBattery) -> Device {
-    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("machineType") var machineType = "mac"
     @AppStorage("deviceName") var deviceName = "Mac"
     return Device(hasBattery: ib.hasBattery, deviceID: "@MacInternalBattery", deviceType: machineType, deviceName: deviceName, deviceModel: macID, batteryLevel: ib.batteryLevel, isCharging: ib.isCharging ? 1 : 0, isCharged: ib.isCharged, acPowered: ib.acPowered, lowPower: ib.lowPower, lastUpdate: Double(Date().timeIntervalSince1970))
 }
@@ -347,7 +347,7 @@ func getMacModelIdentifier() -> String {
 }
 
 func getMacDeviceName() -> String {
-    @AppStorage("machineType") var machineType = "Mac"
+    @AppStorage("machineType") var machineType = "mac"
     var computerName: CFString?
     if let dynamicStore = SCDynamicStoreCreate(nil, "GetComputerName" as CFString, nil, nil) {
         computerName = SCDynamicStoreCopyComputerName(dynamicStore, nil) as CFString?
@@ -710,7 +710,7 @@ func getDeviceIcon(_ d: Device) -> String {
             }
         }
         return "airpodspro.case.fill"
-    case "mac":
+    case "mac", "applevirtualmachine1":
         return "display"
     case "macbook", "macbookpro", "macbookair":
         if let icon = macBookList[macID] { return icon }
@@ -722,7 +722,7 @@ func getDeviceIcon(_ d: Device) -> String {
     case "macpro":
         if let icon = macProList[macID] { return icon }
         return "macpro.gen3.fill"
-    case "imac":
+    case "imac", "imacpro":
         return "desktopcomputer"
     default:
         return "questionmark.circle.fill"
