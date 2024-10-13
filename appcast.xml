@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.6</title>
+            <pubDate>Sun, 13 Oct 2024 08:56:44 +0800</pubDate>
+            <sparkle:version>156</sparkle:version>
+            <sparkle:shortVersionString>1.5.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>添加了某些缺失的设备图标.</li>
+                <li>修复了即使当前 Mac 没有电池也会显示在设备列表中的 bug.</li>
+                </ul><ul>
+                <li>Added some missing device icons.</li>
+                <li>Fixed: Mac will show up in device list even if it has no battery.</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.6/AirBattery_v1.5.6.dmg" length="8316191" type="application/octet-stream" sparkle:edSignature="VmSFdm3zc5QVmP6kHzfHisMpkp7qrPER4NrmvmQKnT5ZxpJdL/qHpxQBooRTgz884a2l9eHoz0ExTxtuwkCuDw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.6/Update156-155.delta" sparkle:deltaFrom="155" length="269394" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="j8oVlNjYn3gWhsPrLQeDk6Ptja/hkVygSMhjidpQxsknsTWSvrkjteInxe3o+4ozDQL1tpQRFfLK9k+DbM73CQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.6/Update156-154.delta" sparkle:deltaFrom="154" length="334002" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="831vO7czCLuIFRN93N6JOXhxfOQL7C5c6fObHyH1KRa3JlXgPGpZ4XCRNugVhGTDpZTrL+aQQrusbrIQxm0wCw=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.6/Update156-153.delta" sparkle:deltaFrom="153" length="352934" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="GEeLl0BsZH3WYcnzELG1XbfGQ6WU1+D6n7n9kCiNVRCr1zmxyZ4enSr3m1y6lz8FUdNQOvt+nKMLc4lI3DiHDw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.5</title>
             <pubDate>Sat, 12 Oct 2024 14:17:10 +0800</pubDate>
             <sparkle:version>155</sparkle:version>
