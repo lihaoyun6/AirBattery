@@ -46,7 +46,6 @@ struct BatteryView: View {
 }
 
 struct mainBatteryView: View {
-    //@State var statusBarItem: NSStatusItem
     @State var item: iBattery = InternalBattery.status
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
@@ -87,7 +86,6 @@ struct mainBatteryView: View {
             .onReceive(dockTimer) { t in
                 item = InternalBattery.status
                 let width = statusBarItem.button?.frame.size.width
-                
                 if statusBarBattPercent {
                     if hidePercentWhenFull && item.batteryLevel > hideLevel {
                         if width != 42 { AppDelegate.shared.setStatusBar(width: 42) }
@@ -101,6 +99,7 @@ struct mainBatteryView: View {
                 } else {
                     if width != 42 { AppDelegate.shared.setStatusBar(width: 42) }
                 }
+                AppDelegate.shared.refeshPinnedBar()
             }
         }
     }

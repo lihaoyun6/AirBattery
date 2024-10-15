@@ -13,6 +13,7 @@ import Sparkle
 
 var updaterController: SPUStandardUpdaterController!
 var statusBarItem: NSStatusItem!
+var pinnedItems = [NSStatusItem]()
 var netcastService: MultipeerService = MultipeerService(serviceType: "airbattery-nc")
 let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
 let systemUUID = getMacDeviceUUID()
@@ -225,8 +226,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusBarItem.menu = statusMenu
         if let button = statusBarItem.button {
             button.target = self
-            //button.action = #selector(statusBarButtonClicked(_:))
-            //button.sendAction(on: [.leftMouseDown, .rightMouseDown])
             let ib = getPowerState()
             
             if ib.hasBattery && intBattOnStatusBar {
@@ -260,20 +259,29 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusBarItem.button?.frame = iconView.frame
     }
     
-    /*@objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent!
-        if event.type == NSEvent.EventType.rightMouseUp {
-            getMenu(fromDock: false)
-            statusBarItem.menu = menu
-            statusBarItem.button?.performClick(nil)
-            statusBarItem.menu = nil
-        } else {
-            //getStatusBarView()
-            statusBarItem.menu = statusMenu
-            statusBarItem.button?.performClick(nil)
-            statusBarItem.menu = nil
+    func refeshPinnedBar() {
+        let pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
+        let pinnedDevices = AirBatteryModel.getAll().filter({ pinnedList.contains($0.deviceName) })
+        for device in pinnedDevices {
+            if let index = pinnedItems.firstIndex(where: { $0.button?.toolTip == device.deviceName }) {
+                pinnedItems[index].button?.title = "\(device.batteryLevel)%"
+            } else {
+                let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+                if let button = statusItem.button {
+                    let icon = getDeviceIcon(device)
+                    let image = NSImage(named: icon)!.resized(to: NSSize(width: 17, height: 17))
+                    image.isTemplate = true
+                    button.image = image
+                    button.title = "\(device.batteryLevel)%"
+                    button.toolTip = device.deviceName
+                }
+                pinnedItems.append(statusItem)
+            }
         }
-    }*/
+        let expItems = pinnedItems.filter({ !pinnedList.contains($0.button?.toolTip ?? "") })
+        DispatchQueue.main.async { for e in expItems { NSStatusBar.system.removeStatusItem(e) } }
+        pinnedItems.removeAll{ !pinnedList.contains($0.button?.toolTip ?? "") }
+    }
     
     @objc func onDisplayWake() {
         if readBTHID {
@@ -281,7 +289,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 BTDBattery.getOtherDevice(last: "2m", timeout: 2)
             }
         }
-        //print("\(Date(timeIntervalSinceNow: 0)) -> Display wake")
     }
     
     @objc func deviceIsConnected(notification: IOBluetoothUserNotification, fromDevice device: IOBluetoothDevice) {
@@ -365,5 +372,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         dockWindow.orderOut(nil)
         return menu
+    }
+}
+
+extension NSImage {
+    func resized(to maxSize: NSSize) -> NSImage {
+        let aspectWidth = maxSize.width / self.size.width
+        let aspectHeight = maxSize.height / self.size.height
+        let aspectRatio = min(aspectWidth, aspectHeight)
+        
+        let newSize = NSSize(width: self.size.width * aspectRatio, height: self.size.height * aspectRatio)
+        
+        let newImage = NSImage(size: newSize)
+        newImage.lockFocus()
+        self.draw(in: NSRect(origin: .zero, size: newSize),
+                  from: NSRect(origin: .zero, size: self.size),
+                  operation: .sourceOver,
+                  fraction: 1.0)
+        newImage.unlockFocus()
+        
+        return newImage
     }
 }

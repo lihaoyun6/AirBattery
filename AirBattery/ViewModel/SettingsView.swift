@@ -107,15 +107,19 @@ struct SettingsView: View {
                             switch newValue {
                             case "sbar":
                                 statusBarItem.isVisible = true
+                                for i in pinnedItems { i.isVisible = true }
                                 NSApp.setActivationPolicy(.accessory)
                             case "both":
                                 statusBarItem.isVisible = true
+                                for i in pinnedItems { i.isVisible = true }
                                 NSApp.setActivationPolicy(.regular)
                             case "dock":
                                 statusBarItem.isVisible = false
+                                for i in pinnedItems { i.isVisible = false }
                                 NSApp.setActivationPolicy(.regular)
                             default:
                                 statusBarItem.isVisible = false
+                                for i in pinnedItems { i.isVisible = false }
                                 NSApp.setActivationPolicy(.accessory)
                             }
                         }

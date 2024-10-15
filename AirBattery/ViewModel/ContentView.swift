@@ -40,8 +40,6 @@ struct MultiBatteryView: View {
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("ncGroupID") var ncGroupID = ""
     @AppStorage("readBTHID") var readBTHID = true
-    
-    //@State var statusBarItem: NSStatusItem
 
     @State private var rollCount = 1
     @State private var darkMode = getDarkMode()
@@ -265,6 +263,7 @@ struct popover: View {
     @State private var overCopyButton = false
     @State private var overHideButton = false
     @State private var overAlertButton = false
+    @State private var overPinButton = false
     @State private var overInfoButton = false
     @State private var overQuitButton = false
     @State private var overSettButton = false
@@ -275,6 +274,7 @@ struct popover: View {
     @State private var hidden:[Int] = []
     @State private var hidden2:[Int] = []
     @State private var alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
+    @State private var pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
     @State private var allNearcast = getFiles(withExtension: "json", in: ncFolder)
     
     var body: some View {
@@ -310,6 +310,7 @@ struct popover: View {
                     
                     Button(action: {
                         if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        statusBarItem.menu?.cancelTracking()
                         AppDelegate.shared.openAboutPanel()
                     }, label: {
                         Image(systemName: "info.circle")
@@ -339,6 +340,8 @@ struct popover: View {
                         .onHover{ hovering in overReloButton = hovering }
                     }
                     Button(action: {
+                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        statusBarItem.menu?.cancelTracking()
                         AppDelegate.shared.openSettingPanel()
                     }, label: {
                         Image(systemName: "gearshape")
@@ -415,44 +418,56 @@ struct popover: View {
                                         .aspectRatio(contentMode: .fit)
                                         .foregroundColor(Color("black_white"))
                                         .frame(width: 22, height: 22, alignment: .center)
-                                    Text("\(((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(allDevices[index].deviceName)")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(Color("black_white"))
-                                        .frame(height: 24, alignment: .center)
-                                        .padding(.horizontal, 7)
-                                    if alertList.contains(allDevices[index].deviceName) {
-                                        Image(systemName: "bell.fill")
-                                            .font(.system(size: 10))
+                                    HStack(spacing: 1) {
+                                        Text("\(((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(allDevices[index].deviceName)")
+                                            .font(.system(size: 12))
                                             .foregroundColor(Color("black_white"))
                                             .frame(height: 24, alignment: .center)
-                                            .padding(.leading, -10)
-                                    }
+                                        Spacer().frame(width: 0.5)
+                                        if alertList.contains(allDevices[index].deviceName) {
+                                            Image(systemName: "bell.fill")
+                                                .font(.system(size: 10))
+                                                .foregroundColor(Color("black_white"))
+                                        }
+                                        if pinnedList.contains(allDevices[index].deviceName) {
+                                            Image(systemName: "pin.fill")
+                                                .font(.system(size: 10))
+                                                .foregroundColor(Color("black_white"))
+                                                .offset(y: 0.2)
+                                        }
+                                    }.padding(.horizontal, 7)
                                     Spacer()
                                     if allDevices[index].hasBattery {
                                         if overStack == index {
-                                            HStack(spacing: 4) {
+                                            HStack(spacing: 3) {
                                                 if allDevices[index].deviceID == "@MacInternalBattery" {
                                                     Text(allDevices[index].isCharging != 0 ? "Until Full:" : "Until Empty:")
-                                                        .font(.system(size: 11))
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundColor(.secondary)
                                                     Text(InternalBattery.status.timeLeft)
-                                                        .font(.system(size: 11))
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundColor(.secondary)
                                                 } else {
                                                     if allDevices[index].realUpdate != 0.0 {
                                                         Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].realUpdate) / 60))"+" mins ago".local)
-                                                            .font(.system(size: 11))
+                                                            .font(.system(size: 11, weight: .medium))
+                                                            .foregroundColor(.secondary)
                                                     } else {
                                                         Text("\(Int((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60))"+" mins ago".local)
-                                                            .font(.system(size: 11))
+                                                            .font(.system(size: 11, weight: .medium))
+                                                            .foregroundColor(.secondary)
                                                     }
                                                 }
+                                                Spacer().frame(width: 1)
                                                 if !alertList.contains(allDevices[index].deviceName) {
                                                     Button(action: {
                                                         alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
                                                         alertList.append(allDevices[index].deviceName)
                                                         UserDefaults.standard.set(alertList, forKey: "alertList")
                                                     }, label: {
-                                                        Image(systemName: "bell")
-                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                        Image("bell.circle")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
                                                             .foregroundColor(overAlertButton ? .accentColor : .secondary)
                                                     })
                                                     .buttonStyle(PlainButtonStyle())
@@ -463,12 +478,42 @@ struct popover: View {
                                                         alertList.removeAll { $0 == allDevices[index].deviceName }
                                                         UserDefaults.standard.set(alertList, forKey: "alertList")
                                                     }, label: {
-                                                        Image(systemName: "bell.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                        Image("bell.circle.fill")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
                                                             .foregroundColor(overAlertButton ? .accentColor : .secondary)
                                                     })
                                                     .buttonStyle(PlainButtonStyle())
                                                     .onHover{ hovering in overAlertButton = hovering }
+                                                }
+                                                if !pinnedList.contains(allDevices[index].deviceName) {
+                                                    Button(action: {
+                                                        pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
+                                                        pinnedList.append(allDevices[index].deviceName)
+                                                        UserDefaults.standard.set(pinnedList, forKey: "pinnedList")
+                                                        AppDelegate.shared.refeshPinnedBar()
+                                                    }, label: {
+                                                        Image("pin.circle")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
+                                                            .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overPinButton = hovering }
+                                                } else {
+                                                    Button(action: {
+                                                        pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
+                                                        pinnedList.removeAll { $0 == allDevices[index].deviceName }
+                                                        UserDefaults.standard.set(pinnedList, forKey: "pinnedList")
+                                                        AppDelegate.shared.refeshPinnedBar()
+                                                    }, label: {
+                                                        Image("pin.circle.fill")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
+                                                            .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                                    })
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .onHover{ hovering in overPinButton = hovering }
                                                 }
                                                 if #available(macOS 14, *) {
                                                     Button(action: {
@@ -477,9 +522,15 @@ struct popover: View {
                                                                         message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
                                                                         button1: "OK".local).runModal()
                                                     }, label: {
-                                                        Image(systemName: "list.clipboard.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
-                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                        ZStack {
+                                                            Image(systemName: "circle")
+                                                                .font(.system(size: 18))
+                                                                .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                            Image(systemName: "list.clipboard.fill")
+                                                                .font(.system(size: 10))
+                                                                .offset(y: -1)
+                                                                .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                                        }
                                                     })
                                                     .buttonStyle(PlainButtonStyle())
                                                     .onHover{ hovering in overCopyButton = hovering }
@@ -492,8 +543,9 @@ struct popover: View {
                                                         blackList.append(allDevices[index].deviceName)
                                                         UserDefaults.standard.set(blackList, forKey: "blackList")
                                                     }, label: {
-                                                        Image(systemName: "eye.slash.fill")
-                                                            .frame(width: 20, height: 20, alignment: .center)
+                                                        Image("eye.slash.circle")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
                                                             .foregroundColor(overHideButton ? .accentColor : .secondary)
                                                     })
                                                     .buttonStyle(PlainButtonStyle())
