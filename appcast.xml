@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.7</title>
+            <pubDate>Tue, 15 Oct 2024 16:25:13 +0800</pubDate>
+            <sparkle:version>157</sparkle:version>
+            <sparkle:shortVersionString>1.5.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>支持将任意设备固定至状态栏, 方便随时查看.</li>
+                <li>改进了按钮样式, 更加美观统一.</li>
+                </ul><ul>
+                <li>Supports pinning any device to the status bar.</li>
+                <li>Improved the button style to be more beautiful.</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.7/AirBattery_v1.5.7.dmg" length="8366557" type="application/octet-stream" sparkle:edSignature="iItgAm7mKKuQ3KtmzsnWmubnCMcj8TiQmqphnfmcqFTzUWNh/SIFe9vBgKU7E6RHU4Qb/x9dCWrwwAYoOHNDDQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://https://github.com/lihaoyun6/AirBattery/releases/download/1.5.7/Update157-156.delta" sparkle:deltaFrom="156" length="323866" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="8KUTRfc4jE3pQDtrZVAandtVjCU9eEqTjfcK9rz2wNpFVKY0P+34NKLUzRTlTKnJO7nN6N2e9NBhRZTurfr/AQ=="/>
+                <enclosure url="https://https://https://github.com/lihaoyun6/AirBattery/releases/download/1.5.7/Update157-155.delta" sparkle:deltaFrom="155" length="377014" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="/qoxSaj+mYA5t4FIfW2xXLX1df7JGoc0b8mCEVjyBQ9tF5Vuton9Yyte4pmIvqSOXZmb7QznmAnRXJhxQwEdBw=="/>
+                <enclosure url="https://https://https://github.com/lihaoyun6/AirBattery/releases/download/1.5.7/Update157-154.delta" sparkle:deltaFrom="154" length="427522" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="+6YcxzOoc6JC/6FXNDFUt0w7/ZD/JibkI8sD1OTk4zRY3LCRl6sNDhQ8eDZ6naeqWLzTMJlsj9Tz1SMjDTsGCQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.6</title>
             <pubDate>Sun, 13 Oct 2024 08:56:44 +0800</pubDate>
             <sparkle:version>156</sparkle:version>
