@@ -148,7 +148,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         var get = false
         let now = Double(Date().timeIntervalSince1970)
-        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         if let deviceName = peripheral.name{
             if blockedItems.contains(deviceName) && !whitelistMode { return }
             if !blockedItems.contains(deviceName) && whitelistMode { return }
@@ -181,7 +181,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         //guard let name = peripheral.name else { return }
-        //let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         //if blockedItems.contains(name) && !whitelistMode { return }
         //if !blockedItems.contains(name) && whitelistMode { return }
         guard let services = peripheral.services else { return }
@@ -192,7 +192,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         //guard let name = peripheral.name else { return }
-        //let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         //if blockedItems.contains(name) && !whitelistMode { return }
         //if !blockedItems.contains(name) && whitelistMode { return }
         guard let characteristics = service.characteristics else { return }
@@ -212,7 +212,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     //电量信息
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         //guard let name = peripheral.name else { return }
-        //let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         //if blockedItems.contains(name) && !whitelistMode { return }
         //if !blockedItems.contains(name) && whitelistMode { return }
         
@@ -306,7 +306,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func getAirpods(peripheral: CBPeripheral, data: Data, messageType: String) {
         guard let name = peripheral.name else { return }
-        let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         if blockedItems.contains(name) && !whitelistMode { return }
         if !blockedItems.contains(name) && whitelistMode { return }
         

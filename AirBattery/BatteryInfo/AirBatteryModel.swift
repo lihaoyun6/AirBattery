@@ -56,11 +56,11 @@ struct Device: Hashable, Codable {
 class AirBatteryModel {
     static var lock = false
     static var Devices: [Device] = []
-    static let machineType = UserDefaults.standard.string(forKey: "machineType") ?? "Mac"
+    static let machineType = ud.string(forKey: "machineType") ?? "Mac"
     static let key = "com.lihaoyun6.AirBattery.widget"
     
     static func updateDevice(_ device: Device) {
-        //let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         //if blockedItems.contains(device.deviceName) { return }
         if lock { return }
         lock = true
@@ -86,15 +86,15 @@ class AirBatteryModel {
     }
     
     static func getBlackList() -> [Device] {
-        let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+        let blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
         let devices = getAll(noFilter: true)
         return devices.filter({ blackList.contains($0.deviceName) })
     }
     
     static func getAll(reverse: Bool = false, noFilter: Bool = false) -> [Device] {
-        let thisMac = UserDefaults.standard.string(forKey: "deviceName")
-        let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
-        let blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+        let thisMac = ud.string(forKey: "deviceName")
+        let disappearTime = (ud.object(forKey: "disappearTime") ?? 20) as! Int
+        let blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
         let now = Double(Date().timeIntervalSince1970)
         var list = (reverse ? Array(Devices.reversed()) : Devices).filter { (now - $0.lastUpdate < Double(disappearTime * 60)) }
         if !noFilter { list = list.filter { !blackList.contains($0.deviceName) && !$0.isHidden } }
@@ -108,8 +108,8 @@ class AirBatteryModel {
             }
         }
         for dd in list.filter({ !newList.contains($0) }) { newList.append(dd) }
-        //if UserDefaults.standard.bool(forKey: "fullBlockMode") {
-            let blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        //if ud.bool(forKey: "fullBlockMode") {
+            let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
             return newList.filter({ !blockedItems.contains($0.deviceName) })
         //}
         //return newList
@@ -134,7 +134,7 @@ class AirBatteryModel {
             return devicename ?? ""
         } else {
             url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/singleDeviceName")
-            try? UserDefaults.standard.string(forKey: "deviceOnWidget")?.write(to: url, atomically: true, encoding: .utf8)
+            try? ud.string(forKey: "deviceOnWidget")?.write(to: url, atomically: true, encoding: .utf8)
         }
         return ""
     }
@@ -151,8 +151,8 @@ class AirBatteryModel {
     }
     
     static func writeData(){
-        let showMac = UserDefaults.standard.object(forKey: "showMacOnWidget") as? Bool ?? true
-        let revList = UserDefaults.standard.object(forKey: "revListOnWidget") as? Bool ?? false
+        let showMac = ud.object(forKey: "showMacOnWidget") as? Bool ?? true
+        let revList = ud.object(forKey: "revListOnWidget") as? Bool ?? false
         
         var devices = getAll(reverse: revList)
         let ibStatus = InternalBattery.status
@@ -177,7 +177,7 @@ class AirBatteryModel {
     }
     
     static func ncGetAll(url: URL, fromWidget: Bool = false) -> [Device] {
-        let disappearTime = (UserDefaults.standard.object(forKey: "disappearTime") ?? 20) as! Int
+        let disappearTime = (ud.object(forKey: "disappearTime") ?? 20) as! Int
         let devices = readData(url: url)
         let now = Double(Date().timeIntervalSince1970)
         var localDevices = getAll().map({ $0.deviceName })

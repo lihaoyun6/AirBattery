@@ -48,7 +48,7 @@ class BTDBattery {
     }
     
     static func getOtherDevice(last: String = "10m", timeout: Double = 0) {
-        let parent = UserDefaults.standard.string(forKey: "deviceName") ?? "Mac"
+        let parent = ud.string(forKey: "deviceName") ?? "Mac"
         guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", "mac", last], timeout: timeout) else { return }
         let connected = getConnected(mac: true)
         var list = [[String : Any]]()

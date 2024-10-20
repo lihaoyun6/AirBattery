@@ -7,6 +7,7 @@
 import AppKit
 import SwiftUI
 import WidgetKit
+import Combine
 //import UserNotifications
 
 /*let test_data: [CGFloat] = [99,80,80,73,70,60,59,51,30,30,25,25,19,18,17,15,12,10,10,9] // 示例数据
@@ -30,16 +31,36 @@ struct BarChartView: View {
     }
 }*/
 
+class AppearanceMonitor: ObservableObject {
+    @Published var isDarkMode: Bool = false
+    private var appearanceChangeCancellable: AnyCancellable?
+
+    init() {
+        updateAppearance()
+        appearanceChangeCancellable = NotificationCenter.default.publisher(for: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification)
+            .sink { [weak self] _ in
+                self?.updateAppearance()
+            }
+    }
+    private func updateAppearance() {
+        let appearance = NSApp.effectiveAppearance
+        isDarkMode = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    }
+}
+
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
     //@AppStorage("machineType") var machineType = "mac"
     @AppStorage("rollingMode") var rollingMode = "auto"
-    @AppStorage("showOn") var showOn = "both"
+    @AppStorage("appearance") var appearance = "auto"
+    @AppStorage("showOn") var showOn = "sbar"
     @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("widgetInterval") var widgetInterval = 0
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("ncGroupID") var ncGroupID = ""
     @AppStorage("readBTHID") var readBTHID = true
+    
+    @StateObject private var appearanceMonitor = AppearanceMonitor()
 
     @State private var rollCount = 1
     @State private var darkMode = getDarkMode()
@@ -173,6 +194,14 @@ struct MultiBatteryView: View {
             }
         }
         .frame(width: 128, height: 128, alignment: .center)
+        .onChange(of: appearanceMonitor.isDarkMode) { newValue in
+            darkMode = newValue
+            NSApp.dockTile.display()
+        }
+        .onChange(of: appearance) { _ in
+            darkMode = getDarkMode()
+            NSApp.dockTile.display()
+        }
         .onReceive(alertTimer) {_ in batteryAlert() }
         .onReceive(widgetDataTimer) {_ in
             if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) {
@@ -197,12 +226,10 @@ struct MultiBatteryView: View {
             }
         }
         .onReceive(dockTimer) { t in
-            InternalBattery.status = getPowerState()
-            //for w in NSApplication.shared.windows { if w.level.rawValue == 0 || w.level.rawValue == 3 { w.level = .floating } }
-            
             if showOn == "both" || showOn == "dock" {
-                darkMode = getDarkMode()
                 var list = AirBatteryModel.getAll()
+                let ncFiles = getFiles(withExtension: "json", in: ncFolder)
+                for ncFile in ncFiles { list += AirBatteryModel.ncGetAll(url: ncFile) }
                 let ibStatus = InternalBattery.status
                 let now = Double(t.timeIntervalSince1970)
                 
@@ -226,7 +253,6 @@ struct MultiBatteryView: View {
                         rollCount = rollCount + 1
                     }
                 }
-                
                 NSApp.dockTile.display()
             }
         }
@@ -256,9 +282,10 @@ struct BlurView: NSViewRepresentable {
 
 struct popover: View {
     var fromDock: Bool = false
-    var allDevices: [Device]
+    var allDevice: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
     @AppStorage("nearCast") var nearCast = false
+    @State private var allDevices = [Device]()
     @State private var overReloadButton = false
     @State private var overCopyButton = false
     @State private var overHideButton = false
@@ -273,14 +300,25 @@ struct popover: View {
     @State private var overStackNC = -1
     @State private var hidden:[Int] = []
     @State private var hidden2:[Int] = []
-    @State private var alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-    @State private var pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
+    @State private var alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+    @State private var pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
     @State private var allNearcast = getFiles(withExtension: "json", in: ncFolder)
     
     var body: some View {
         ZStack{
             if fromDock { Color.clear.background(BlurView(material: .menu)) }
             VStack(spacing: 0){
+                if !fromDock {
+                    Color.clear
+                        .frame(height: 8.5)
+                        .onHover { hovering in
+                            if hovering {
+                                overStack = -1
+                                overStack2 = -1
+                                overStackNC = -1
+                            }
+                        }
+                }
                 HStack(spacing: 4){
                     if !fromDock {
                         Button(action: {
@@ -292,11 +330,12 @@ struct popover: View {
                                 .foregroundColor(overQuitButton ? .red : .secondary)
                                 .opacity(overQuitButton ? 1 : 0.7)
                         })
+                        .focusable(false)
                         .buttonStyle(PlainButtonStyle())
                         .onHover{ hovering in overQuitButton = hovering }
                     } else {
                         Button(action: {
-                            if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                            dockWindow.orderOut(nil)
                         }, label: {
                             Image(systemName: "minus.circle")
                                 .font(.system(size: 14, weight: .light))
@@ -304,14 +343,18 @@ struct popover: View {
                                 .foregroundColor(overQuitButton ? Color("my_yellow") : .secondary)
                                 .opacity(overQuitButton ? 1 : 0.7)
                         })
+                        .focusable(false)
                         .buttonStyle(PlainButtonStyle())
                         .onHover{ hovering in overQuitButton = hovering }
                     }
                     
                     Button(action: {
-                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
                         AppDelegate.shared.openAboutPanel()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+                            NSApp.activate(ignoringOtherApps: true)
+                        }
                     }, label: {
                         Image(systemName: "info.circle")
                             .font(.system(size: 14, weight: .light))
@@ -319,28 +362,11 @@ struct popover: View {
                             .foregroundColor(overInfoButton ? .accentColor : .secondary)
                             .opacity(overInfoButton ? 1 : 0.7)
                     })
+                    .focusable(false)
                     .buttonStyle(PlainButtonStyle())
                     .onHover{ hovering in overInfoButton = hovering }
-                    if nearCast {
-                        Button(action: {
-                            if fromDock {
-                                if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
-                            } else {
-                                netcastService.refeshAll()
-                                statusBarItem.menu?.cancelTracking()
-                            }
-                        }, label: {
-                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
-                                .font(.system(size: 14, weight: .light))
-                                .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overReloButton ? .accentColor : .secondary)
-                                .opacity(overReloButton ? 1 : 0.7)
-                        })
-                        .buttonStyle(PlainButtonStyle())
-                        .onHover{ hovering in overReloButton = hovering }
-                    }
                     Button(action: {
-                        if let window = NSApp.windows.first(where: { $0.title == "AirBattery Dock Window" }) { window.orderOut(nil) }
+                        dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
                         AppDelegate.shared.openSettingPanel()
                     }, label: {
@@ -350,14 +376,33 @@ struct popover: View {
                             .foregroundColor(overSettButton ? .accentColor : .secondary)
                             .opacity(overSettButton ? 1 : 0.7)
                     })
+                    .focusable(false)
                     .buttonStyle(PlainButtonStyle())
                     .onHover{ hovering in overSettButton = hovering }
                     Spacer()
-                    if fromDock {
-                        Text("Click Dock icon again to hide this panel")
-                            .font(.system(size: 10, weight: .light))
-                            .foregroundColor(.secondary)
-                            .opacity(0.7).offset(y: 0.5)
+                    if nearCast {
+                        Button(action: {
+                            netcastService.refeshAll()
+                            if fromDock {
+                                dockWindow.orderOut(nil)
+                            } else {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    allDevices = AirBatteryModel.getAll()
+                                    let ibStatus = InternalBattery.status
+                                    if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+                                    allNearcast = getFiles(withExtension: "json", in: ncFolder)
+                                }
+                            }
+                        }, label: {
+                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
+                                .font(.system(size: 14, weight: .light))
+                                .frame(width: 14, height: 14, alignment: .center)
+                                .foregroundColor(overReloButton ? .accentColor : .secondary)
+                                .opacity(overReloButton ? 1 : 0.7)
+                        })
+                        .focusable(false)
+                        .buttonStyle(PlainButtonStyle())
+                        .onHover{ hovering in overReloButton = hovering }
                     }
                 }
                 .offset(y: -3.5)
@@ -424,7 +469,7 @@ struct popover: View {
                                             .foregroundColor(Color("black_white"))
                                             .frame(height: 24, alignment: .center)
                                         Spacer().frame(width: 0.5)
-                                        if alertList.contains(allDevices[index].deviceName) {
+                                        if alertList.map({$0.name}).contains(allDevices[index].deviceName) {
                                             Image(systemName: "bell.fill")
                                                 .font(.system(size: 10))
                                                 .foregroundColor(Color("black_white"))
@@ -459,11 +504,17 @@ struct popover: View {
                                                     }
                                                 }
                                                 Spacer().frame(width: 1)
-                                                if !alertList.contains(allDevices[index].deviceName) {
+                                                if !alertList.map({$0.name}).contains(allDevices[index].deviceName) {
                                                     Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.append(allDevices[index].deviceName)
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                        let alert = btAlert(name: allDevices[index].deviceName,
+                                                                                    full: 80, fullOn: true, fullSound: true,
+                                                                                    low: 20, lowOn: true, lowSound: true)
+                                                        let alertWindowController = AlertWindowController()
+                                                        alertWindowController.showAlert(with: alert, iconName: getDeviceIcon(allDevices[index]), onConfirm: { newAlert in
+                                                            alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                                            alertList.append(newAlert)
+                                                            ud.set(object: alertList, forKey: "alertList")
+                                                        }, onCancel: {})
                                                     }, label: {
                                                         Image("bell.circle")
                                                             .resizable().scaledToFit()
@@ -474,9 +525,16 @@ struct popover: View {
                                                     .onHover{ hovering in overAlertButton = hovering }
                                                 } else {
                                                     Button(action: {
-                                                        alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-                                                        alertList.removeAll { $0 == allDevices[index].deviceName }
-                                                        UserDefaults.standard.set(alertList, forKey: "alertList")
+                                                        alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                                        if let alert = alertList.first(where: {$0.name == allDevices[index].deviceName}) {
+                                                            let alertWindowController = AlertWindowController()
+                                                            alertWindowController.showAlert(with: alert, iconName: getDeviceIcon(allDevices[index]), onConfirm: { newAlert in
+                                                                alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                                                alertList.removeAll {$0.name == allDevices[index].deviceName}
+                                                                alertList.append(newAlert)
+                                                                ud.set(object: alertList, forKey: "alertList")
+                                                            }, onCancel: {})
+                                                        }
                                                     }, label: {
                                                         Image("bell.circle.fill")
                                                             .resizable().scaledToFit()
@@ -486,51 +544,48 @@ struct popover: View {
                                                     .buttonStyle(PlainButtonStyle())
                                                     .onHover{ hovering in overAlertButton = hovering }
                                                 }
-                                                if !pinnedList.contains(allDevices[index].deviceName) {
-                                                    Button(action: {
-                                                        pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
-                                                        pinnedList.append(allDevices[index].deviceName)
-                                                        UserDefaults.standard.set(pinnedList, forKey: "pinnedList")
-                                                        AppDelegate.shared.refeshPinnedBar()
-                                                    }, label: {
-                                                        Image("pin.circle")
-                                                            .resizable().scaledToFit()
-                                                            .frame(width: 18, height: 18, alignment: .center)
-                                                            .foregroundColor(overPinButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overPinButton = hovering }
-                                                } else {
-                                                    Button(action: {
-                                                        pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
-                                                        pinnedList.removeAll { $0 == allDevices[index].deviceName }
-                                                        UserDefaults.standard.set(pinnedList, forKey: "pinnedList")
-                                                        AppDelegate.shared.refeshPinnedBar()
-                                                    }, label: {
-                                                        Image("pin.circle.fill")
-                                                            .resizable().scaledToFit()
-                                                            .frame(width: 18, height: 18, alignment: .center)
-                                                            .foregroundColor(overPinButton ? .accentColor : .secondary)
-                                                    })
-                                                    .buttonStyle(PlainButtonStyle())
-                                                    .onHover{ hovering in overPinButton = hovering }
+                                                if allDevices[index].deviceID != "@MacInternalBattery" {
+                                                    if !pinnedList.contains(allDevices[index].deviceName) {
+                                                        Button(action: {
+                                                            pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                                            pinnedList.append(allDevices[index].deviceName)
+                                                            ud.set(pinnedList, forKey: "pinnedList")
+                                                            AppDelegate.shared.refeshPinnedBar()
+                                                        }, label: {
+                                                            Image("pin.circle")
+                                                                .resizable().scaledToFit()
+                                                                .frame(width: 18, height: 18, alignment: .center)
+                                                                .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                                        })
+                                                        .buttonStyle(PlainButtonStyle())
+                                                        .onHover{ hovering in overPinButton = hovering }
+                                                    } else {
+                                                        Button(action: {
+                                                            pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                                            pinnedList.removeAll(where:  { $0 == allDevices[index].deviceName })
+                                                            ud.set(pinnedList, forKey: "pinnedList")
+                                                            AppDelegate.shared.refeshPinnedBar()
+                                                        }, label: {
+                                                            Image("pin.circle.fill")
+                                                                .resizable().scaledToFit()
+                                                                .frame(width: 18, height: 18, alignment: .center)
+                                                                .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                                        })
+                                                        .buttonStyle(PlainButtonStyle())
+                                                        .onHover{ hovering in overPinButton = hovering }
+                                                    }
                                                 }
                                                 if #available(macOS 14, *) {
                                                     Button(action: {
                                                         copyToClipboard(allDevices[index].deviceName)
                                                         _ = createAlert(title: "Device Name Copied".local,
-                                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                        message: String(format: "Device name \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
                                                                         button1: "OK".local).runModal()
                                                     }, label: {
-                                                        ZStack {
-                                                            Image(systemName: "circle")
-                                                                .font(.system(size: 18))
-                                                                .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                            Image(systemName: "list.clipboard.fill")
-                                                                .font(.system(size: 10))
-                                                                .offset(y: -1)
-                                                                .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                                        }
+                                                        Image("list.clipboard.fill.circle")
+                                                            .resizable().scaledToFit()
+                                                            .frame(width: 18, height: 18, alignment: .center)
+                                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
                                                     })
                                                     .buttonStyle(PlainButtonStyle())
                                                     .onHover{ hovering in overCopyButton = hovering }
@@ -539,9 +594,9 @@ struct popover: View {
                                                 if allDevices[index].deviceID != "@MacInternalBattery" {
                                                     Button(action: {
                                                         hidden.append(index)
-                                                        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                                        var blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
                                                         blackList.append(allDevices[index].deviceName)
-                                                        UserDefaults.standard.set(blackList, forKey: "blackList")
+                                                        ud.set(blackList, forKey: "blackList")
                                                     }, label: {
                                                         Image("eye.slash.circle")
                                                             .resizable().scaledToFit()
@@ -557,19 +612,93 @@ struct popover: View {
                                                 .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
                                                 .font(.system(size: 11))
                                             BatteryView(item: allDevices[index])
-                                                .scaleEffect(0.8)
+                                                .scaleEffect(0.85)
                                         }
                                     }
                                 }
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 10)
                                 .background(overStack == index ? Color("black_white").opacity(0.15) : .clear)//.cornerRadius(4)
-                                .clipShape(RoundedCornersShape(radius: 1.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
+                                .clipShape(RoundedCornersShape(radius: 2.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
                                 .onHover{ hovering in
                                     overStack2 = -1
                                     overStackNC = -1
                                     if overStack != index { overStack = index }
                                 }
+                                /*.contextMenu{
+                                    if nearCast && ["Trackpad", "Keyboard", "Mouse", "MMouse"].contains(allDevices[index].deviceType) {
+                                        Section(header: Text("Transmit to...").textCase(nil)) {
+                                            Divider()
+                                            ForEach(netcastService.transceiver.availablePeers, id: \.self) { peer in
+                                                Button (action:{
+                                                    createNotification(title: "Transmitting".local,
+                                                                       message: String(format: "%@ -> %@".local, allDevices[index].deviceName, peer.name),
+                                                                       interval: 1)
+                                                    if fromDock {
+                                                        dockWindow.orderOut(nil)
+                                                    } else {
+                                                        menuPopover.performClose(nil)
+                                                    }
+                                                    DispatchQueue.global(qos: .background).async {
+                                                        let ret = BTTool.disconnect(mac: allDevices[index].deviceID)
+                                                        if ret {
+                                                            netcastService.transDevice(device: allDevices[index], to: peer.name)
+                                                        } else {
+                                                            createNotification(title: "Transmission Failed".local,
+                                                                               message: String(format: "Failed to disconnect %@!".local, allDevices[index].deviceName))
+                                                        }
+                                                    }
+                                                }, label:{ Text(peer.name)})
+                                            }
+                                            if netcastService.transceiver.availablePeers.isEmpty { Text("No Available Peers".local) }
+                                        }
+                                    }
+                                    if allDevices[index].deviceID != "@MacInternalBattery" {
+                                        if !pinnedList.contains(allDevices[index].deviceName) {
+                                            Button(action: {
+                                                pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                                pinnedList.append(allDevices[index].deviceName)
+                                                ud.set(pinnedList, forKey: "pinnedList")
+                                                AppDelegate.shared.refeshPinnedBar()
+                                            }) {
+                                                Label("Pin to Menu Bar", systemImage: "")
+                                            }
+                                        } else {
+                                            Button(action: {
+                                                pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                                pinnedList.removeAll { $0 == allDevices[index].deviceName }
+                                                ud.set(pinnedList, forKey: "pinnedList")
+                                                AppDelegate.shared.refeshPinnedBar()
+                                            }) {
+                                                Label("Unpin This Device", systemImage: "")
+                                            }
+                                        }
+                                        Divider()
+                                        Menu(content: {
+                                        }, label: {
+                                            Label("Transfer to...", systemImage: "")
+                                        })
+                                        Divider()
+                                        if #available(macOS 14, *) {
+                                            Button(action: {
+                                                copyToClipboard(allDevices[index].deviceName)
+                                                _ = createAlert(title: "Device Name Copied".local,
+                                                                message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, allDevices[index].deviceName),
+                                                                button1: "OK".local).runModal()
+                                            }) {
+                                                Label("Copy Device Name", systemImage: "")
+                                            }
+                                        }
+                                        Button(action: {
+                                            hidden.append(index)
+                                            var blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
+                                            blackList.append(allDevices[index].deviceName)
+                                            ud.set(blackList, forKey: "blackList")
+                                        }) {
+                                            Label("Hide From List", systemImage: "")
+                                        }
+                                    }
+                                }*/
                             }
                             if index != allDevices.count-1 { Divider() }
                         }
@@ -593,9 +722,9 @@ struct popover: View {
                                 if !hidden2.contains(index){
                                     Button(action: {
                                         hidden2.append(index)
-                                        var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+                                        var blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
                                         blackList.removeAll { $0 == hiddenDevices[index].deviceName }
-                                        UserDefaults.standard.set(blackList, forKey: "blackList")
+                                        ud.set(blackList, forKey: "blackList")
                                     }, label: {
                                         Image(getDeviceIcon(hiddenDevices[index]))
                                             .resizable()
@@ -622,7 +751,7 @@ struct popover: View {
                 }
                 .padding(.horizontal, 6)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 3)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
                         .strokeBorder(Color.secondary, lineWidth: 1)
                         .padding(.vertical, -1)
                         .padding(.horizontal, 5)
@@ -641,6 +770,27 @@ struct popover: View {
                         }
                     }
                 }
+                if !fromDock {
+                    Color.clear
+                        .frame(height: 8.5)
+                        .onHover { hovering in
+                            if hovering {
+                                overStack = -1
+                                overStack2 = -1
+                                overStackNC = -1
+                            }
+                        }
+                }
+            }
+        }
+        .frame(width: 352)
+        .onAppear { allDevices = allDevice }
+        .onReceive(mainTimer) { t in
+            if !fromDock && menuPopover.isShown {
+                allDevices = AirBatteryModel.getAll()
+                let ibStatus = InternalBattery.status
+                if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+                if nearCast { allNearcast = getFiles(withExtension: "json", in: ncFolder) }
             }
         }
     }
@@ -652,6 +802,10 @@ struct nearcastView: View {
     @Binding var overStackNC: Int
     @State private var overStack = -1
     @State private var overCopyButton = false
+    @State private var overAlertButton = false
+    @State private var overPinButton = false
+    @State private var alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+    @State private var pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
     
     var body: some View {
         Spacer().frame(height: 8)
@@ -664,29 +818,115 @@ struct nearcastView: View {
                             .aspectRatio(contentMode: .fit)
                             .foregroundColor(Color("black_white"))
                             .frame(width: 22, height: 22, alignment: .center)
-                        Text("\(((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(devices[index].deviceName)")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("black_white"))
-                            .frame(height: 24, alignment: .center)
-                            .padding(.horizontal, 7)
+                        HStack(spacing: 1) {
+                            Text("\(((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(devices[index].deviceName)")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("black_white"))
+                                .frame(height: 24, alignment: .center)
+                                .padding(.horizontal, 7)
+                            Spacer().frame(width: 0.5)
+                            if alertList.map({$0.name}).contains(devices[index].deviceName) {
+                                Image(systemName: "bell.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(Color("black_white"))
+                            }
+                            if pinnedList.contains(devices[index].deviceName) {
+                                Image(systemName: "pin.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(Color("black_white"))
+                                    .offset(y: 0.2)
+                            }
+                        }.padding(.horizontal, 7)
                         if overStackNC == mainIndex && overStack == index {
                             Spacer()
-                            Text("\(Int((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60))"+" mins ago".local)
-                                .font(.system(size: 11))
-                            if devices[index].hasBattery {
-                                if #available(macOS 14, *) {
-                                    Button(action: {
-                                        copyToClipboard(devices[index].deviceName)
-                                        _ = createAlert(title: "Device Name Copied".local,
-                                                        message: String(format: "Device name: \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
-                                                        button1: "OK".local).runModal()
-                                    }, label: {
-                                        Image(systemName: "list.clipboard.fill")
-                                            .frame(width: 20, height: 20, alignment: .center)
-                                            .foregroundColor(overCopyButton ? .accentColor : .secondary)
-                                    })
-                                    .buttonStyle(PlainButtonStyle())
-                                    .onHover{ hovering in overCopyButton = hovering }
+                            HStack(spacing: 3) {
+                                Text("\(Int((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60))"+" mins ago".local)
+                                    .font(.system(size: 11))
+                                if devices[index].hasBattery {
+                                    Spacer().frame(width: 1)
+                                    if !alertList.map({$0.name}).contains(devices[index].deviceName) {
+                                        Button(action: {
+                                            let alert = btAlert(name: devices[index].deviceName,
+                                                                full: 80, fullOn: true, fullSound: true,
+                                                                low: 20, lowOn: true, lowSound: true)
+                                            let alertWindowController = AlertWindowController()
+                                            alertWindowController.showAlert(with: alert, iconName: getDeviceIcon(devices[index]), onConfirm: { newAlert in
+                                                alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                                alertList.append(newAlert)
+                                                ud.set(object: alertList, forKey: "alertList")
+                                            }, onCancel: {})
+                                        }, label: {
+                                            Image("bell.circle")
+                                                .resizable().scaledToFit()
+                                                .frame(width: 18, height: 18, alignment: .center)
+                                                .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                        })
+                                        .buttonStyle(PlainButtonStyle())
+                                        .onHover{ hovering in overAlertButton = hovering }
+                                    } else {
+                                        Button(action: {
+                                            alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                            if let alert = alertList.first(where: {$0.name == devices[index].deviceName}) {
+                                                let alertWindowController = AlertWindowController()
+                                                alertWindowController.showAlert(with: alert, iconName: getDeviceIcon(devices[index]), onConfirm: { newAlert in
+                                                    alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
+                                                    alertList.removeAll(where: {$0.name == devices[index].deviceName})
+                                                    alertList.append(newAlert)
+                                                    ud.set(object: alertList, forKey: "alertList")
+                                                }, onCancel: {})
+                                            }
+                                        }, label: {
+                                            Image("bell.circle.fill")
+                                                .resizable().scaledToFit()
+                                                .frame(width: 18, height: 18, alignment: .center)
+                                                .foregroundColor(overAlertButton ? .accentColor : .secondary)
+                                        })
+                                        .buttonStyle(PlainButtonStyle())
+                                        .onHover{ hovering in overAlertButton = hovering }
+                                    }
+                                    if !pinnedList.contains(devices[index].deviceName) {
+                                        Button(action: {
+                                            pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                            pinnedList.append(devices[index].deviceName)
+                                            ud.set(pinnedList, forKey: "pinnedList")
+                                            AppDelegate.shared.refeshPinnedBar()
+                                        }, label: {
+                                            Image("pin.circle")
+                                                .resizable().scaledToFit()
+                                                .frame(width: 18, height: 18, alignment: .center)
+                                                .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                        })
+                                        .buttonStyle(PlainButtonStyle())
+                                        .onHover{ hovering in overPinButton = hovering }
+                                    } else {
+                                        Button(action: {
+                                            pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                            pinnedList.removeAll { $0 == devices[index].deviceName }
+                                            ud.set(pinnedList, forKey: "pinnedList")
+                                            AppDelegate.shared.refeshPinnedBar()
+                                        }, label: {
+                                            Image("pin.circle.fill")
+                                                .resizable().scaledToFit()
+                                                .frame(width: 18, height: 18, alignment: .center)
+                                                .foregroundColor(overPinButton ? .accentColor : .secondary)
+                                        })
+                                        .buttonStyle(PlainButtonStyle())
+                                        .onHover{ hovering in overPinButton = hovering }
+                                    }
+                                    if #available(macOS 14, *) {
+                                        Button(action: {
+                                            copyToClipboard(devices[index].deviceName)
+                                            _ = createAlert(title: "Device Name Copied".local,
+                                                            message: String(format: "Device name \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
+                                                            button1: "OK".local).runModal()
+                                        }, label: {
+                                            Image(systemName: "list.clipboard.fill")
+                                                .frame(width: 20, height: 20, alignment: .center)
+                                                .foregroundColor(overCopyButton ? .accentColor : .secondary)
+                                        })
+                                        .buttonStyle(PlainButtonStyle())
+                                        .onHover{ hovering in overCopyButton = hovering }
+                                    }
                                 }
                             }
                         } else {
@@ -696,7 +936,7 @@ struct nearcastView: View {
                                     .foregroundColor((devices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
                                     .font(.system(size: 11))
                                 BatteryView(item: devices[index])
-                                    .scaleEffect(0.8)
+                                    .scaleEffect(0.85)
                             }
                         }
                     }
@@ -705,14 +945,14 @@ struct nearcastView: View {
                     .onHover{ hovering in overStack = index }
                 }
                 .background((overStackNC == mainIndex && overStack == index) ? Color("black_white").opacity(0.15) : .clear)
-                .clipShape(RoundedCornersShape(radius: 1.9, corners: index == devices.count - 1 ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
+                .clipShape(RoundedCornersShape(radius: 2.9, corners: index == devices.count - 1 ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
                 if index != devices.count-1 { Divider() }
             }
         }
         .onHover{ hovering in overStackNC = mainIndex }
         .padding(.horizontal, 6)
         .overlay(
-            RoundedRectangle(cornerRadius: 3)
+            RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(Color.secondary, lineWidth: 1)
                 .padding(.vertical, -1)
                 .padding(.horizontal, 5)

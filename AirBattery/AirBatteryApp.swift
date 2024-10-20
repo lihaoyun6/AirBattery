@@ -11,12 +11,15 @@ import UserNotifications
 import IOBluetooth
 import Sparkle
 
+let ud = UserDefaults.standard
 var updaterController: SPUStandardUpdaterController!
 var statusBarItem: NSStatusItem!
 var pinnedItems = [NSStatusItem]()
 var netcastService: MultipeerService = MultipeerService(serviceType: "airbattery-nc")
 let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
 let systemUUID = getMacDeviceUUID()
+var dockWindow = AutoHideWindow()
+var menuPopover = NSPopover()
 
 @main
 struct AirBatteryApp: App {
@@ -35,9 +38,9 @@ struct AirBatteryApp: App {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotificationCenterDelegate {
     static let shared = AppDelegate()
-    @AppStorage("showOn") var showOn = "both"
+    @AppStorage("showOn") var showOn = "sbar"
     @AppStorage("machineType") var machineType = "mac"
     @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("ncGroupID") var ncGroupID = ""
@@ -46,13 +49,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
+    @AppStorage("alertSound") var alertSound = true
     @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("hideLevel") var hideLevel = 90
-    //var blackList = (UserDefaults.standard.object(forKey: "blackList") ?? []) as! [String]
+    
+    //加载旧版设置项
+    @AppStorage("alertLevel") var alertLevel = 10
+    @AppStorage("fullyLevel") var fullyLevel = 100
     
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
-    var dockWindow = NSWindow()
     var startTime = Date()
     let bleBattery = BLEBattery()
     let btdBattery = BTDBattery()
@@ -72,7 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             var allDevices = AirBatteryModel.getAll()
             let ibStatus = InternalBattery.status
             if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
-            let contentViewSwiftUI = popover(fromDock: true, allDevices: allDevices)
+            let contentViewSwiftUI = popover(fromDock: true, allDevice: allDevices)
             let contentView = NSHostingView(rootView: contentViewSwiftUI)
             let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
             let allNearcast = getFiles(withExtension: "json", in: ncFolder)
@@ -119,28 +125,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 }
             }
             contentView.frame = NSRect(x: menuX, y: menuY, width: 352, height: menuHeight)
-            dockWindow = NSWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
+            dockWindow = AutoHideWindow(contentRect: contentView.frame, styleMask: [.fullSizeContentView], backing: .buffered, defer: false)
             dockWindow.title = "AirBattery Dock Window"
             dockWindow.level = .popUpMenu
             dockWindow.contentView = contentView
             dockWindow.isOpaque = false
             dockWindow.backgroundColor = NSColor.clear
             dockWindow.contentView?.wantsLayer = true
-            dockWindow.contentView?.layer?.cornerRadius = 6
+            dockWindow.contentView?.layer?.cornerRadius = 7
             dockWindow.contentView?.layer?.masksToBounds = true
-            dockWindow.orderFront(self)
+            dockWindow.makeKeyAndOrderFront(nil)
         }
         return true
     }
     
     func applicationWillFinishLaunching(_ notification: Notification) {
-        if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
-        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds, .withTimeZone]
-        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
-        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
-        UserDefaults.standard.register( // default defaults (used if not set)
+        // default defaults (used if not set)
+        ud.register(
             defaults: [
-                "showOn": "both",
+                "showOn": "sbar",
                 "machineType": "mac",
                 "deviceName": "Mac",
                 "launchAtLogin": false,
@@ -157,6 +160,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             ]
         )
         
+        if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds, .withTimeZone]
+        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
+        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
+        
+        //处理旧版偏好设置
+        if let alertList = (ud.object(forKey: "alertList") ?? []) as? [String] {
+            let alerts: [btAlert] = alertList.map({
+                btAlert(name: $0, full: fullyLevel == 100 ? 99 : fullyLevel, fullOn: true, fullSound: alertSound, low: alertLevel, lowOn: true, lowSound: alertSound)
+            })
+            ud.set([], forKey: "alertList")
+            ud.set(object: alerts, forKey: "alertList")
+        } else {
+            print(ud.get(objectType: [btAlert].self, forKey: "alertList") ?? [])
+        }
+        
         if !FileManager.default.fileExists(atPath: ncFolder.path) {
             do {
                 try FileManager.default.createDirectory(at: ncFolder, withIntermediateDirectories: true, attributes: nil)
@@ -172,6 +191,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         startTime = Date()
+        InternalBattery.status = getPowerState()
         nc.addObserver(self, selector: #selector(onDisplayWake), name: NSWorkspace.screensDidWakeNotification, object: nil)
         IOBluetoothDevice.register(forConnectNotifications: self, selector: #selector(deviceIsConnected(notification:fromDevice:)))
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(_:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
@@ -179,10 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         launchAtLogin = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == "com.lihaoyun6.AirBatteryHelper" }
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
         print("⚙️ Icon mode = \(showOn)")
-        if ncGroupID != "" {
-            //netcastService = MultipeerService(serviceType: String(ncGroupID.prefix(15)))
-            if nearCast { netcastService.resume() }
-        }
+        if ncGroupID != "" { if nearCast { netcastService.resume() } }
         machineType = getMacDeviceType()
         //machineType = getMacModelIdentifier()
         deviceName = getMacDeviceName()
@@ -191,28 +208,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error { print("⚠️ Notification authorization denied: \(error.localizedDescription)") }
         }
+        UNUserNotificationCenter.current().delegate = self
         
         bleBattery.startScan()
         btdBattery.startScan()
         magicBattery.startScan()
         ideviceBattery.startScan()
-        
-        if readBTHID {
-            let tipID = "ab.third-party-device.note"
-            let never = UserDefaults.standard.object(forKey: "neverRemindMe") as! [String]
-            if !never.contains(tipID) {
-                let alert = createAlert(title: "AirBattery Tips".local, message: "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes.".local, button1: "Don't remind me again", button2: "OK")
-                if alert.runModal() == .alertFirstButtonReturn {
-                    UserDefaults.standard.setValue(never + [tipID], forKey: "neverRemindMe")
-                }
-            }
-            /*if !IOHIDRequestAccess(kIOHIDRequestTypeListenEvent) {
-                let alert = createAlert(title: "Permission Required".local, message: "AirBattery does not log any of your input! This permission is only used to read battery info from HID devices.".local, button1: "Open Settings")
-                if alert.runModal() == .alertFirstButtonReturn {
-                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
-                }
-            }*/
-        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             AirBatteryModel.writeData()
@@ -223,32 +224,59 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.delegate = self
         statusMenu.delegate = self
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusBarItem.menu = statusMenu
+        //statusBarItem.menu = statusMenu
         if let button = statusBarItem.button {
             button.target = self
             let ib = getPowerState()
-            
+            let iconView = NSHostingView(rootView: mainBatteryView())
             if ib.hasBattery && intBattOnStatusBar {
-                let iconView = NSHostingView(rootView: mainBatteryView())
                 iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
                 if hidePercentWhenFull && ib.batteryLevel > hideLevel {
                     iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
                 }
-                button.addSubview(iconView)
-                button.frame = iconView.frame
             } else {
-                let image = NSImage(named: "bolt.square.fill")!
-                image.size = NSSize(width: 16, height: 16)
-                button.image = image
+                iconView.frame = NSRect(x: 0, y: 0, width: 36, height: 21.5)
             }
+            button.addSubview(iconView)
+            button.frame = iconView.frame
+            button.action = #selector(togglePopover(_ :))
         }
         statusBarItem.isVisible = !(showOn == "dock" || showOn == "none")
         NSApp.dockTile.contentView = NSHostingView(rootView: MultiBatteryView())
         NSApp.dockTile.display()
+        if nearCast {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                netcastService.refeshAll()
+            }
+        }
+        
+        if showOn == "dock" || showOn == "both" {
+            let tipID = "ab.docktile-power.note"
+            let never = ud.object(forKey: "neverRemindMe") as! [String]
+            if !never.contains(tipID) {
+                let alert = createAlert(title: "AirBattery Tips".local, message: "Displaying AirBattery on the Dock will consume more power, it is better to use Menu Bar mode or Widgets.".local, button1: "Don't remind me again", button2: "OK")
+                if alert.runModal() == .alertFirstButtonReturn { ud.setValue(never + [tipID], forKey: "neverRemindMe") }
+            }
+        }
+        
+        if readBTHID {
+            let tipID = "ab.third-party-device.note"
+            let never = ud.object(forKey: "neverRemindMe") as! [String]
+            if !never.contains(tipID) {
+                let alert = createAlert(title: "AirBattery Tips".local, message: "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes.".local, button1: "Don't remind me again", button2: "OK")
+                if alert.runModal() == .alertFirstButtonReturn { ud.setValue(never + [tipID], forKey: "neverRemindMe") }
+            }
+        }
     }
     
     func applicationWillTerminate(_ notification: Notification) {
         _ = process(path: "/usr/bin/killall", arguments: ["idevicesyslog"])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                    willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
     }
     
     func setStatusBar(width: Double) {
@@ -260,11 +288,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func refeshPinnedBar() {
-        let pinnedList = (UserDefaults.standard.object(forKey: "pinnedList") ?? []) as! [String]
-        let pinnedDevices = AirBatteryModel.getAll().filter({ pinnedList.contains($0.deviceName) })
+        let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+        if pinnedList.isEmpty { return }
+        var allDevices = AirBatteryModel.getAll()
+        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
+        for ncFile in ncFiles { allDevices += AirBatteryModel.ncGetAll(url: ncFile) }
+        let pinnedDevices = allDevices.filter({ pinnedList.contains($0.deviceName) })
         for device in pinnedDevices {
             if let index = pinnedItems.firstIndex(where: { $0.button?.toolTip == device.deviceName }) {
-                pinnedItems[index].button?.title = "\(device.batteryLevel)%"
+                pinnedItems[index].button?.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
             } else {
                 let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
                 if let button = statusItem.button {
@@ -272,7 +304,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     let image = NSImage(named: icon)!.resized(to: NSSize(width: 17, height: 17))
                     image.isTemplate = true
                     button.image = image
-                    button.title = "\(device.batteryLevel)%"
+                    button.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
                     button.toolTip = device.deviceName
                 }
                 pinnedItems.append(statusItem)
@@ -314,7 +346,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
         if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
-        let contentViewSwiftUI = popover(fromDock: false, allDevices: allDevices)
+        let contentViewSwiftUI = popover(fromDock: false, allDevice: allDevices)
         let contentView = NSHostingView(rootView: contentViewSwiftUI)
         let hiddenRow = AirBatteryModel.getBlackList().count > 0 ? 1 : 0
         let allNearcast = getFiles(withExtension: "json", in: ncFolder)
@@ -332,6 +364,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuItem.view = contentView
         statusMenu.removeAllItems()
         statusMenu.addItem(menuItem)
+    }
+    
+    @objc func togglePopover(_ sender: Any?) {
+        if let button = statusBarItem.button, !menuPopover.isShown {
+            var allDevices = AirBatteryModel.getAll()
+            let ibStatus = InternalBattery.status
+            if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
+            let contentView = NSHostingController(rootView: popover(fromDock: false, allDevice: allDevices))
+            menuPopover.setValue(true, forKeyPath: "shouldHideAnchor")
+            menuPopover.contentViewController = contentView
+            menuPopover.behavior = .transient
+            var bound = button.bounds
+            if getMenuBarHeight() == 24.0 { bound.origin.y -= 6 }
+            menuPopover.show(relativeTo: bound, of: button, preferredEdge: .minY)
+            //menuPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            menuPopover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
+        }
     }
     
     @objc func handleURLEvent(_ event: NSAppleEventDescriptor, replyEvent: NSAppleEventDescriptor) {
@@ -375,6 +424,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 }
 
+class NNSWindow: NSWindow {
+    override var canBecomeKey: Bool {
+        return true
+    }
+}
+
+class AutoHideWindow: NSWindow {
+    override var canBecomeKey: Bool {
+        return true
+    }
+    
+    override func resignKey() {
+        super.resignKey()
+        self.orderOut(nil)
+    }
+}
+
 extension NSImage {
     func resized(to maxSize: NSSize) -> NSImage {
         let aspectWidth = maxSize.width / self.size.width
@@ -392,5 +458,21 @@ extension NSImage {
         newImage.unlockFocus()
         
         return newImage
+    }
+}
+
+public extension UserDefaults {
+    func set<T: Codable>(object: T, forKey: String) {
+        if let jsonData = try? JSONEncoder().encode(object) {
+            set(jsonData, forKey: forKey)
+        }
+    }
+    
+    func get<T: Codable>(objectType: T.Type, forKey: String) -> T? {
+        guard let result = value(forKey: forKey) as? Data else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(objectType, from: result)
     }
 }

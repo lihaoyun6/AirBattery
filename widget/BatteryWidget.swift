@@ -8,6 +8,7 @@
 import WidgetKit
 import SwiftUI
 let ncPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
+let ud = UserDefaults.standard
 
 @available(macOS 14, *)
 struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {

@@ -9,10 +9,11 @@ import CryptoKit
 import SystemConfiguration
 import UserNotifications
 
-let widgetInterval = UserDefaults.standard.integer(forKey: "widgetInterval")
-let updateInterval = UserDefaults.standard.double(forKey: "updateInterval")
+let widgetInterval = ud.integer(forKey: "widgetInterval")
+let updateInterval = ud.double(forKey: "updateInterval")
 
-let dockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+let mainTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+let dockTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetDataTimer = Timer.publish(every: TimeInterval(24 * updateInterval), on: .main, in: .common).autoconnect()
 let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Double(arc4random_uniform(10)) - Double(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
@@ -158,6 +159,15 @@ public func process(path: String, arguments: [String], timeout: Double = 0) -> S
     return output.trimmingCharacters(in: .newlines)
 }
 
+func getMenuBarHeight() -> CGFloat {
+    let mouseLocation = NSEvent.mouseLocation
+    let screen = NSScreen.screens.first(where: { NSMouseInRect(mouseLocation, $0.frame, false) })
+    if let screen = screen {
+        return screen.frame.height - screen.visibleFrame.height - (screen.visibleFrame.origin.y - screen.frame.origin.y) - 1
+    }
+    return 0.0
+}
+
 func createAlert(level: NSAlert.Style = .warning, title: String, message: String, button1: String, button2: String = "") -> NSAlert {
     let alert = NSAlert()
     alert.messageText = title.local
@@ -166,6 +176,20 @@ func createAlert(level: NSAlert.Style = .warning, title: String, message: String
     if button2 != "" { alert.addButton(withTitle: button2.local) }
     alert.alertStyle = level
     return alert
+}
+
+func createNotification(title: String, message: String, alertSound: Bool = true, interval: TimeInterval = 2) {
+    //@AppStorage("alertSound") var alertSound = true
+    
+    let content = UNMutableNotificationContent()
+    content.title = title
+    content.body = message
+    content.sound = alertSound ? UNNotificationSound.default : nil
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
+    }
 }
 
 func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
@@ -276,38 +300,6 @@ func isGroudIDValid(id: String) -> Bool {
     let ncid = pre.evaluate(with: String(id.prefix(15)))
     let pasd = pre2.evaluate(with: id)
     return (id.count == 23 && String(id.prefix(3)) == "nc-" && ncid && pasd)
-}
-
-func batteryAlert() {
-    @AppStorage("alertLevel") var alertLevel = 10
-    @AppStorage("fullyLevel") var fullyLevel = 100
-    @AppStorage("alertSound") var alertSound = true
-    let alertList = (UserDefaults.standard.object(forKey: "alertList") ?? []) as! [String]
-    var allDevices = AirBatteryModel.getAll()
-    let ibStatus = InternalBattery.status
-    allDevices.insert(ib2ab(ibStatus), at: 0)
-    for device in allDevices.filter({ $0.batteryLevel <= alertLevel && $0.isCharging == 0 && alertList.contains($0.deviceName) }) {
-        let content = UNMutableNotificationContent()
-        content.title = "Low Battery".local
-        content.body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
-        content.sound = alertSound ? UNNotificationSound.default : nil
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-        let request = UNNotificationRequest(identifier: device.deviceName + ".lowbattery", content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
-        }
-    }
-    for device in allDevices.filter({ $0.batteryLevel >= fullyLevel && $0.isCharging != 0 && alertList.contains($0.deviceName) }) {
-        let content = UNMutableNotificationContent()
-        content.title = "Fully Charged".local
-        content.body = String(format: "\"%@\" battery has reached %d%%".local, device.deviceName, device.batteryLevel)
-        content.sound = alertSound ? UNNotificationSound.default : nil
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-        let request = UNNotificationRequest(identifier: device.deviceName + ".fullycharged", content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error { print("Notification failed to send：\(error.localizedDescription)") }
-        }
-    }
 }
 
 func getMacDeviceType() -> String {

@@ -36,7 +36,7 @@ struct SettingsView: View {
     @State private var editingIndex: Int?
     @State private var ib = getMacDeviceType().lowercased().contains("book")
     
-    @AppStorage("showOn") var showOn = "both"
+    @AppStorage("showOn") var showOn = "sbar"
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showThisMac") var showThisMac = "icon"
     //@AppStorage("useDeviceName") var useDeviceName = true
@@ -121,6 +121,9 @@ struct SettingsView: View {
                                 statusBarItem.isVisible = false
                                 for i in pinnedItems { i.isVisible = false }
                                 NSApp.setActivationPolicy(.accessory)
+                            }
+                            if showOn == "dock" || showOn == "both" {
+                                _ = createAlert(title: "AirBattery Tips".local, message: "Displaying AirBattery on the Dock will consume more power, it is better to use Menu Bar mode or Widgets.".local, button1: "OK").runModal()
                             }
                         }
                         
@@ -294,9 +297,11 @@ struct SettingsView: View {
                         Button(action: {
                             if ncGroupID != "" && isGroudIDValid(id: ncGroupID) {
                                 copyToClipboard(ncGroupID)
-                                _ = createAlert(title: "Group ID Copied".local,
+                                createNotification(title: "Group ID Copied".local,
+                                                   message: String(format: "Group ID has been copied to the clipboard.".local, ncGroupID))
+                                /*_ = createAlert(title: "Group ID Copied".local,
                                                 message: String(format: "Group ID has been copied to the clipboard.".local, ncGroupID),
-                                                button1: "OK".local).runModal()
+                                                button1: "OK".local).runModal()*/
                             } else {
                                 DispatchQueue.main.async { ncGroupID = "" }
                                 _ = createAlert(
@@ -368,8 +373,8 @@ struct SettingsView: View {
                     HStack{
                         Toggle(isOn: $intBattOnStatusBar) {}
                             .toggleStyle(.switch)
-                            .onChange(of: intBattOnStatusBar) { _ in
-                                _ = createAlert(title: "Relaunch Required".local, message: "Restart AirBattery to apply this change.".local, button1: "OK".local).runModal()
+                            .onChange(of: intBattOnStatusBar) { newValue in
+                                if !newValue { AppDelegate.shared.setStatusBar(width: 42) }
                             }
                         Text("Dynamic Battery Icon").foregroundColor(ib ? Color.primary : Color.secondary)
                     }
@@ -459,7 +464,7 @@ struct SettingsView: View {
                 Image("widget")
                 Text("Widget")
             }
-            HStack(spacing: 0){
+            /*HStack(spacing: 0){
                 VStack(alignment:.trailing, spacing: 22){
                     Text("Notification Sound:")
                     Text("Low Battery Threshold:")
@@ -482,7 +487,7 @@ struct SettingsView: View {
                 }.frame(width: 240, alignment: .leading)
             }
             .navigationTitle("AirBattery Settings")
-            .tabItem { Label("Notification", systemImage: "bell") }
+            .tabItem { Label("Notification", systemImage: "bell") }*/
             VStack(alignment:.center, spacing: 0) {
                 HStack {
                     /*Text(fullBlockMode
@@ -542,8 +547,8 @@ struct SettingsView: View {
                         }.padding()
                     }
                 }
-                .onAppear { blockedItems = (UserDefaults.standard.object(forKey: "blockedDevices") as? [String]) ?? [String]() }
-                .onChange(of: blockedItems) { b in UserDefaults.standard.setValue(b, forKey: "blockedDevices") }
+                .onAppear { blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]() }
+                .onChange(of: blockedItems) { b in ud.setValue(b, forKey: "blockedDevices") }
             }
             .padding(.top, 5)
             .navigationTitle("AirBattery Settings")
