@@ -3,6 +3,36 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.8</title>
+            <pubDate>Sun, 20 Oct 2024 19:38:09 +0800</pubDate>
+            <sparkle:version>158</sparkle:version>
+            <sparkle:shortVersionString>1.5.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>改进充电提醒功能, 支持为每台设备添加不同的提醒配置.</li>
+                <li>菜单栏设备列表支持自动刷新, 且改进了对低版本系统的兼容性.</li>
+                <li>充电提醒可以在所有加入同一 Nearcast 组的 Mac 上同步弹出.</li>
+                <li>支持将 Nearcast 设备固定到菜单栏, 或为其添加充电提醒.</li>
+                <li>支持在程序坞图标上显示 Nearcast 设备, 优化了程序坞模式的功耗表现.</li>
+                <li>修复了已固定到菜单栏的设备电量不会自动刷新的问题.</li>
+                </ul><ul>
+                <li>Now you can set different battery alerts for each device.</li>
+                <li>The device list window from menu bar supports automatically refresh.</li>
+                <li>Battery alerts will be shared across Macs in a Nearcast group.</li>
+                <li>Support for pinning Nearcast devices, or setting battery alerts for them.</li>
+                <li>Support for displaying NearCast devices on the Dock icon.</li>
+                <li>Fixed an issue where pinned devices would not automatically refresh.</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.8/AirBattery_v1.5.8.dmg" length="8508613" type="application/octet-stream" sparkle:edSignature="ZYZ1qu4utPz06kaxo13KW0AuCmkKZcDKhmgtW9Sp2rxw/omGZnitUnpU8pB7ISXhiwFxFoBJXlBTANtYNZr2Cg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.8/Update158-157.delta" sparkle:deltaFrom="157" length="556870" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="CN3YvlnSDY65xGZeZy1q26AjA4jypywKJKLGeWbqB9P6ephaBJ6q6e6sAxxfBwWzWIQT0LiVg2H0x9D2cbhsDA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.8/Update158-156.delta" sparkle:deltaFrom="156" length="587506" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="Zr1b7yvuybaMEiyghK9Q4XdhALCWT0pxLOJ7A+vIAfWowSXEdKXeTndcf4E4cMc/XomnRK83Re+QYjR1wjruDA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.8/Update158-155.delta" sparkle:deltaFrom="155" length="612986" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="8//5AM4gnMLhxGd+sxP6WBs1vkKSKDf9EYH0LFJ3pQNBvS961MmcJsWLFRbrCujPHU2juH18K79eEMFzK47OBg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.7</title>
             <pubDate>Tue, 15 Oct 2024 16:25:13 +0800</pubDate>
             <sparkle:version>157</sparkle:version>
