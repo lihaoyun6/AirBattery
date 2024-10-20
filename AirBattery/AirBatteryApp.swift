@@ -172,8 +172,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             })
             ud.set([], forKey: "alertList")
             ud.set(object: alerts, forKey: "alertList")
-        } else {
-            print(ud.get(objectType: [btAlert].self, forKey: "alertList") ?? [])
         }
         
         if !FileManager.default.fileExists(atPath: ncFolder.path) {
