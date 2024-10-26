@@ -8,33 +8,43 @@ import SwiftUI
 import Foundation
 
 class SPBluetoothDataModel {
-    static var data: String = "{}"
+    static var shared: SPBluetoothDataModel = SPBluetoothDataModel()
+    var data: String = "{}"
+    
+    func refeshData(completion: (String) -> Void) {
+        if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) {
+            data = result
+            completion(result)
+        }
+    }
 }
 
 class MagicBattery {
-    var scanTimer: Timer?
+    static var shared: MagicBattery = MagicBattery()
+    
+    //var scanTimer: Timer?
     @AppStorage("readBTDevice") var readBTDevice = true
     //@AppStorage("readBTHID") var readBTHID = true
     @AppStorage("updateInterval") var updateInterval = 1.0
     @AppStorage("deviceName") var deviceName = "Mac"
     
     func startScan() {
-        let interval = TimeInterval(59.0 * updateInterval)
-        scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
+        //let interval = TimeInterval(59.0 * updateInterval)
+        //scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning Magic devices...")
         scanDevices()
     }
     
     @objc func scanDevices() {
-        Thread.detachNewThread {
+        //Thread.detachNewThread {
             if self.readBTDevice {
+                self.getOtherBTBattery()
                 self.getMagicBattery()
                 self.getOldMagicKeyboard()
                 self.getOldMagicTrackpad()
                 self.getOldMagicMouse()
-                self.getOtherBTBattery()
             }
-        }
+        //}
     }
     
     func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
@@ -60,7 +70,7 @@ class MagicBattery {
     
     func getDeviceName(_ mac: String, _ def: String) -> String {
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return def }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any] {
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any] {
             if let parent = findParentKey(forValue: mac, in: json) {
                 return parent
             }
@@ -69,7 +79,7 @@ class MagicBattery {
     }
     
     func getDeviceType(_ mac: String, _ def: String) -> String {
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
            let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
            let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
             if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
@@ -88,7 +98,7 @@ class MagicBattery {
     }
     
     func getDeviceTypeWithPID(_ pid: String, _ def: String) -> String {
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
            let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
            let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
             if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
@@ -218,7 +228,7 @@ class MagicBattery {
     func getAirpods() {
         let now = Date().timeIntervalSince1970
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
         let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
         let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
             if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
@@ -293,7 +303,7 @@ class MagicBattery {
     
     func getOtherBTBattery() {
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
         let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
         let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
             if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{

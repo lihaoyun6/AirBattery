@@ -8,15 +8,16 @@ import SwiftUI
 import Foundation
 
 class IDeviceBattery {
-    var scanTimer: Timer?
-    //var deviceIDs: [String: String] = [:]
+    static var shared: IDeviceBattery = IDeviceBattery()
+    
+    //var scanTimer: Timer?
     @AppStorage("readPencil") var readPencil = false
     @AppStorage("readIDevice") var readIDevice = true
     @AppStorage("updateInterval") var updateInterval = 1.0
     
     func startScan() {
-        let interval = TimeInterval(20.0 * updateInterval)
-        scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
+        //let interval = TimeInterval(5.0)
+        //scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning iDevice devices...")
         scanDevices()
     }
@@ -68,6 +69,7 @@ class IDeviceBattery {
     }
     
     func writeBatteryInfo(_ id: String, _ connectType: String) {
+        //print("ℹ️ Getting Battery Info for \(id)")
         let lastUpdate = Date().timeIntervalSince1970
         if connectType == "" { _ = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/wificonnection", arguments: ["-u", id, "true"]) }
         if let deviceInfo = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/ideviceinfo", arguments: [connectType, "-u", id]){

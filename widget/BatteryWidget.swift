@@ -7,7 +7,7 @@
 
 import WidgetKit
 import SwiftUI
-let ncPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
+let ncFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
 let ud = UserDefaults.standard
 
 @available(macOS 14, *)
@@ -21,7 +21,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
-        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
         for ncFile in ncFiles {
             let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
             data += ncData
@@ -39,7 +39,7 @@ struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
-        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
         for ncFile in ncFiles {
             let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
             data += ncData
@@ -66,7 +66,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
-        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
         for ncFile in ncFiles {
             let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
             data += ncData
@@ -86,7 +86,7 @@ struct ViewSizeTimelineProvider: TimelineProvider {
         let apps = NSWorkspace.shared.runningApplications
         for app in apps as [NSRunningApplication] { if app.bundleIdentifier == "com.lihaoyun6.AirBattery" { mainApp = true } }
         var data = AirBatteryModel.readData()
-        let ncFiles = getFiles(withExtension: "json", in: ncPath)
+        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
         for ncFile in ncFiles {
             let ncData = AirBatteryModel.ncGetAll(url: ncFile, fromWidget: true)
             data += ncData

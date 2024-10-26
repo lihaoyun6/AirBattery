@@ -20,6 +20,9 @@ let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainM
 let systemUUID = getMacDeviceUUID()
 var dockWindow = AutoHideWindow()
 var menuPopover = NSPopover()
+let bleBattery = BLEBattery()
+let btdBattery = BTDBattery()
+var updateDelay = 1.0
 
 @main
 struct AirBatteryApp: App {
@@ -39,7 +42,7 @@ struct AirBatteryApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotificationCenterDelegate {
-    static let shared = AppDelegate()
+    //static let shared = AppDelegate()
     @AppStorage("showOn") var showOn = "sbar"
     @AppStorage("machineType") var machineType = "mac"
     @AppStorage("deviceName") var deviceName = "Mac"
@@ -47,11 +50,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
-    @AppStorage("statusBarBattPercent") var statusBarBattPercent = false
+    @AppStorage("batteryPercent") var batteryPercent = "outside"
     @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     @AppStorage("alertSound") var alertSound = true
     @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("hideLevel") var hideLevel = 90
+    @AppStorage("whitelistMode") var whitelistMode = false
+    @AppStorage("iosBatteryStyle") var iosBatteryStyle = false
+    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("carouselMode") var carouselMode = true
     
     //加载旧版设置项
     @AppStorage("alertLevel") var alertLevel = 10
@@ -60,10 +67,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
     var startTime = Date()
-    let bleBattery = BLEBattery()
-    let btdBattery = BTDBattery()
-    let magicBattery = MagicBattery()
-    let ideviceBattery = IDeviceBattery()
     let nc = NSWorkspace.shared.notificationCenter
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -148,7 +151,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 "deviceName": "Mac",
                 "launchAtLogin": false,
                 "intBattOnStatusBar": true,
-                "statusBarBattPercent": false,
                 "hidePercentWhenFull": false,
                 "deviceOnWidget": "",
                 "updateInterval": 1.0,
@@ -156,14 +158,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 "hideLevel": 90,
                 "nearCast": false,
                 "readBTHID": true,
+                "whitelistMode": false,
                 "neverRemindMe": [String]()
             ]
         )
         
+        updateDelay = updateInterval
+        machineType = getMacDeviceType()
+        deviceName = getMacDeviceName()
+        InternalBattery.status = getPowerState()
+        
         if showOn == "dock" || showOn == "both" { NSApp.setActivationPolicy(.regular) }
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds, .withTimeZone]
-        menu.addItem(withTitle:"Settings...".local, action: #selector(openSettingPanel), keyEquivalent: "")
-        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAboutPanel), keyEquivalent: "")
+        menu.addItem(withTitle:"Settings...".local, action: #selector(openSetting), keyEquivalent: "")
+        menu.addItem(withTitle:"About AirBattery".local, action: #selector(openAbout), keyEquivalent: "")
         
         //处理旧版偏好设置
         if let alertList = (ud.object(forKey: "alertList") ?? []) as? [String] {
@@ -185,11 +193,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             let oldFiles = getFiles(withExtension: "json", in: ncFolder)
             for url in oldFiles { try? FileManager.default.removeItem(at: url) }
         }
-    }
-    
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        
         startTime = Date()
-        InternalBattery.status = getPowerState()
         nc.addObserver(self, selector: #selector(onDisplayWake), name: NSWorkspace.screensDidWakeNotification, object: nil)
         IOBluetoothDevice.register(forConnectNotifications: self, selector: #selector(deviceIsConnected(notification:fromDevice:)))
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(_:replyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
@@ -198,10 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         print("⚙️ Launch AirBattery at login = \(launchAtLogin)")
         print("⚙️ Icon mode = \(showOn)")
         if ncGroupID != "" { if nearCast { netcastService.resume() } }
-        machineType = getMacDeviceType()
-        //machineType = getMacModelIdentifier()
-        deviceName = getMacDeviceName()
-        if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.data = result }
+        if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) { SPBluetoothDataModel.shared.data = result }
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error { print("⚠️ Notification authorization denied: \(error.localizedDescription)") }
@@ -210,8 +212,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         
         bleBattery.startScan()
         btdBattery.startScan()
-        magicBattery.startScan()
-        ideviceBattery.startScan()
+        MagicBattery.shared.startScan()
+        IDeviceBattery.shared.startScan()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             AirBatteryModel.writeData()
@@ -228,10 +230,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             let ib = getPowerState()
             let iconView = NSHostingView(rootView: mainBatteryView())
             if ib.hasBattery && intBattOnStatusBar {
-                iconView.frame = NSRect(x: 0, y: 0, width: statusBarBattPercent ? 76 : 42, height: 21.5)
-                if hidePercentWhenFull && ib.batteryLevel > hideLevel {
-                    iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
-                }
+                iconView.frame = NSRect(x: 0, y: 0, width: 42, height: 21.5)
             } else {
                 iconView.frame = NSRect(x: 0, y: 0, width: 36, height: 21.5)
             }
@@ -247,7 +246,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 netcastService.refeshAll()
             }
         }
-        
+    }
+    
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         if showOn == "dock" || showOn == "both" {
             let tipID = "ab.docktile-power.note"
             let never = ud.object(forKey: "neverRemindMe") as! [String]
@@ -277,42 +278,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         completionHandler([.banner, .list, .sound])
     }
     
-    func setStatusBar(width: Double) {
-        let iconView = NSHostingView(rootView: mainBatteryView())
-        iconView.frame = NSRect(x: 0, y: 0, width: width, height: 21.5)
-        statusBarItem.button?.subviews.removeAll()
-        statusBarItem.button?.addSubview(iconView)
-        statusBarItem.button?.frame = iconView.frame
-    }
-    
-    func refeshPinnedBar() {
-        let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
-        if pinnedList.isEmpty { return }
-        var allDevices = AirBatteryModel.getAll()
-        let ncFiles = getFiles(withExtension: "json", in: ncFolder)
-        for ncFile in ncFiles { allDevices += AirBatteryModel.ncGetAll(url: ncFile) }
-        let pinnedDevices = allDevices.filter({ pinnedList.contains($0.deviceName) })
-        for device in pinnedDevices {
-            if let index = pinnedItems.firstIndex(where: { $0.button?.toolTip == device.deviceName }) {
-                pinnedItems[index].button?.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
-            } else {
-                let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-                if let button = statusItem.button {
-                    let icon = getDeviceIcon(device)
-                    let image = NSImage(named: icon)!.resized(to: NSSize(width: 17, height: 17))
-                    image.isTemplate = true
-                    button.image = image
-                    button.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
-                    button.toolTip = device.deviceName
-                }
-                pinnedItems.append(statusItem)
-            }
-        }
-        let expItems = pinnedItems.filter({ !pinnedList.contains($0.button?.toolTip ?? "") })
-        DispatchQueue.main.async { for e in expItems { NSStatusBar.system.removeStatusItem(e) } }
-        pinnedItems.removeAll{ !pinnedList.contains($0.button?.toolTip ?? "") }
-    }
-    
     @objc func onDisplayWake() {
         if readBTHID {
             DispatchQueue.global().asyncAfter(deadline: .now() + 10) {
@@ -326,11 +291,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             let now = Date()
             if now.timeIntervalSince(startTime) >= 10 {
                 if let name = device.name, let macAdd = device.addressString {
+                    if AirBatteryModel.checkIfBlocked(name: name) { return }
                     if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
-                        if !appleMacPrefix.contains(prefix) {
-                            print("ℹ️ \(name) (\(macAdd)) connected")
-                            DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                                BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                        print("ℹ️ \(name) (\(macAdd)) connected")
+                        DispatchQueue.global(qos: .background).async {
+                            usleep(2500000)
+                            if !appleMacPrefix.contains(prefix) {
+                                SPBluetoothDataModel.shared.refeshData { _ in
+                                    BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                                    MagicBattery.shared.getOtherBTBattery()
+                                }
+                            } else {
+                                if let device = AirBatteryModel.getByName(name) {
+                                    if ["Trackpad", "Keyboard", "MMouse", "Mouse"].contains(device.deviceType) {
+                                        SPBluetoothDataModel.shared.refeshData { _ in MagicBattery.shared.scanDevices() }
+                                    }
+                                } else {
+                                    SPBluetoothDataModel.shared.refeshData { _ in MagicBattery.shared.scanDevices() }
+                                }
                             }
                         }
                     }
@@ -396,24 +374,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         }
     }
      
-    @objc func openAboutPanel() {
-        NSApp.activate(ignoringOtherApps: true)
-        NSApp.orderFrontStandardAboutPanel(nil)
+    @objc func openAbout() {
+        openAboutPanel()
     }
     
-    @objc func openSettingPanel() {
-        dockWindow.orderOut(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        if #available(macOS 14, *) {
-            NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
-        }else if #available(macOS 13, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NSApp.windows.first(where: { $0.title == "AirBattery Settings".local })?.level = .floating
-        }
+    @objc func openSetting() {
+        openSettingPanel()
     }
     
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
@@ -473,4 +439,32 @@ public extension UserDefaults {
 
         return try? JSONDecoder().decode(objectType, from: result)
     }
+}
+
+func refeshPinnedBar() {
+    let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+    if pinnedList.isEmpty { return }
+    var allDevices = AirBatteryModel.getAll()
+    let ncFiles = getFiles(withExtension: "json", in: ncFolder)
+    for ncFile in ncFiles { allDevices += AirBatteryModel.ncGetAll(url: ncFile) }
+    let pinnedDevices = allDevices.filter({ pinnedList.contains($0.deviceName) })
+    for device in pinnedDevices {
+        if let index = pinnedItems.firstIndex(where: { $0.button?.toolTip == device.deviceName }) {
+            pinnedItems[index].button?.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
+        } else {
+            let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            if let button = statusItem.button {
+                let icon = getDeviceIcon(device)
+                let image = NSImage(named: icon)!.resized(to: NSSize(width: 17, height: 17))
+                image.isTemplate = true
+                button.image = image
+                button.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
+                button.toolTip = device.deviceName
+            }
+            pinnedItems.append(statusItem)
+        }
+    }
+    let expItems = pinnedItems.filter({ !pinnedList.contains($0.button?.toolTip ?? "") })
+    DispatchQueue.main.async { for e in expItems { NSStatusBar.system.removeStatusItem(e) } }
+    pinnedItems.removeAll{ !pinnedList.contains($0.button?.toolTip ?? "") }
 }

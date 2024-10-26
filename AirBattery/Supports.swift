@@ -17,7 +17,7 @@ let dockTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetDataTimer = Timer.publish(every: TimeInterval(24 * updateInterval), on: .main, in: .common).autoconnect()
 let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Double(arc4random_uniform(10)) - Double(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
-let widgetViewTimer = Timer.publish(every: TimeInterval(60 * (widgetInterval != 0 ? Double(abs(widgetInterval)) : updateInterval)), on: .main, in: .common).autoconnect()
+let widgetViewTimer = Timer.publish(every: TimeInterval(60 * updateInterval), on: .main, in: .common).autoconnect()
 let macID = getMacModelIdentifier()
 let isoFormatter = ISO8601DateFormatter()
 
@@ -422,25 +422,21 @@ func getHeadphoneModel(_ model: String) -> String {
         return "Airpods"
     case "200e":
         return "Airpods Pro"
-    case "200a":
-        return "Airpods Max"
-    case "201f":
-        ///USB-C
+    case "200a", "201f":
+        ///200a: Lightning
+        ///201f: USB-C
         return "Airpods Max"
     case "200f":
         return "Airpods 2"
     case "2013":
         return "Airpods 3"
-    case "201B":
-        ///with ANC
+    case "201B", "2019":
+        ///201B: ANC
+        ///2019: no ANC
         return "Airpods 4"
-    case "2019":
-        ///without ANC
-        return "Airpods 4"
-    case "2014":
-        return "Airpods Pro 2"
-    case "2024":
-        ///USB-C Case
+    case "2014", "2024":
+        ///2014: Lightning Case
+        ///2024: USB-C Case
         return "Airpods Pro 2"
     case "2003":
         return "PowerBeats 3"
@@ -506,10 +502,10 @@ func getDeviceIcon(_ d: Device) -> String {
         return "computermouse.fill"
     case "Gamepad":
         return "gamecontroller.fill"
-    case "Headphones":
+    case "Headphones", "Headset":
         return "headphones"
-    case "Headset":
-        return "headphones"
+    case "Speaker":
+        return "hifispeaker.fill"
     case "ApplePencil":
         ///Model list: https://theapplewiki.com/wiki/List_of_Apple_Pencils
         if let model = d.deviceModel {

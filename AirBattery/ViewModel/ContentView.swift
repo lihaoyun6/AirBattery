@@ -50,15 +50,14 @@ class AppearanceMonitor: ObservableObject {
 
 struct MultiBatteryView: View {
     @AppStorage("showThisMac") var showThisMac = "icon"
-    //@AppStorage("machineType") var machineType = "mac"
-    @AppStorage("rollingMode") var rollingMode = "auto"
+    @AppStorage("carouselMode") var carouselMode = true
     @AppStorage("appearance") var appearance = "auto"
     @AppStorage("showOn") var showOn = "sbar"
-    @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("widgetInterval") var widgetInterval = 0
+    @AppStorage("readBTHID") var readBTHID = true
+    @AppStorage("deviceName") var deviceName = "Mac"
     @AppStorage("nearCast") var nearCast = false
     @AppStorage("ncGroupID") var ncGroupID = ""
-    @AppStorage("readBTHID") var readBTHID = true
     
     @StateObject private var appearanceMonitor = AppearanceMonitor()
 
@@ -203,13 +202,17 @@ struct MultiBatteryView: View {
             NSApp.dockTile.display()
         }
         .onReceive(alertTimer) {_ in batteryAlert() }
-        .onReceive(widgetDataTimer) {_ in
-            if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) {
-                SPBluetoothDataModel.data = result
-            }
-            AirBatteryModel.writeData()
+        .onReceive(widgetViewTimer) {_ in
+            if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }
         }
-        .onReceive(widgetViewTimer) {_ in if widgetInterval != -1 { WidgetCenter.shared.reloadAllTimelines() }}
+        .onReceive(dockTimer) {_ in IDeviceBattery.shared.scanDevices() }
+        .onReceive(widgetDataTimer) {_ in
+            SPBluetoothDataModel.shared.refeshData { result in
+                DispatchQueue.global(qos: .background).async {
+                    MagicBattery.shared.scanDevices()
+                }
+            }
+        }
         .onReceive(nearCastTimer) {_ in
             if nearCast && ncGroupID != ""{
                 var allDevices = AirBatteryModel.getAll()
@@ -233,7 +236,7 @@ struct MultiBatteryView: View {
                 let ibStatus = InternalBattery.status
                 let now = Double(t.timeIntervalSince1970)
                 
-                if rollingMode == "off" { rollCount = 1 }
+                if !carouselMode { rollCount = 1 }
                 if ibStatus.hasBattery && showThisMac != "hidden" { list.insert(ib2ab(ibStatus), at: 0) }
                 
                 batteryList = sliceList(data: list, length: 4, count: rollCount)
@@ -242,16 +245,9 @@ struct MultiBatteryView: View {
                     batteryList = sliceList(data: list, length: 4, count: rollCount)
                 }
                 
-                if now - lastTime >= 20 && (rollingMode == "on" || rollingMode == "auto") {
-                    if rollingMode == "auto" {
-                        if list.count > 4 {
-                            lastTime = now
-                            rollCount = rollCount + 1
-                        }
-                    } else {
-                        lastTime = now
-                        rollCount = rollCount + 1
-                    }
+                if now - lastTime >= 20 && list.count > 4 && carouselMode {
+                    lastTime = now
+                    rollCount = rollCount + 1
                 }
                 NSApp.dockTile.display()
             }
@@ -284,7 +280,9 @@ struct popover: View {
     var fromDock: Bool = false
     var allDevice: [Device]
     let hiddenDevices = AirBatteryModel.getBlackList()
+
     @AppStorage("nearCast") var nearCast = false
+    
     @State private var allDevices = [Device]()
     @State private var overReloadButton = false
     @State private var overCopyButton = false
@@ -351,7 +349,7 @@ struct popover: View {
                     Button(action: {
                         dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
-                        AppDelegate.shared.openAboutPanel()
+                        openAboutPanel()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
                             NSApp.activate(ignoringOtherApps: true)
                         }
@@ -368,7 +366,7 @@ struct popover: View {
                     Button(action: {
                         dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
-                        AppDelegate.shared.openSettingPanel()
+                        openSettingPanel()
                     }, label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 13.6, weight: .light))
@@ -550,7 +548,7 @@ struct popover: View {
                                                             pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                                             pinnedList.append(allDevices[index].deviceName)
                                                             ud.set(pinnedList, forKey: "pinnedList")
-                                                            AppDelegate.shared.refeshPinnedBar()
+                                                            refeshPinnedBar()
                                                         }, label: {
                                                             Image("pin.circle")
                                                                 .resizable().scaledToFit()
@@ -564,7 +562,7 @@ struct popover: View {
                                                             pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                                             pinnedList.removeAll(where:  { $0 == allDevices[index].deviceName })
                                                             ud.set(pinnedList, forKey: "pinnedList")
-                                                            AppDelegate.shared.refeshPinnedBar()
+                                                            refeshPinnedBar()
                                                         }, label: {
                                                             Image("pin.circle.fill")
                                                                 .resizable().scaledToFit()
@@ -659,7 +657,7 @@ struct popover: View {
                                                 pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                                 pinnedList.append(allDevices[index].deviceName)
                                                 ud.set(pinnedList, forKey: "pinnedList")
-                                                AppDelegate.shared.refeshPinnedBar()
+                                                refeshPinnedBar()
                                             }) {
                                                 Label("Pin to Menu Bar", systemImage: "")
                                             }
@@ -668,7 +666,7 @@ struct popover: View {
                                                 pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                                 pinnedList.removeAll { $0 == allDevices[index].deviceName }
                                                 ud.set(pinnedList, forKey: "pinnedList")
-                                                AppDelegate.shared.refeshPinnedBar()
+                                                refeshPinnedBar()
                                             }) {
                                                 Label("Unpin This Device", systemImage: "")
                                             }
@@ -889,7 +887,7 @@ struct nearcastView: View {
                                             pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                             pinnedList.append(devices[index].deviceName)
                                             ud.set(pinnedList, forKey: "pinnedList")
-                                            AppDelegate.shared.refeshPinnedBar()
+                                            refeshPinnedBar()
                                         }, label: {
                                             Image("pin.circle")
                                                 .resizable().scaledToFit()
@@ -903,7 +901,7 @@ struct nearcastView: View {
                                             pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                             pinnedList.removeAll { $0 == devices[index].deviceName }
                                             ud.set(pinnedList, forKey: "pinnedList")
-                                            AppDelegate.shared.refeshPinnedBar()
+                                            refeshPinnedBar()
                                         }, label: {
                                             Image("pin.circle.fill")
                                                 .resizable().scaledToFit()
@@ -920,8 +918,9 @@ struct nearcastView: View {
                                                             message: String(format: "Device name \"%@\" has been copied to the clipboard.".local, devices[index].deviceName),
                                                             button1: "OK".local).runModal()
                                         }, label: {
-                                            Image(systemName: "list.clipboard.fill")
-                                                .frame(width: 20, height: 20, alignment: .center)
+                                            Image("list.clipboard.fill.circle")
+                                                .resizable().scaledToFit()
+                                                .frame(width: 18, height: 18, alignment: .center)
                                                 .foregroundColor(overCopyButton ? .accentColor : .secondary)
                                         })
                                         .buttonStyle(PlainButtonStyle())
@@ -961,4 +960,51 @@ struct nearcastView: View {
         .offset(y: 2.5)
     }
 
+}
+
+func openAboutPanel() {
+    NSApp.activate(ignoringOtherApps: true)
+    NSApp.orderFrontStandardAboutPanel(nil)
+}
+
+func openSettingPanel() {
+    dockWindow.orderOut(nil)
+    NSApp.activate(ignoringOtherApps: true)
+    if #available(macOS 14, *) {
+        NSApp.mainMenu?.items.first?.submenu?.item(at: 2)?.performAction()
+    }else if #available(macOS 13, *) {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    } else {
+        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        if let w = NSApp.windows.first(where: { $0.title == "AirBattery Settings".local }) {
+            w.level = .floating
+            w.titlebarSeparatorStyle = .none
+            guard let nsSplitView = findNSSplitVIew(view: w.contentView),
+                  let controller = nsSplitView.delegate as? NSSplitViewController else { return }
+            controller.splitViewItems.first?.canCollapse = false
+            controller.splitViewItems.first?.minimumThickness = 175
+            controller.splitViewItems.first?.maximumThickness = 175
+            w.makeKeyAndOrderFront(nil)
+            w.makeKey()
+        }
+    }
+}
+
+func findNSSplitVIew(view: NSView?) -> NSSplitView? {
+    var queue = [NSView]()
+    if let root = view {
+        queue.append(root)
+    }
+    while !queue.isEmpty {
+        let current = queue.removeFirst()
+        if current is NSSplitView {
+            return current as? NSSplitView
+        }
+        for subview in current.subviews {
+            queue.append(subview)
+        }
+    }
+    return nil
 }

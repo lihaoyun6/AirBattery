@@ -65,7 +65,11 @@ class AirBatteryModel {
         if lock { return }
         lock = true
         //self.Devices.removeAll(where: {blockedItems.contains($0.deviceName)})
-        if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) { self.Devices[index] = device } else { self.Devices.append(device) }
+        if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) {
+            self.Devices[index] = device
+        } else {
+            self.Devices.append(device)
+        }
         lock = false
     }
     
@@ -108,11 +112,7 @@ class AirBatteryModel {
             }
         }
         for dd in list.filter({ !newList.contains($0) }) { newList.append(dd) }
-        //if ud.bool(forKey: "fullBlockMode") {
-            let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
-            return newList.filter({ !blockedItems.contains($0.deviceName) })
-        //}
-        //return newList
+        return newList.filter({ !checkIfBlocked(name: $0.deviceName) })
     }
     
     static func getByName(_ name: String) -> Device? {
@@ -186,5 +186,14 @@ class AirBatteryModel {
         if let first = devices.first { if !list.contains(first) && list.count != 0 { list.insert(first, at: 0) }}
         if let first = list.first { if list.count == 1 && !first.hasBattery { return [] }}
         return list
+    }
+    
+    static func checkIfBlocked(name: String) -> Bool {
+        let whitelistMode = ud.bool(forKey: "whitelistMode")
+        let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
+        if (blockedItems.contains(name) && !whitelistMode) || (!blockedItems.contains(name) && whitelistMode) {
+            return true
+        }
+        return false
     }
 }

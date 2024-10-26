@@ -90,7 +90,6 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     //@AppStorage("cStatusOfBLE") var cStatusOfBLE = false
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
-    @AppStorage("whitelistMode") var whitelistMode = false
     @AppStorage("updateInterval") var updateInterval = 1.0
     @AppStorage("twsMerge") var twsMerge = 5
     
@@ -148,10 +147,8 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         var get = false
         let now = Double(Date().timeIntervalSince1970)
-        let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         if let deviceName = peripheral.name{
-            if blockedItems.contains(deviceName) && !whitelistMode { return }
-            if !blockedItems.contains(deviceName) && whitelistMode { return }
+            if AirBatteryModel.checkIfBlocked(name: deviceName) { return }
             if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, data.count > 0 {
                 if data[0] != 76 {
                     //获取非Apple的普通BLE设备数据
@@ -270,7 +267,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func getLevel(_ name: String, _ side: String) -> UInt8{
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return 255 }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
         let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
         let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any],
         let device_connected = SPBluetoothDataType["device_connected"] as? [Any] {
@@ -288,7 +285,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func getType(_ name: String) -> String{
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return "general_bt" }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
         let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
         let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any],
         let device_connected = SPBluetoothDataType["device_connected"] as? [Any] {
@@ -306,9 +303,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func getAirpods(peripheral: CBPeripheral, data: Data, messageType: String) {
         guard let name = peripheral.name else { return }
-        let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
-        if blockedItems.contains(name) && !whitelistMode { return }
-        if !blockedItems.contains(name) && whitelistMode { return }
+        if AirBatteryModel.checkIfBlocked(name: name) { return }
         
         if let deviceName = peripheral.name{
             //NSLog("AirPods: \(messageType) message [\(data.hexEncodedString())]")
@@ -370,7 +365,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func getPaired() -> [String]{
         var paired:[String] = []
         //guard let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) else { return paired }
-        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.data.utf8), options: []) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: Data(SPBluetoothDataModel.shared.data.utf8), options: []) as? [String: Any],
         let SPBluetoothDataTypeRaw = json["SPBluetoothDataType"] as? [Any],
         let SPBluetoothDataType = SPBluetoothDataTypeRaw[0] as? [String: Any]{
             if let device_connected = SPBluetoothDataType["device_connected"] as? [Any]{
