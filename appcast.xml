@@ -3,6 +3,34 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.5.9</title>
+            <pubDate>Sat, 26 Oct 2024 13:02:38 +0800</pubDate>
+            <sparkle:version>159</sparkle:version>
+            <sparkle:shortVersionString>1.5.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.9/AirBattery_v1.5.9.dmg" length="8599589" type="application/octet-stream" sparkle:edSignature="ldLRgH7C/ZxV2kR9RId9VHxijNODZQX4v53nbnWKdPv6P3yLnT7bWsafrimv0T7WVHmlyVM/vmzhyjbza029DQ=="/>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>重新设计了偏好设置窗口的样式.</li>
+                <li>为菜单栏图标添加了 iOS 电池样式.</li>
+                <li>支持在菜单栏电池图标内部显示百分比.</li>
+                <li>修复了蓝牙音箱显示为未知图标的问题.</li>
+                <li>修复了黑白名单功能运行不正常的问题.</li>
+                </ul><ul>
+                <li>Redesigned the preferences view.</li>
+                <li>Added: iOS-style menu bar battery icon.</li>
+                <li>Fixed: Bluetooth speakers are displayed as unknown icons.</li>
+                <li>Fixed: Blacklist and whitelist features do not work properly.</li>
+                <li>Supported: Show battery percentage inside the menu bar battery icon.</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.9/Update159-157.delta" sparkle:deltaFrom="157" length="822562" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="Fi9Ec3x0gBobw4UVFvsuZJf5OnbL3NOi09YoNO4pblFsavvOOB7VVRWbUmyMKC797apR4XwF5/M1YPLVfsfRDQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.9/Update159-156.delta" sparkle:deltaFrom="156" length="845414" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="2lGxWdQUkP7NEny6bOeG+6fEAvO2OvVJAXXPKyH4+bdzgIRV0LpTfG3bg0RAWvnOelRhkZ+SfNGSGz7xI3qEBA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.5.9/Update159-155.delta" sparkle:deltaFrom="155" length="817754" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="yRoWlE6uWvZjwkhSYViZuvtIRymXk1NdFH8Ge7FBy7qWZQnLG5KvzIyYxtIXTVMqpl/asHERduSxgZ1N88naCA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.5.8</title>
             <pubDate>Sun, 20 Oct 2024 19:38:09 +0800</pubDate>
             <sparkle:version>158</sparkle:version>
