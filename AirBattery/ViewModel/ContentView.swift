@@ -207,11 +207,14 @@ struct MultiBatteryView: View {
         }
         .onReceive(dockTimer) {_ in IDeviceBattery.shared.scanDevices() }
         .onReceive(widgetDataTimer) {_ in
-            SPBluetoothDataModel.shared.refeshData { result in
+            SPBluetoothDataModel.shared.refeshData (completion: { result in
                 DispatchQueue.global(qos: .background).async {
                     MagicBattery.shared.scanDevices()
+                    AirBatteryModel.writeData()
                 }
-            }
+            }, error: {
+                AirBatteryModel.writeData()
+            })
         }
         .onReceive(nearCastTimer) {_ in
             if nearCast && ncGroupID != ""{
@@ -596,7 +599,7 @@ struct popover: View {
                                                         blackList.append(allDevices[index].deviceName)
                                                         ud.set(blackList, forKey: "blackList")
                                                         let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
-                                                        if pinnedList.contains(hiddenDevices[index].deviceName){
+                                                        if pinnedList.contains(allDevices[index].deviceName){
                                                             refeshPinnedBar()
                                                         }
                                                     }, label: {

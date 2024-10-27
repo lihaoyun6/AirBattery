@@ -11,10 +11,12 @@ class SPBluetoothDataModel {
     static var shared: SPBluetoothDataModel = SPBluetoothDataModel()
     var data: String = "{}"
     
-    func refeshData(completion: (String) -> Void) {
+    func refeshData(completion: (String) -> Void, error: (() -> Void)? = nil) {
         if let result = process(path: "/usr/sbin/system_profiler", arguments: ["SPBluetoothDataType", "-json"]) {
             data = result
             completion(result)
+        } else {
+            error?()
         }
     }
 }
