@@ -10,13 +10,13 @@ import SystemConfiguration
 import UserNotifications
 
 let widgetInterval = ud.integer(forKey: "widgetInterval")
-let updateInterval = ud.double(forKey: "updateInterval")
+let updateInterval = ud.integer(forKey: "updateInterval")
 
 let mainTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 let dockTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 let alertTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 let widgetDataTimer = Timer.publish(every: TimeInterval(24 * updateInterval), on: .main, in: .common).autoconnect()
-let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Double(arc4random_uniform(10)) - Double(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
+let nearCastTimer = Timer.publish(every: TimeInterval(60 * updateInterval + Int(arc4random_uniform(10)) - Int(arc4random_uniform(10))), on: .main, in: .common).autoconnect()
 let widgetViewTimer = Timer.publish(every: TimeInterval(60 * updateInterval), on: .main, in: .common).autoconnect()
 let macID = getMacModelIdentifier()
 let isoFormatter = ISO8601DateFormatter()
@@ -124,7 +124,7 @@ struct RoundedCornersShape: Shape {
     }
 }
 
-public func process(path: String, arguments: [String], timeout: Double = 0) -> String? {
+public func process(path: String, arguments: [String], timeout: Int = 0) -> String? {
     let task = Process()
     task.launchPath = path
     task.arguments = arguments
@@ -213,9 +213,8 @@ func findParentKey(forValue value: Any, in json: [String: Any]) -> String? {
     return nil
 }
 
-func randomString(type: Int = 1, length: Int) -> String {
-    var characters = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    if type == 1 { characters = Array("abcdefghijklmnopqrstuvwxyz0123456789") }
+func randomString(length: Int) -> String {
+    let characters = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     var randomString = ""
 
     for _ in 0..<length {
@@ -295,11 +294,9 @@ func pasteFromClipboard() -> String? {
 }
 
 func isGroudIDValid(id: String) -> Bool {
-    let pre = NSPredicate(format: "SELF MATCHES %@", "^[a-z0-9\\-]+$")
-    let pre2 = NSPredicate(format: "SELF MATCHES %@", "^[a-zA-Z0-9\\-]+$")
-    let ncid = pre.evaluate(with: String(id.prefix(15)))
-    let pasd = pre2.evaluate(with: id)
-    return (id.count == 23 && String(id.prefix(3)) == "nc-" && ncid && pasd)
+    let pre = NSPredicate(format: "SELF MATCHES %@", "^[a-zA-Z0-9\\-]+$")
+    let pasd = pre.evaluate(with: id)
+    return (id.count == 23 && String(id.prefix(3)) == "nc-" && pasd)
 }
 
 func getMacDeviceType() -> String {

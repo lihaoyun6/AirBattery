@@ -21,6 +21,26 @@ struct Tooltip: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: NSViewRepresentableContext<Tooltip>) { }
 }
 
+struct WindowConfigurator: NSViewRepresentable {
+    var onWindowConfigured: (NSWindow?) -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+
+        DispatchQueue.main.async {
+            if let window = view.window {
+                self.onWindowConfigured(window)
+            } else {
+                self.onWindowConfigured(nil)
+            }
+        }
+
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
 public extension View {
     func toolTip(_ toolTip: String) -> some View {
         self.overlay(Tooltip(tooltip: toolTip))
@@ -29,11 +49,12 @@ public extension View {
 
 struct SettingsView: View {
     @State private var selectedItem: String? = "General"
+    @State private var showDebug: Bool = false
     
     var body: some View {
         NavigationView {
             List(selection: $selectedItem) {
-                NavigationLink(destination: GeneralView(), tag: "General", selection: $selectedItem) {
+                NavigationLink(destination: GeneralView(showDebug: $showDebug), tag: "General", selection: $selectedItem) {
                     Label("General", image: "gear")
                 }
                 NavigationLink(destination: NearbilityView(), tag: "Nearbility", selection: $selectedItem) {
@@ -51,13 +72,34 @@ struct SettingsView: View {
                 NavigationLink(destination: BlacklistView(), tag: "Blacklist", selection: $selectedItem) {
                     Label("Blacklist", image: "blacklist")
                 }
+                if showDebug {
+                    NavigationLink(destination: DebugView(), tag: "Debug", selection: $selectedItem) {
+                        Label("Debug", image: "debug")
+                    }
+                }
             }
             .listStyle(.sidebar)
             .padding(.top, 9)
         }
-        .frame(width: 600, height: 450)
+        .frame(width: 600, height: 430)
         .navigationTitle("AirBattery Settings")
         //.background(WindowConfigurator { window in window?.level = .floating })
+    }
+}
+
+struct SField: View {
+    var title: LocalizedStringKey
+    @Binding var text: String
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Spacer()
+            TextField("", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 220)
+        }
     }
 }
 
@@ -125,7 +167,7 @@ struct SToggle: View {
     }
     
     var body: some View {
-        HStack(spacing: 3) {
+        HStack {
             Text(title)
             Spacer()
             if let tips = tips {
@@ -156,9 +198,69 @@ struct SToggle: View {
     }
 }
 
+struct SSteper: View {
+    var title: LocalizedStringKey
+    @Binding var value: Int
+    var tips: LocalizedStringKey?
+    var length: CGFloat
+    var min: Int
+    var max: Int
+    
+    @State private var isPresented: Bool = false
+    
+    init(_ title: LocalizedStringKey, value: Binding<Int>, tips: LocalizedStringKey? = nil, length: CGFloat = 45, min: Int = 0, max: Int = 100) {
+        self.title = title
+        self._value = value
+        self.tips = tips
+        self.length = length
+        self.min = min
+        self.max = max
+    }
+    
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            if let tips = tips {
+                Button(action: {
+                    isPresented = true
+                }, label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 15, weight: .light))
+                        .opacity(0.5)
+                })
+                .buttonStyle(.plain)
+                .sheet(isPresented: $isPresented) {
+                    VStack(alignment: .trailing) {
+                        GroupBox { Text(tips).padding() }
+                        Button(action: {
+                            isPresented = false
+                        }, label: {
+                            Text("OK").frame(width: 30)
+                        }).keyboardShortcut(.defaultAction)
+                    }.padding()
+                }
+            }
+            TextField("", value: $value, formatter: NumberFormatter())
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .frame(width: length)
+                .onChange(of: value) { newValue in
+                    if newValue > max { value = max }
+                    if newValue < min { value = min }
+                }
+            Stepper("", value: $value)
+                .padding(.leading, -10)
+        }.frame(height: 16)
+    }
+}
+
 struct GeneralView: View {
     @AppStorage("showOn") var showOn = "sbar"
     @AppStorage("launchAtLogin") var launchAtLogin = false
+    
+    @Binding var showDebug: Bool
+    @State private var debugCount: Int = 0
 
     var body: some View {
         VStack(spacing: 30) {
@@ -193,7 +295,7 @@ struct GeneralView: View {
                             for i in pinnedItems { i.isVisible = false }
                             NSApp.setActivationPolicy(.accessory)
                         }
-                        if showOn == "dock" || showOn == "both" {
+                        if newValue == "dock" || newValue == "both" {
                             _ = createAlert(title: "AirBattery Tips".local, message: "Displaying AirBattery on the Dock will consume more power, it is better to use Menu Bar mode or Widgets.".local, button1: "OK").runModal()
                         }
                     }
@@ -210,6 +312,13 @@ struct GeneralView: View {
                     Text("AirBattery v\(appVersion)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .onTapGesture {
+                            debugCount += 1
+                            if debugCount > 10 {
+                                debugCount = 0
+                                showDebug.toggle()
+                            }
+                        }
                 }
             }
             Spacer().frame(minHeight: 0)
@@ -226,10 +335,8 @@ struct NearbilityView: View {
     @AppStorage("readPencil") var readPencil = false
     @AppStorage("readIDevice") var readIDevice = true
     @AppStorage("readBTHID") var readBTHID = true
-    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("updateInterval") var updateInterval = 1
     @AppStorage("twsMerge") var twsMerge = 5
-    
-    @State private var isPresented: Bool = false
     
     var body: some View {
         VStack(spacing: 30) {
@@ -245,6 +352,11 @@ struct NearbilityView: View {
                     Divider().opacity(0.5)
                     SToggle("Discover more BLE devices", isOn: $readBLEDevice, tips: "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!")
                         .foregroundColor(.orange)
+                        .onChange(of: readBLEDevice) { newValue in
+                            if newValue {
+                                _ = createAlert(title: "AirBattery Tips".local, message: "If you see a bluetooth pairing request from any device that isn't yours, add it to your blacklist!".local, button1: "OK").runModal()
+                            }
+                        }
                     Divider().opacity(0.5)
                     SToggle("Apple Pencil from your iPad", isOn: $readPencil, tips: "Read the battery status of the connected Apple Pencil through your iPad\n(It may take 10 minutes or longer to discover the Pencil for the first time)\n\nWARNING: This is a BETA feature and may drain your iPad's battery faster!")
                         .foregroundColor(.orange)
@@ -252,56 +364,19 @@ struct NearbilityView: View {
             }
             GroupBox(label: Text("Others").font(.headline)) {
                 VStack(spacing: 10) {
-                    HStack {
-                        Text("Refresh Interval (min)")
-                        Spacer()
+                    VStack(spacing: 2) {
+                        SSteper("Refresh Interval (min)", value: $updateInterval, min: 1, max: 99)
                         if updateDelay != updateInterval {
-                            Text("Relaunch AirBattery to apply this change")
-                                .font(.footnote)
-                                .foregroundColor(.red)
-                        }
-                        TextField("", value: $updateInterval, formatter: NumberFormatter())
-                            .textFieldStyle(.squareBorder)
-                            .frame(width: 30)
-                            .onChange(of: updateInterval) { newValue in
-                                if newValue > 99.0 { updateInterval = 99.0 }
-                                if newValue < 1.0 { updateInterval = 1.0 }
+                            HStack {
+                                Text("Relaunch AirBattery to apply this change")
+                                    .font(.footnote)
+                                    .foregroundColor(.red)
+                                Spacer()
                             }
-                        Stepper("", value: $updateInterval)
-                            .padding(.leading, -10)
-                    }.frame(height: 16)
+                        }
+                    }
                     Divider().opacity(0.5)
-                    HStack {
-                        Text("Earbud Merging Threshold")
-                        Spacer()
-                        Button(action: {
-                            isPresented = true
-                        }, label: {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 15, weight: .light))
-                                .opacity(0.5)
-                        })
-                        .buttonStyle(.plain)
-                        .sheet(isPresented: $isPresented) {
-                            VStack(alignment: .trailing) {
-                                GroupBox { Text("If the difference in battery usage between the left and right earbuds is less than this value, AirBattery will show them as one device.").padding() }
-                                Button(action: {
-                                    isPresented = false
-                                }, label: {
-                                    Text("OK").frame(width: 30)
-                                }).keyboardShortcut(.defaultAction)
-                            }.padding()
-                        }
-                        TextField("", value: $twsMerge, formatter: NumberFormatter())
-                            .textFieldStyle(.squareBorder)
-                            .frame(width: 30)
-                            .onChange(of: twsMerge) { newValue in
-                                if newValue > 99 { twsMerge = 99 }
-                                if newValue < 1 { twsMerge = 1 }
-                            }
-                        Stepper("", value: $twsMerge)
-                            .padding(.leading, -10)
-                    }.frame(height: 16)
+                    SSteper("Earbud Merging Threshold", value: $twsMerge, min: 1, max: 99)
                 }.padding(5)
             }
             Spacer().frame(minHeight: 0)
@@ -339,13 +414,9 @@ struct NearcastView: View {
                         }
                     Divider().opacity(0.5)
                     HStack(spacing: 4) {
-                        Text("Group ID")
-                        TextField("", text: $ncGroupID)
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
-                            .disabled(nearCast)
+                        SField(title: "Group ID", text: $ncGroupID).disabled(nearCast)
                         Button(action: {
-                            ncGroupID = "nc-" + randomString(length: 12) + randomString(type: 2, length: 8)
+                            ncGroupID = "nc-" + randomString(length: 20)
                         }, label: {
                             if ncGroupID != "" {
                                 Image(systemName: "arrow.clockwise.circle")
@@ -599,6 +670,136 @@ struct BlacklistView: View {
             }
             .onAppear { blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]() }
             .onChange(of: blockedItems) { b in ud.setValue(b, forKey: "blockedDevices") }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct DebugView: View {
+    @AppStorage("test_debug") var test_debug = false
+    @AppStorage("test_hasib") var test_hasib = false
+    @AppStorage("test_acpower") var test_ac = false
+    @AppStorage("test_full") var test_full = false
+    @AppStorage("test_iblevel") var test_iblevel = 100
+    
+    @State private var deviceID: String = ""
+    @State private var deviceType: String = ""
+    @State private var deviceName: String = ""
+    @State private var deviceModel: String = ""
+    @State private var parentName: String = ""
+    @State private var batteryLevel: Int = 0
+    @State private var lowPower: Bool = false
+    @State private var isCharging: Bool = false
+    @State private var fullCharged: Bool = false
+    
+    
+    
+    @State private var isPresented: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            GroupBox {
+                VStack(spacing: 10) {
+                    SToggle("Debug Mode", isOn: $test_debug)
+                    Divider().opacity(0.5)
+                    HStack {
+                        Text("Data Folder")
+                        Spacer()
+                        Button("Open") {
+                            NSWorkspace.shared.open(ncFolder.deletingLastPathComponent())
+                        }
+                    }
+                }.padding(5)
+            }
+            GroupBox(label: Text("Built-in Battery").font(.headline)) {
+                VStack(spacing: 10) {
+                    SToggle("Built-in Battery", isOn: $test_hasib)
+                    Divider().opacity(0.5)
+                    SToggle("AC Powered", isOn: $test_ac)
+                    Divider().opacity(0.5)
+                    SToggle("Paused", isOn: $test_full)
+                    Divider().opacity(0.5)
+                    SSteper("Level", value: $test_iblevel, min: 1)
+                }.padding(5)
+            }
+            GroupBox(label: Text("Remote Battery").font(.headline)) {
+                VStack(spacing: 10) {
+                    HStack {
+                        Text("Create Item")
+                        Spacer()
+                        Button(action: {
+                            isPresented = true
+                        }, label: {
+                            Image(systemName: "plus.circle.fill")
+                        })
+                        .buttonStyle(.plain)
+                        .sheet(isPresented: $isPresented) {
+                            VStack {
+                                GroupBox(label: Text("Remote Battery").font(.headline)) {
+                                    VStack(spacing: 10) {
+                                        SField(title: "Device ID", text: $deviceID)
+                                        Divider().opacity(0.5)
+                                        SField(title: "Device Name", text: $deviceName)
+                                        Divider().opacity(0.5)
+                                        SField(title: "Device Type", text: $deviceType)
+                                        Divider().opacity(0.5)
+                                        SField(title: "Device Model", text: $deviceModel)
+                                        Divider().opacity(0.5)
+                                        HStack {
+                                            SField(title: "Parent Name", text: $parentName)
+                                            Button(action: {
+                                                parentName = getMacDeviceName()
+                                            }, label: {
+                                                let ib = ib2ab(InternalBattery.status)
+                                                Image(getDeviceIcon(ib))
+                                                    .resizable().scaledToFit()
+                                                    .frame(width: 16, height: 16)
+                                            }).buttonStyle(.plain)
+                                        }
+                                        Divider().opacity(0.5)
+                                        SSteper("Level", value: $batteryLevel)
+                                        Divider().opacity(0.5)
+                                        SToggle("Charging", isOn: $isCharging)
+                                        Divider().opacity(0.5)
+                                        SToggle("Paused", isOn: $fullCharged)
+                                        Divider().opacity(0.5)
+                                        SToggle("Low Power", isOn: $lowPower)
+                                    }.padding(5)
+                                }
+                                HStack {
+                                    Spacer()
+                                    Button(action: {
+                                        isPresented = false
+                                    }, label: {
+                                        Text("Cancle").frame(width: 50)
+                                    })
+                                    Button(action: {
+                                        let device = Device(deviceID: deviceID, deviceType: deviceType, deviceName: deviceName, batteryLevel: batteryLevel, isCharging: isCharging ? 1 : (fullCharged ? 5 : 0), lowPower: lowPower, parentName: parentName,lastUpdate: Date().timeIntervalSince1970)
+                                        AirBatteryModel.updateDevice(device)
+                                        isPresented = false
+                                    }, label: {
+                                        Text("Add").frame(width: 50)
+                                    }).keyboardShortcut(.defaultAction)
+                                }
+                            }
+                            .padding()
+                            .onAppear {
+                                deviceID = randomString(length: 10)
+                                deviceType = ""
+                                deviceName = ""
+                                deviceModel = ""
+                                parentName = ""
+                                batteryLevel = 0
+                                lowPower = false
+                                isCharging = false
+                                fullCharged = false
+                            }
+                        }
+                    }
+                }.padding(5)
+            }
+            Spacer().frame(minHeight: 0)
         }
         .padding()
         .frame(maxWidth: .infinity)

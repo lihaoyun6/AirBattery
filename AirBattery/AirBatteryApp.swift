@@ -22,7 +22,7 @@ var dockWindow = AutoHideWindow()
 var menuPopover = NSPopover()
 let bleBattery = BLEBattery()
 let btdBattery = BTDBattery()
-var updateDelay = 1.0
+var updateDelay = 1
 
 @main
 struct AirBatteryApp: App {
@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @AppStorage("hideLevel") var hideLevel = 90
     @AppStorage("whitelistMode") var whitelistMode = false
     @AppStorage("iosBatteryStyle") var iosBatteryStyle = false
-    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("updateInterval") var updateInterval = 1
     @AppStorage("carouselMode") var carouselMode = true
     
     //加载旧版设置项
@@ -153,7 +153,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 "intBattOnStatusBar": true,
                 "hidePercentWhenFull": false,
                 "deviceOnWidget": "",
-                "updateInterval": 1.0,
+                "updateInterval": 1,
                 "widgetInterval": 0,
                 "hideLevel": 90,
                 "nearCast": false,
@@ -234,6 +234,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             } else {
                 iconView.frame = NSRect(x: 0, y: 0, width: 36, height: 21.5)
             }
+            button.image = NSImage()
             button.addSubview(iconView)
             button.frame = iconView.frame
             button.action = #selector(togglePopover(_ :))
@@ -441,13 +442,15 @@ public extension UserDefaults {
     }
 }
 
-func refeshPinnedBar() {
-    let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+func refeshPinnedBar(unpin: String? = nil) {
+    var pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
     if pinnedList.isEmpty { return }
+    if let unpin = unpin { pinnedList.removeAll(where: { $0 == unpin }) }
     var allDevices = AirBatteryModel.getAll()
     let ncFiles = getFiles(withExtension: "json", in: ncFolder)
     for ncFile in ncFiles { allDevices += AirBatteryModel.ncGetAll(url: ncFile) }
     let pinnedDevices = allDevices.filter({ pinnedList.contains($0.deviceName) })
+    let deviceNames = pinnedDevices.map({ $0.deviceName })
     for device in pinnedDevices {
         if let index = pinnedItems.firstIndex(where: { $0.button?.toolTip == device.deviceName }) {
             pinnedItems[index].button?.title = "\(device.batteryLevel)\(device.isCharging != 0  ? "⚡︎" : "%")"
@@ -464,7 +467,8 @@ func refeshPinnedBar() {
             pinnedItems.append(statusItem)
         }
     }
-    let expItems = pinnedItems.filter({ !pinnedList.contains($0.button?.toolTip ?? "") })
+    let expItems = pinnedItems.filter({ !pinnedList.contains($0.button?.toolTip ?? "") || !deviceNames.contains($0.button?.toolTip ?? "") })
+    let expNames = expItems.map({ $0.button?.toolTip ?? "" })
     DispatchQueue.main.async { for e in expItems { NSStatusBar.system.removeStatusItem(e) } }
-    pinnedItems.removeAll{ !pinnedList.contains($0.button?.toolTip ?? "") }
+    pinnedItems.removeAll{ expNames.contains($0.button?.toolTip ?? "") }
 }

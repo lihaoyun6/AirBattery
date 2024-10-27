@@ -13,7 +13,7 @@ class IDeviceBattery {
     //var scanTimer: Timer?
     @AppStorage("readPencil") var readPencil = false
     @AppStorage("readIDevice") var readIDevice = true
-    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("updateInterval") var updateInterval = 1
     
     func startScan() {
         //let interval = TimeInterval(5.0)
@@ -49,7 +49,7 @@ class IDeviceBattery {
         if let result = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/idevice_id", arguments: ["-n"]) {
             for id in result.components(separatedBy: .newlines) {
                 if let d = AirBatteryModel.getByID(id) {
-                    if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 * updateInterval { writeBatteryInfo(id, "-n") }
+                    if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > Double(60 * updateInterval) { writeBatteryInfo(id, "-n") }
                     getPencil(d: d, type: "-n")
                 } else {
                     writeBatteryInfo(id, "-n")
@@ -59,7 +59,7 @@ class IDeviceBattery {
         if let result = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/idevice_id", arguments: ["-l"]) {
             for id in result.components(separatedBy: .newlines) {
                 if let d = AirBatteryModel.getByID(id) {
-                    if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > 60 * updateInterval { writeBatteryInfo(id, "") }
+                    if (Double(Date().timeIntervalSince1970) - d.lastUpdate) > Double(60 * updateInterval) { writeBatteryInfo(id, "") }
                     getPencil(d: d)
                 } else {
                     writeBatteryInfo(id, "")

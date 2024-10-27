@@ -90,7 +90,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     //@AppStorage("cStatusOfBLE") var cStatusOfBLE = false
     @AppStorage("readBTDevice") var readBTDevice = true
     @AppStorage("readBLEDevice") var readBLEDevice = false
-    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("updateInterval") var updateInterval = 1
     @AppStorage("twsMerge") var twsMerge = 5
     
     var centralManager: CBCentralManager!
@@ -99,7 +99,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var bleDevicesLevel: [String:UInt8] = [:]
     var bleDevicesVendor: [String:String] = [:]
     var scanTimer: Timer?
-    var a = 1
+    //var a = 1
     //var mfgData: Data!
     
     override init() {
@@ -119,7 +119,7 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
     func startScan() {
         // 每隔一段时间启动一次扫描
-        let interval = TimeInterval(29.0 * updateInterval)
+        let interval = TimeInterval(29 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scan), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning BLE devices...")
         // 立即启动一次扫描
@@ -154,13 +154,13 @@ class BLEBattery: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     //获取非Apple的普通BLE设备数据
                     if readBLEDevice {
                         if let device = AirBatteryModel.getByName(deviceName) {
-                            if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
+                            if now - device.lastUpdate > Double(60 * updateInterval) { get = true } } else { get = true }
                     }
                 } else {
                     if data.count > 2 {
                         //获取ios个人热点广播数据
                         if [16, 12].contains(data[2]) && !otherAppleDevices.contains(deviceName) && ideviceOverBLE {
-                            if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > 60 * updateInterval { get = true } } else { get = true }
+                            if let device = AirBatteryModel.getByName(deviceName), let _ = device.deviceModel { if now - device.lastUpdate > Double(60 * updateInterval) { get = true } } else { get = true }
                         }
                         //获取Airpods合盖状态消息
                         if data.count == 25 && data[2] == 18 && readBTDevice { getAirpods(peripheral: peripheral, data: data, messageType: "close") }

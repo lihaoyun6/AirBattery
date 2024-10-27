@@ -15,7 +15,7 @@ class BTDBattery {
     @AppStorage("readBTHID") var readBTHID = true
     
     func startScan() {
-        let interval = TimeInterval(59.0 * updateInterval)
+        let interval = TimeInterval(59 * updateInterval)
         scanTimer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(scanDevices), userInfo: nil, repeats: true)
         print("ℹ️ Start scanning Bluetooth HID devices...")
         scanDevices(longScan: true)
@@ -47,7 +47,7 @@ class BTDBattery {
         return bluetoothDevices.map({ $0.name ?? "" }).filter({ $0 != "" })
     }
     
-    static func getOtherDevice(last: String = "10m", timeout: Double = 0) {
+    static func getOtherDevice(last: String = "10m", timeout: Int = 0) {
         let parent = ud.string(forKey: "deviceName") ?? "Mac"
         guard let result = process(path: "/bin/bash", arguments: ["\(Bundle.main.resourcePath!)/logReader.sh", "mac", last], timeout: timeout) else { return }
         let connected = getConnected(mac: true)

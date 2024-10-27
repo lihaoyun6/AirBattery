@@ -279,11 +279,11 @@ struct BlurView: NSViewRepresentable {
 struct popover: View {
     var fromDock: Bool = false
     var allDevice: [Device]
-    let hiddenDevices = AirBatteryModel.getBlackList()
 
     @AppStorage("nearCast") var nearCast = false
     
     @State private var allDevices = [Device]()
+    @State private var hiddenDevices = AirBatteryModel.getBlackList()
     @State private var overReloadButton = false
     @State private var overCopyButton = false
     @State private var overHideButton = false
@@ -296,8 +296,8 @@ struct popover: View {
     @State private var overStack = -1
     @State private var overStack2 = -1
     @State private var overStackNC = -1
-    @State private var hidden:[Int] = []
-    @State private var hidden2:[Int] = []
+    @State private var hidden = [Int]()
+    @State private var hidden2 = [Int]()
     @State private var alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
     @State private var pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
     @State private var allNearcast = getFiles(withExtension: "json", in: ncFolder)
@@ -561,8 +561,8 @@ struct popover: View {
                                                         Button(action: {
                                                             pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
                                                             pinnedList.removeAll(where:  { $0 == allDevices[index].deviceName })
+                                                            refeshPinnedBar(unpin: allDevices[index].deviceName)
                                                             ud.set(pinnedList, forKey: "pinnedList")
-                                                            refeshPinnedBar()
                                                         }, label: {
                                                             Image("pin.circle.fill")
                                                                 .resizable().scaledToFit()
@@ -595,6 +595,10 @@ struct popover: View {
                                                         var blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
                                                         blackList.append(allDevices[index].deviceName)
                                                         ud.set(blackList, forKey: "blackList")
+                                                        let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                                        if pinnedList.contains(hiddenDevices[index].deviceName){
+                                                            refeshPinnedBar()
+                                                        }
                                                     }, label: {
                                                         Image("eye.slash.circle")
                                                             .resizable().scaledToFit()
@@ -723,6 +727,10 @@ struct popover: View {
                                         var blackList = (ud.object(forKey: "blackList") ?? []) as! [String]
                                         blackList.removeAll { $0 == hiddenDevices[index].deviceName }
                                         ud.set(blackList, forKey: "blackList")
+                                        let pinnedList = (ud.object(forKey: "pinnedList") ?? []) as! [String]
+                                        if pinnedList.contains(hiddenDevices[index].deviceName){
+                                            refeshPinnedBar()
+                                        }
                                     }, label: {
                                         Image(getDeviceIcon(hiddenDevices[index]))
                                             .resizable()
@@ -737,7 +745,8 @@ struct popover: View {
                                                 if overStack2 != index { overStack2 = index }
                                             }
                                     })
-                                    .buttonStyle(PlainButtonStyle())
+                                    .buttonStyle(.plain)
+                                    .focusable(false)
                                     .help(hiddenDevices[index].deviceName)
                                 }
                             }
@@ -786,6 +795,9 @@ struct popover: View {
         .onReceive(mainTimer) { t in
             if !fromDock && menuPopover.isShown {
                 allDevices = AirBatteryModel.getAll()
+                hiddenDevices = AirBatteryModel.getBlackList()
+                hidden = [Int]()
+                hidden2 = [Int]()
                 let ibStatus = InternalBattery.status
                 if ibStatus.hasBattery { allDevices.insert(ib2ab(ibStatus), at: 0) }
                 if nearCast { allNearcast = getFiles(withExtension: "json", in: ncFolder) }

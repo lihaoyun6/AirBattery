@@ -163,6 +163,7 @@
 "Peer Info" = "节点信息";
 "Local ID" = "本机 ID";
 "Same as Nearbility" = "与 Nearbility 同步";
+"If you see a bluetooth pairing request from any device that isn't yours, add it to your blacklist!" = "如果您看到任何来自不属于您的设备的蓝牙配对请求, 将其加入黑名单就能让它消失.";
 
 //"Permission Required" = "需要授权";
 //"Open Settings" = "打开系统设置";

@@ -25,7 +25,7 @@ class MagicBattery {
     //var scanTimer: Timer?
     @AppStorage("readBTDevice") var readBTDevice = true
     //@AppStorage("readBTHID") var readBTHID = true
-    @AppStorage("updateInterval") var updateInterval = 1.0
+    @AppStorage("updateInterval") var updateInterval = 1
     @AppStorage("deviceName") var deviceName = "Mac"
     
     func startScan() {
