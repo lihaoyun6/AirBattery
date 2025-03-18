@@ -3,6 +3,28 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.6.1</title>
+            <pubDate>Tue, 18 Mar 2025 10:36:39 +0800</pubDate>
+            <sparkle:version>161</sparkle:version>
+            <sparkle:shortVersionString>1.6.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>添加了对 Magic Keyboard/Trackpad (USB-C) 的支持</li>
+                <li>修复了一些已知的问题, 修复了部分 UI 字符串</li>
+                </ul><ul>
+                <li>Added support for Magic Keyboard/Trackpad (USB-C)</li>
+                <li>Fixed some known issues, fixed some UI strings</li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="300"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.1/AirBattery_v1.6.1.dmg" length="8648794" type="application/octet-stream" sparkle:edSignature="QiFWrqQLloUEaXlQbR6eWNCUmINOGfFRtKvPtz2GpdvlRjZdVwIVCNJae4LcYrGYCWOobR6g3XVEfLyd1T7yBA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.1/Update161-160.delta" sparkle:deltaFrom="160" length="305606" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="BEOs3nR7Zj/b0lpbC7vObiLXA+LDiv2QK51LyfSaAHBx8MIVxCmkCW5Vacge8RlfQSQ1X3CjVizvYVyKfYihCQ=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.1/Update161-159.delta" sparkle:deltaFrom="159" length="544602" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="uIPWnkDPphOVvzqiz8ZeJXsY0kkWkCDgzlIDBv4o8mUoI6wlHd/n2W9kXD9Sfby4d8yX2Y0BXM5PBnTTV4OyBg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.1/Update161-158.delta" sparkle:deltaFrom="158" length="745438" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="owSkT22MQ2LjgL6FxTwdbsSZO62dZKTETVGVAgjlnLAyHIyd6mNp9adg5HemIanpWNUlJhJ+2CTBjbMZEJL3DA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.6.0</title>
             <pubDate>Sun, 27 Oct 2024 23:44:29 +0800</pubDate>
             <sparkle:version>160</sparkle:version>
