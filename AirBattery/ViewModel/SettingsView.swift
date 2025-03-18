@@ -9,44 +9,6 @@ import SwiftUI
 import ServiceManagement
 import WidgetKit
 
-struct Tooltip: NSViewRepresentable {
-    let tooltip: String
-    
-    func makeNSView(context: NSViewRepresentableContext<Tooltip>) -> NSView {
-        let view = NSView()
-        view.toolTip = tooltip
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSView, context: NSViewRepresentableContext<Tooltip>) { }
-}
-
-struct WindowConfigurator: NSViewRepresentable {
-    var onWindowConfigured: (NSWindow?) -> Void
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-
-        DispatchQueue.main.async {
-            if let window = view.window {
-                self.onWindowConfigured(window)
-            } else {
-                self.onWindowConfigured(nil)
-            }
-        }
-
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {}
-}
-
-public extension View {
-    func toolTip(_ toolTip: String) -> some View {
-        self.overlay(Tooltip(tooltip: toolTip))
-    }
-}
-
 struct SettingsView: View {
     @State private var selectedItem: String? = "General"
     @State private var showDebug: Bool = false
@@ -69,8 +31,8 @@ struct SettingsView: View {
                 NavigationLink(destination: WidgetView(), tag: "Widget", selection: $selectedItem) {
                     Label("Widget", image: "widget")
                 }
-                NavigationLink(destination: BlacklistView(), tag: "Blacklist", selection: $selectedItem) {
-                    Label("Blacklist", image: "blacklist")
+                NavigationLink(destination: BlacklistView(), tag: "Blocklist", selection: $selectedItem) {
+                    Label("Blocklist", image: "blacklist")
                 }
                 if showDebug {
                     NavigationLink(destination: DebugView(), tag: "Debug", selection: $selectedItem) {
@@ -83,175 +45,6 @@ struct SettingsView: View {
         }
         .frame(width: 600, height: 430)
         .navigationTitle("AirBattery Settings")
-        //.background(WindowConfigurator { window in window?.level = .floating })
-    }
-}
-
-struct SField: View {
-    var title: LocalizedStringKey
-    @Binding var text: String
-    
-    var body: some View {
-        HStack(spacing: 4) {
-            Text(title)
-            Spacer()
-            TextField("", text: $text)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 220)
-        }
-    }
-}
-
-struct SPicker<T: Hashable, Content: View, Style: PickerStyle>: View {
-    var title: LocalizedStringKey
-    @Binding var selection: T
-    var style: Style
-    var tips: LocalizedStringKey?
-    @ViewBuilder let content: () -> Content
-    
-    @State private var isPresented: Bool = false
-    
-    init(_ title: LocalizedStringKey, selection: Binding<T>, style: Style = .menu, tips: LocalizedStringKey? = nil, @ViewBuilder content: @escaping () -> Content) {
-            self.title = title
-            self._selection = selection
-            self.style = style
-            self.tips = tips
-            self.content = content
-        }
-    
-    var body: some View {
-        HStack {
-            Text(title)
-            Spacer()
-            if let tips = tips {
-                Button(action: {
-                    isPresented = true
-                }, label: {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 15, weight: .light))
-                        .opacity(0.5)
-                })
-                .buttonStyle(.plain)
-                .padding(.trailing, -10)
-                .sheet(isPresented: $isPresented) {
-                    VStack(alignment: .trailing) {
-                        GroupBox { Text(tips).padding() }
-                        Button(action: {
-                            isPresented = false
-                        }, label: {
-                            Text("OK").frame(width: 30)
-                        }).keyboardShortcut(.defaultAction)
-                    }.padding()
-                }
-            }
-            Picker("", selection: $selection) { content() }
-                .fixedSize()
-                .pickerStyle(style)
-                .buttonStyle(.borderless)
-        }.frame(height: 16)
-    }
-}
-
-struct SToggle: View {
-    var title: LocalizedStringKey
-    @Binding var isOn: Bool
-    var tips: LocalizedStringKey?
-    
-    @State private var isPresented: Bool = false
-    
-    init(_ title: LocalizedStringKey, isOn: Binding<Bool>, tips: LocalizedStringKey? = nil) {
-        self.title = title
-        self._isOn = isOn
-        self.tips = tips
-    }
-    
-    var body: some View {
-        HStack {
-            Text(title)
-            Spacer()
-            if let tips = tips {
-                Button(action: {
-                    isPresented = true
-                }, label: {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 15, weight: .light))
-                        .opacity(0.5)
-                })
-                .buttonStyle(.plain)
-                .sheet(isPresented: $isPresented) {
-                    VStack(alignment: .trailing) {
-                        GroupBox { Text(tips).padding() }
-                        Button(action: {
-                            isPresented = false
-                        }, label: {
-                            Text("OK").frame(width: 30)
-                        }).keyboardShortcut(.defaultAction)
-                    }.padding()
-                }
-            }
-            Toggle("", isOn: $isOn)
-                .toggleStyle(.switch)
-                .scaleEffect(0.7)
-                .frame(width: 32)
-        }.frame(height: 16)
-    }
-}
-
-struct SSteper: View {
-    var title: LocalizedStringKey
-    @Binding var value: Int
-    var tips: LocalizedStringKey?
-    var length: CGFloat
-    var min: Int
-    var max: Int
-    
-    @State private var isPresented: Bool = false
-    
-    init(_ title: LocalizedStringKey, value: Binding<Int>, tips: LocalizedStringKey? = nil, length: CGFloat = 45, min: Int = 0, max: Int = 100) {
-        self.title = title
-        self._value = value
-        self.tips = tips
-        self.length = length
-        self.min = min
-        self.max = max
-    }
-    
-    var body: some View {
-        HStack {
-            Text(title)
-            Spacer()
-            if let tips = tips {
-                Button(action: {
-                    isPresented = true
-                }, label: {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 15, weight: .light))
-                        .opacity(0.5)
-                })
-                .buttonStyle(.plain)
-                .sheet(isPresented: $isPresented) {
-                    VStack(alignment: .trailing) {
-                        GroupBox { Text(tips).padding() }
-                        Button(action: {
-                            isPresented = false
-                        }, label: {
-                            Text("OK").frame(width: 30)
-                        }).keyboardShortcut(.defaultAction)
-                    }.padding()
-                }
-            }
-            TextField("", value: $value, formatter: NumberFormatter())
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.trailing)
-                .frame(width: length)
-                .onChange(of: value) { newValue in
-                    if newValue > max { value = max }
-                    if newValue < min { value = min }
-                }
-            Stepper("", value: $value)
-                .padding(.leading, -10)
-        }.frame(height: 16)
     }
 }
 
@@ -354,7 +147,7 @@ struct NearbilityView: View {
                         .foregroundColor(.orange)
                         .onChange(of: readBLEDevice) { newValue in
                             if newValue {
-                                _ = createAlert(title: "AirBattery Tips".local, message: "If you see a bluetooth pairing request from any device that isn't yours, add it to your blacklist!".local, button1: "OK").runModal()
+                                _ = createAlert(title: "AirBattery Tips".local, message: "If you see a bluetooth pairing request from any device that isn't yours, add it to your blocklist!".local, button1: "OK").runModal()
                             }
                         }
                     Divider().opacity(0.5)
@@ -582,14 +375,9 @@ struct WidgetView: View {
                         }.onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
                     }
                     Divider().opacity(0.5)
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            AirBatteryModel.writeData()
-                            WidgetCenter.shared.reloadAllTimelines()
-                        }, label: {
-                            Text("Reload All Widgets")
-                        })
+                    SButton(title: "Reload All Widgets", buttonTitle: "Reload") {
+                        AirBatteryModel.writeData()
+                        WidgetCenter.shared.reloadAllTimelines()
                     }
                 }.padding(5)
             }
@@ -615,9 +403,9 @@ struct BlacklistView: View {
     
     var body: some View {
         VStack(spacing: 30) {
-            GroupBox(label: Text("Blacklist").font(.headline)) {
+            GroupBox(label: Text("Blocklist").font(.headline)) {
                 VStack(spacing: 10) {
-                    SToggle("Whitelist Mode", isOn: $whitelistMode)
+                    SToggle("Allowlist Mode", isOn: $whitelistMode)
                     Divider().opacity(0.5)
                     HStack {
                         Spacer()
@@ -693,8 +481,6 @@ struct DebugView: View {
     @State private var isCharging: Bool = false
     @State private var fullCharged: Bool = false
     
-    
-    
     @State private var isPresented: Bool = false
     
     var body: some View {
@@ -703,12 +489,8 @@ struct DebugView: View {
                 VStack(spacing: 10) {
                     SToggle("Debug Mode", isOn: $test_debug)
                     Divider().opacity(0.5)
-                    HStack {
-                        Text("Data Folder")
-                        Spacer()
-                        Button("Open") {
-                            NSWorkspace.shared.open(ncFolder.deletingLastPathComponent())
-                        }
+                    SButton(title: "Data Folder", buttonTitle: "Open") {
+                        NSWorkspace.shared.open(ncFolder.deletingLastPathComponent())
                     }
                 }.padding(5)
             }

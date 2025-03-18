@@ -134,6 +134,7 @@ class MagicBattery {
         }
         if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryPercent" as CFString, kCFAllocatorDefault, 0) {
             percent = percentProperty.takeRetainedValue() as! Int
+            if percent == 4 { percent = 0 }
         }
         if let productProperty = IORegistryEntryCreateCFProperty(object, "Product" as CFString, kCFAllocatorDefault, 0) {
             productName = productProperty.takeRetainedValue() as! String

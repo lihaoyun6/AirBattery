@@ -64,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @AppStorage("alertLevel") var alertLevel = 10
     @AppStorage("fullyLevel") var fullyLevel = 100
     
-    var statusMenu: NSMenu = NSMenu()
+    //var statusMenu: NSMenu = NSMenu()
     var menu: NSMenu = NSMenu()
     var startTime = Date()
     let nc = NSWorkspace.shared.notificationCenter
@@ -221,8 +221,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             WidgetCenter.shared.reloadAllTimelines()
         }
         
-        menu.delegate = self
-        statusMenu.delegate = self
+        //menu.delegate = self
+        //statusMenu.delegate = self
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         //statusBarItem.menu = statusMenu
         if let button = statusBarItem.button {
@@ -318,7 +318,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         }
     }
     
-    func menuWillOpen(_ menu: NSMenu) {
+    /*func menuWillOpen(_ menu: NSMenu) {
         dockWindow.orderOut(nil)
         var allDevices = AirBatteryModel.getAll()
         let ibStatus = InternalBattery.status
@@ -341,7 +341,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         menuItem.view = contentView
         statusMenu.removeAllItems()
         statusMenu.addItem(menuItem)
-    }
+    }*/
     
     @objc func togglePopover(_ sender: Any?) {
         if let button = statusBarItem.button, !menuPopover.isShown {
