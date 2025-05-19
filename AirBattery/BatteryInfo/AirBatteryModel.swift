@@ -129,11 +129,11 @@ class AirBatteryModel {
         var url: URL
         let bundleIdentifier = Bundle.main.bundleIdentifier
         if bundleIdentifier == key {
-            url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("singleDeviceName")
+            url = fd.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("singleDeviceName")
             let devicename = try? String(contentsOf: url, encoding: .utf8)
             return devicename ?? ""
         } else {
-            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/singleDeviceName")
+            url = fd.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/singleDeviceName")
             try? ud.string(forKey: "deviceOnWidget")?.write(to: url, atomically: true, encoding: .utf8)
         }
         return ""
@@ -143,20 +143,20 @@ class AirBatteryModel {
         var url: URL
         let bundleIdentifier = Bundle.main.bundleIdentifier
         if bundleIdentifier == key {
-            url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("data.json")
+            url = fd.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("data.json")
         } else {
-            url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/data.json")
+            url = fd.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(key)/Data/Documents/data.json")
         }
         return url
     }
     
     static func writeData(){
-        let showMac = ud.object(forKey: "showMacOnWidget") as? Bool ?? true
+        //let showMac = ud.object(forKey: "showMacOnWidget") as? Bool ?? true
         let revList = ud.object(forKey: "revListOnWidget") as? Bool ?? false
         
         var devices = getAll(reverse: revList)
         let ibStatus = InternalBattery.status
-        if ibStatus.hasBattery && showMac { devices.insert(ib2ab(ibStatus), at: 0) }
+        if ibStatus.hasBattery { devices.insert(ib2ab(ibStatus), at: 0) }
         do {
             let jsonData = try JSONEncoder().encode(devices)
             try jsonData.write(to: getJsonURL())

@@ -1,4 +1,5 @@
 {
+  "originHash" : "ae12922b0d357456d6d86966484d755d7c3b4929250b576743e522f629188b7e",
   "pins" : [
     {
       "identity" : "multipeerkit",
@@ -17,7 +18,16 @@
         "revision" : "41847a58cdef7506b257591fcca6f9495df591d4",
         "version" : "2.6.2"
       }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
+        "version" : "1.5.0"
+      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

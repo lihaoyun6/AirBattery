@@ -401,10 +401,8 @@ func substring(from string: String, start: Int, length: Int) -> String? {
 
 
 func getFiles(withExtension fileExtension: String, in directory: URL) -> [URL] {
-    let fileManager = FileManager.default
-    
     do {
-        let filesAndDirectories = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [])
+        let filesAndDirectories = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [])
         let filteredFiles = filesAndDirectories.filter { $0.pathExtension == fileExtension }
         return filteredFiles
     } catch {
@@ -468,6 +466,8 @@ func getDeviceIcon(_ d: Device) -> String {
     switch d.deviceType {
     case "blank":
         return "blank"
+    case "virtual":
+        return "square.dashed"
     case "general_bt":
         return "bluetooth.fill"
     case "MobilePhone":

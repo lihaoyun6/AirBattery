@@ -164,7 +164,7 @@ struct AlertInputView: View {
         if level <= 10 {
             color = Color.red
         } else if level <= 20 {
-            color = Color("my_yellow")
+            color = Color.myYellow
         }
         return color
     }

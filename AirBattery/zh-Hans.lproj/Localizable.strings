@@ -106,7 +106,7 @@
 "Try to get the battery usage of any Bluetooth device that AirBattery can find\n\nWARNING: This is a BETA feature and may cause unexpected errors!" = "尝试扫描周边所有的 BLE 设备, 即使它可能不属于您\n\n请注意: 这是一项测试版功能, 可能会导致未知的错误!";
 "Show or hide this Mac's built-in battery in the Dock icon" = "在 Dock 图标中显示此 Mac 的内置电池, 或将其从 Dock 图标上隐藏";
 "Cycle through all found devices in the Dock icon" = "在 Dock 图标中循环显示所有已发现的设备";
-"If the difference in battery usage between the left and right earbuds is less than this value, AirBattery will show them as one device." = "当同一副立体声耳机左右两侧的电量差距小于此值的时候, AirBattery 会将它们合并显示为一个设备.";
+"If the difference in battery usage between the left and right earbuds is less than this value, AirBattery will show them as one device." = "若一副立体声耳机的左右两侧的电量差距小于此值, AirBattery 会将它们合并显示为一个设备.";
 "System Default" = "跟随系统默认";
 "System Default: Determined by macOS\n\nNearbility: Same as Nearbility setting" = "跟随系统默认: 由 macOS 决定小组件何时更新\n\nNearbility: 与 Nearbility 更新频率保持一致";
 "AirBattery battery usage widget" = "AirBattery 电量小组件";
@@ -176,3 +176,8 @@
 //"The following BLE devices will be ignored:" = "AirBattery 将会忽略下列所有 BLE 设备:";
 "Only the following devices will be showed" = "AirBattery 仅会显示下列设备";
 "The following devices will be ignored" = "AirBattery 将会忽略下列设备";
+
+"Command Line Tool" = "命令行工具";
+"Uninstall" = "卸载";
+"Install" = "安装";
+"After installation, you can run \"airbattery\" in yor terminal to list all devices." = "安装此工具后, 在命令行中执行\"airbattery\"即可列出所有设备.";

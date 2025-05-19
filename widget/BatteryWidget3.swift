@@ -100,7 +100,7 @@ struct SmallWidgetView2: View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 10, alignment: .center)
-                                            .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                            .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                             .offset(y:-29.5)
                                     }
                                 }.frame(width: 58, height: 58, alignment: .center)
@@ -149,7 +149,7 @@ struct SmallWidgetView2: View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 10, alignment: .center)
-                                            .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                            .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                             .offset(y:-29.5)
                                     }
                                 }.frame(width: 58, height: 58, alignment: .center)
@@ -234,7 +234,7 @@ struct doubleBatteryWidgetEntryView2: View {
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 10, alignment: .center)
-                                                .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                                .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                                 .offset(y:-29.5)
                                         }
                                     }.frame(width: 58, height: 58, alignment: .center)
@@ -284,7 +284,7 @@ struct doubleBatteryWidgetEntryView2: View {
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 10, alignment: .center)
-                                                .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                                .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                                 .offset(y:-29.5)
                                         }
                                     }.frame(width: 58, height: 58, alignment: .center)

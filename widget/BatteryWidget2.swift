@@ -63,7 +63,7 @@ struct LargeWidgetView2: View {
                                 Spacer()
                                 if item.batteryLevel <= 10 {
                                     Text("\(item.batteryLevel)%") .font(.system(size: 11))
-                                        .foregroundColor(Color("dark_my_red"))
+                                        .foregroundColor(.darkMyRed)
                                 } else {
                                     Text("\(item.batteryLevel)%") .font(.system(size: 11))
                                 }
@@ -164,7 +164,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                         Image(getDeviceIcon(item))
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            //sf.foregroundColor(Color("black_white"))
+                                            //sf.foregroundColor(.blackWhite)
                                             .frame(width: 26, height: 26, alignment: .center)
                                         
                                         if item.isCharging != 0 {
@@ -178,7 +178,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 10, alignment: .center)
-                                                .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                                .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                                 .offset(y:-29.5)
                                         }
                                     }.frame(width: 58, height: 58, alignment: .center)
@@ -219,7 +219,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                         Image(getDeviceIcon(item))
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            //.foregroundColor(Color("black_white"))
+                                            //.foregroundColor(.blackWhite)
                                             .frame(width: 26, height: 26, alignment: .center)
                                         
                                         if item.isCharging != 0 {
@@ -233,7 +233,7 @@ struct doubleRowBatteryWidgetEntryView: View {
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 10, alignment: .center)
-                                                .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                                .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                                 .offset(y:-29.5)
                                         }
                                     }.frame(width: 58, height: 58, alignment: .center)
@@ -306,7 +306,7 @@ struct singleBatteryWidgetEntryView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 16, alignment: .center)
-                                    .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                    .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                     .offset(y: -55.5)
                             }
                         }.frame(width: 110, height: 110, alignment: .center)

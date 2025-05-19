@@ -7,8 +7,10 @@
 
 import WidgetKit
 import SwiftUI
-let ncFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
+
+let fd = FileManager.default
 let ud = UserDefaults.standard
+let ncFolder = fd.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("NearcastData")
 
 @available(macOS 14, *)
 struct ViewSizeTimelineProviderNew: AppIntentTimelineProvider {
@@ -182,7 +184,7 @@ struct LargeWidgetView : View {
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                    //.foregroundColor(Color("black_white"))
+                                    //.foregroundColor(.blackWhite)
                                         .frame(width: 20, height: 20, alignment: .center)
                                     Text("\(((Date().timeIntervalSince1970 - item.lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(item.deviceName)")
                                         .font(.system(size: 11))
@@ -191,7 +193,7 @@ struct LargeWidgetView : View {
                                     Spacer()
                                     if item.batteryLevel <= 10 {
                                         Text("\(item.batteryLevel)%") .font(.system(size: 11))
-                                            .foregroundColor(Color("dark_my_red"))
+                                            .foregroundColor(.darkMyRed)
                                     } else {
                                         Text("\(item.batteryLevel)%") .font(.system(size: 11))
                                     }
@@ -293,7 +295,7 @@ struct SmallWidgetView : View {
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        //.foregroundColor(Color("black_white"))
+                                        //.foregroundColor(.blackWhite)
                                         .frame(width: 26, height: 26, alignment: .center)
                                     
                                     if item.isCharging != 0 {
@@ -307,7 +309,7 @@ struct SmallWidgetView : View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 10, alignment: .center)
-                                            .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                            .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                             .offset(y:-29.5)
                                     }
                                 }.frame(width: 58, height: 58, alignment: .center)
@@ -347,7 +349,7 @@ struct SmallWidgetView : View {
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        //.foregroundColor(Color("black_white"))
+                                        //.foregroundColor(.blackWhite)
                                         .frame(width: 26, height: 26, alignment: .center)
                                     
                                     if item.isCharging != 0 {
@@ -361,7 +363,7 @@ struct SmallWidgetView : View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 10, alignment: .center)
-                                            .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                            .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                             .offset(y:-29.5)
                                     }
                                 }.frame(width: 58, height: 58, alignment: .center)
@@ -431,7 +433,7 @@ struct MediumWidgetView : View {
                                     Image(getDeviceIcon(item))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        //.foregroundColor(Color("black_white"))
+                                        //.foregroundColor(.blackWhite)
                                         .frame(width: 26, height: 26, alignment: .center)
                                     
                                     if item.isCharging != 0 {
@@ -445,7 +447,7 @@ struct MediumWidgetView : View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 10, alignment: .center)
-                                            .foregroundColor(item.batteryLevel == 100 ? Color("my_green") : Color.primary)
+                                            .foregroundColor(item.batteryLevel == 100 ? .myGreen : .primary)
                                             .offset(y:-29.5)
                                     }
                                 }
@@ -487,7 +489,7 @@ struct BatteryView: View {
                         .offset(x:-1.5)
                     Image("batt_" + ((item.isCharging != 0 || item.isCharged) ? "bolt" : "plug"))
                         .offset(x:-1.5)
-                        .foregroundColor(Color("black_white"))
+                        .foregroundColor(.blackWhite)
                 }
             }else{
                 if item.isCharging != 0 {
@@ -496,7 +498,7 @@ struct BatteryView: View {
                         .offset(x:-1.5)
                     Image("batt_" + ((item.isCharging == 5) ? "plug" : "bolt"))
                         .offset(x:-1.5)
-                        .foregroundColor(Color("black_white"))
+                        .foregroundColor(.blackWhite)
                 }
             }
         }.compositingGroup()

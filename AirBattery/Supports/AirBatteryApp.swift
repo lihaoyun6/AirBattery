@@ -11,12 +11,13 @@ import UserNotifications
 import IOBluetooth
 import Sparkle
 
+let fd = FileManager.default
 let ud = UserDefaults.standard
 var updaterController: SPUStandardUpdaterController!
 var statusBarItem: NSStatusItem!
 var pinnedItems = [NSStatusItem]()
 var netcastService: MultipeerService = MultipeerService(serviceType: "airbattery-nc")
-let ncFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
+let ncFolder = fd.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Containers/\(AirBatteryModel.key)/Data/Documents/NearcastData")
 let systemUUID = getMacDeviceUUID()
 var dockWindow = AutoHideWindow()
 var menuPopover = NSPopover()
@@ -37,6 +38,21 @@ struct AirBatteryApp: App {
     var body: some Scene {
         Settings {
             SettingsView()
+                .background(
+                    WindowAccessor(
+                        onWindowOpen: { w in
+                            if let w = w {
+                                //w.level = .floating
+                                w.titlebarSeparatorStyle = .none
+                                guard let nsSplitView = findNSSplitVIew(view: w.contentView),
+                                      let controller = nsSplitView.delegate as? NSSplitViewController else { return }
+                                controller.splitViewItems.first?.canCollapse = false
+                                controller.splitViewItems.first?.minimumThickness = 175
+                                controller.splitViewItems.first?.maximumThickness = 175
+                                w.orderFront(nil)
+                            }
+                        })
+                )
         }
     }
 }
@@ -51,7 +67,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @AppStorage("launchAtLogin") var launchAtLogin = false
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("batteryPercent") var batteryPercent = "outside"
-    @AppStorage("hidePercentWhenFull") var hidePercentWhenFull = false
     @AppStorage("alertSound") var alertSound = true
     @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("hideLevel") var hideLevel = 90
@@ -151,7 +166,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 "deviceName": "Mac",
                 "launchAtLogin": false,
                 "intBattOnStatusBar": true,
-                "hidePercentWhenFull": false,
                 "deviceOnWidget": "",
                 "updateInterval": 1,
                 "widgetInterval": 0,
@@ -182,16 +196,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             ud.set(object: alerts, forKey: "alertList")
         }
         
-        if !FileManager.default.fileExists(atPath: ncFolder.path) {
+        if !fd.fileExists(atPath: ncFolder.path) {
             do {
-                try FileManager.default.createDirectory(at: ncFolder, withIntermediateDirectories: true, attributes: nil)
+                try fd.createDirectory(at: ncFolder, withIntermediateDirectories: true, attributes: nil)
                 print("ℹ️ Folder created at: \(ncFolder.path)")
             } catch {
                 print("⚠️ Failed to create folder: \(error)")
             }
         } else {
             let oldFiles = getFiles(withExtension: "json", in: ncFolder)
-            for url in oldFiles { try? FileManager.default.removeItem(at: url) }
+            for url in oldFiles { try? fd.removeItem(at: url) }
         }
         
         startTime = Date()
@@ -365,6 +379,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
            let url = URL(string: urlString) {
             if url.scheme == "airbattery"{
                 switch url.host {
+                case "writedata" :
+                    print("Writing data to disk...")
+                    AirBatteryModel.writeData()
                 case "reloadwingets" :
                     print("Reloading all widgets...")
                     AirBatteryModel.writeData()

@@ -121,7 +121,7 @@ struct MultiBatteryView: View {
                                     if item.deviceType.contains("mac") && showThisMac == "percent"{
                                         Text(String(item.batteryLevel))
                                             .colorScheme(darkMode ? .dark : .light)
-                                            .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : Color("black_white"))
+                                            .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : .blackWhite)
                                             .font(.custom("Helvetica-Bold", size: item.batteryLevel>99 ? 32 : 42))
                                             .frame(width: 100, alignment: .center)
                                             .scaleEffect(0.5)
@@ -132,7 +132,7 @@ struct MultiBatteryView: View {
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
                                             .colorScheme(darkMode ? .dark : .light)
-                                            .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : Color("black_white"))
+                                            .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : .blackWhite)
                                             .offset(y:-1)
                                             .frame(width: 44, height: 43, alignment: .center)
                                             .scaleEffect(0.5)
@@ -176,7 +176,7 @@ struct MultiBatteryView: View {
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .colorScheme(darkMode ? .dark : .light)
-                                        .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : Color("black_white"))
+                                        .foregroundColor(item.isCharging != 0 ? Color("dark_"+getPowerColor(item)) : .blackWhite)
                                         .offset(y:-1)
                                         .frame(width: 44, height: 43, alignment: .center)
                                         .scaleEffect(0.5)
@@ -341,7 +341,7 @@ struct popover: View {
                             Image(systemName: "minus.circle")
                                 .font(.system(size: 14, weight: .light))
                                 .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overQuitButton ? Color("my_yellow") : .secondary)
+                                .foregroundColor(overQuitButton ? .myYellow : .secondary)
                                 .opacity(overQuitButton ? 1 : 0.7)
                         })
                         .focusable(false)
@@ -415,22 +415,22 @@ struct popover: View {
                             /*Image(systemName: "exclamationmark.circle")
                              .resizable()
                              .aspectRatio(contentMode: .fit)
-                             .foregroundColor(Color("black_white"))
+                             .foregroundColor(.blackWhite)
                              .frame(width: 20, height: 20, alignment: .center)
                              Text("No Device Found!")
                              .font(.system(size: 12))
-                             .foregroundColor(Color("black_white"))
+                             .foregroundColor(.blackWhite)
                              .frame(height: 24, alignment: .center)
                              .padding(.horizontal, 8)*/
                             let ib = ib2ab(InternalBattery.status)
                             Image(getDeviceIcon(ib))
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .foregroundColor(Color("black_white"))
+                                .foregroundColor(.blackWhite)
                                 .frame(width: 22, height: 22, alignment: .center)
                             Text("\(ib.deviceName)")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color("black_white"))
+                                .foregroundColor(.blackWhite)
                                 .frame(height: 24, alignment: .center)
                                 .padding(.horizontal, 7)
                             Spacer()
@@ -442,7 +442,7 @@ struct popover: View {
                             overStackNC = -1
                             if hovering { overStack = 0 }
                         }
-                        .background(overStack == 0 ? Color("black_white").opacity(0.15) : .clear)
+                        .background(overStack == 0 ? Color.blackWhite.opacity(0.15) : .clear)
                         if hiddenDevices.count > 0 { Divider() }
                     }
                     ForEach(allDevices.indices, id: \.self) { index in
@@ -462,23 +462,23 @@ struct popover: View {
                                     Image(getDeviceIcon(allDevices[index]))
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        .foregroundColor(Color("black_white"))
+                                        .foregroundColor(.blackWhite)
                                         .frame(width: 22, height: 22, alignment: .center)
                                     HStack(spacing: 1) {
                                         Text("\(((Date().timeIntervalSince1970 - allDevices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(allDevices[index].deviceName)")
                                             .font(.system(size: 12))
-                                            .foregroundColor(Color("black_white"))
+                                            .foregroundColor(.blackWhite)
                                             .frame(height: 24, alignment: .center)
                                         Spacer().frame(width: 0.5)
                                         if alertList.map({$0.name}).contains(allDevices[index].deviceName) {
                                             Image(systemName: "bell.fill")
                                                 .font(.system(size: 10))
-                                                .foregroundColor(Color("black_white"))
+                                                .foregroundColor(.blackWhite)
                                         }
                                         if pinnedList.contains(allDevices[index].deviceName) {
                                             Image(systemName: "pin.fill")
                                                 .font(.system(size: 10))
-                                                .foregroundColor(Color("black_white"))
+                                                .foregroundColor(.blackWhite)
                                                 .offset(y: 0.2)
                                         }
                                     }.padding(.horizontal, 7)
@@ -614,7 +614,7 @@ struct popover: View {
                                             }
                                         } else {
                                             Text("\(allDevices[index].batteryLevel)%")
-                                                .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
+                                                .foregroundColor((allDevices[index].batteryLevel <= 10) ? Color.darkMyRed : .primary)
                                                 .font(.system(size: 11))
                                             BatteryView(item: allDevices[index])
                                                 .scaleEffect(0.85)
@@ -623,7 +623,7 @@ struct popover: View {
                                 }
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 10)
-                                .background(overStack == index ? Color("black_white").opacity(0.15) : .clear)//.cornerRadius(4)
+                                .background(overStack == index ? Color.blackWhite.opacity(0.15) : .clear)//.cornerRadius(4)
                                 .clipShape(RoundedCornersShape(radius: 2.9, corners: index == allDevices.count - (hiddenDevices.count > 0 ? 0 : 1) ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
                                 .onHover{ hovering in
                                     overStack2 = -1
@@ -714,12 +714,12 @@ struct popover: View {
                             Image("sunglasses.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .foregroundColor(Color("black_white"))
+                                .foregroundColor(.blackWhite)
                                 .frame(width: 22, height: 22, alignment: .center)
                                 .padding(.vertical, 6)
                             Text("Hidden Device:")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color("black_white"))
+                                .foregroundColor(.blackWhite)
                                 .frame(height: 24, alignment: .center)
                                 .padding(.horizontal, 10)
                             Spacer()
@@ -741,7 +741,7 @@ struct popover: View {
                                             .frame(width: 20, height: 20, alignment: .center)
                                             .padding(.vertical, 4)
                                             .padding(.horizontal, 4)
-                                            .background(overStack2 == index ? Color("black_white").opacity(0.15) : .clear).cornerRadius(2.5)
+                                            .background(overStack2 == index ? Color.blackWhite.opacity(0.15) : .clear).cornerRadius(2.5)
                                             .onHover{ hovering in
                                                 overStack = -1
                                                 overStackNC = -1
@@ -829,24 +829,24 @@ struct nearcastView: View {
                         Image(getDeviceIcon(devices[index]))
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(Color("black_white"))
+                            .foregroundColor(.blackWhite)
                             .frame(width: 22, height: 22, alignment: .center)
                         HStack(spacing: 1) {
                             Text("\(((Date().timeIntervalSince1970 - devices[index].lastUpdate) / 60) > 10 ? "⚠︎ " : "")\(devices[index].deviceName)")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color("black_white"))
+                                .foregroundColor(.blackWhite)
                                 .frame(height: 24, alignment: .center)
                                 .padding(.horizontal, 7)
                             Spacer().frame(width: 0.5)
                             if alertList.map({$0.name}).contains(devices[index].deviceName) {
                                 Image(systemName: "bell.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color("black_white"))
+                                    .foregroundColor(.blackWhite)
                             }
                             if pinnedList.contains(devices[index].deviceName) {
                                 Image(systemName: "pin.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color("black_white"))
+                                    .foregroundColor(.blackWhite)
                                     .offset(y: 0.2)
                             }
                         }.padding(.horizontal, 7)
@@ -947,7 +947,7 @@ struct nearcastView: View {
                             Spacer()
                             if devices[index].hasBattery {
                                 Text("\(devices[index].batteryLevel)%")
-                                    .foregroundColor((devices[index].batteryLevel <= 10) ? Color("dark_my_red") : .primary)
+                                    .foregroundColor((devices[index].batteryLevel <= 10) ? Color.darkMyRed : .primary)
                                     .font(.system(size: 11))
                                 BatteryView(item: devices[index])
                                     .scaleEffect(0.85)
@@ -958,7 +958,7 @@ struct nearcastView: View {
                     .padding(.horizontal, 10)
                     .onHover{ hovering in overStack = index }
                 }
-                .background((overStackNC == mainIndex && overStack == index) ? Color("black_white").opacity(0.15) : .clear)
+                .background((overStackNC == mainIndex && overStack == index) ? Color.blackWhite.opacity(0.15) : .clear)
                 .clipShape(RoundedCornersShape(radius: 2.9, corners: index == devices.count - 1 ? [.bottomLeft, .bottomRight] : (index == 0 ? [.topLeft, .topRight] : [])))
                 if index != devices.count-1 { Divider() }
             }
@@ -991,19 +991,6 @@ func openSettingPanel() {
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     } else {
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-    }
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-        if let w = NSApp.windows.first(where: { $0.title == "AirBattery Settings".local }) {
-            w.level = .floating
-            w.titlebarSeparatorStyle = .none
-            guard let nsSplitView = findNSSplitVIew(view: w.contentView),
-                  let controller = nsSplitView.delegate as? NSSplitViewController else { return }
-            controller.splitViewItems.first?.canCollapse = false
-            controller.splitViewItems.first?.minimumThickness = 175
-            controller.splitViewItems.first?.maximumThickness = 175
-            w.makeKeyAndOrderFront(nil)
-            w.makeKey()
-        }
     }
 }
 
