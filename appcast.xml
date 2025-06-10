@@ -3,6 +3,31 @@
     <channel>
         <title>AirBattery</title>
         <item>
+            <title>v1.6.3</title>
+            <pubDate>Tue, 10 Jun 2025 09:56:14 +0800</pubDate>
+            <sparkle:version>163</sparkle:version>
+            <sparkle:shortVersionString>1.6.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <style>ul{margin-top: 0;margin-bottom: 7;padding-left: 18;}</style><ul>
+                <li>修复了菜单栏电池图标的一些bug</li>
+                <li>支持为电量通知设置延时提醒</li>
+                <li><b style="color: red">我的免费开发者证书将在6月14日过期, 请收藏此App的<a href="https://lihaoyun6.github.io/airbattery/">主页</a>以随时下载最新版!</b></li>
+                </ul><ul>
+                <li>Fixed some bugs of the menu bar battery icon.</li>
+                <li>Ability to snooze battery notifications.</li>
+                <li><b style="color: red">My certificate will expire on June 14, bookmark this <a href="https://lihaoyun6.github.io/airbattery/">page</a> to download AirBattery at any time!
+                </b></li>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+            ]]></description>
+            <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.3/AirBattery_v1.6.3.dmg" length="9518933" type="application/octet-stream" sparkle:edSignature="NNReGQPLvzll7GrdM5plJat0pYEjR8w1bci8GCAkWyxnt8BGjjSCCOcDpdj2VW5ZN06HL3gl5RloZahzMWeBAg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.3/Update163-162.delta" sparkle:deltaFrom="162" length="563454" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="ucAg71IGzwXYLQOPysxIFQiG79+RxQwDAhfn5M8EjiNq7Cuvr+ZB5aRybnB+cyT0k3i3vl3HqmTg7G13LtxwBg=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.3/Update163-161.delta" sparkle:deltaFrom="161" length="1413038" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="XeO+MpToRQF11vRusqvJBOGbIbKwbMl+5WAgJ2KXrYPw3N46/t0mKWk9z7rt/BquzWSfzWWcQRzWPL3SET2fCA=="/>
+                <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.3/Update163-160.delta" sparkle:deltaFrom="160" length="1443502" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864752" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="K2QVZR+myfvKcZtvp0hVux/gTfxkm8Oq1C4opmkF+Qwt8xY6xYJy+AcE7RvflEnq6u+73UX9Yy2/aU14eD+/Cw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>v1.6.2</title>
             <pubDate>Tue, 20 May 2025 00:48:33 +0800</pubDate>
             <sparkle:version>162</sparkle:version>
