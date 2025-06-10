@@ -18,7 +18,7 @@
                 <li>Ability to snooze battery notifications.</li>
                 <li><b style="color: red">My certificate will expire on June 14, bookmark this <a href="https://lihaoyun6.github.io/airbattery/">page</a> to download AirBattery at any time!
                 </b></li>
-                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="280"/>
+                </ul><img src="https://github.com/lihaoyun6/AirBattery/raw/main/img/donate.png" width="250"/>
             ]]></description>
             <enclosure url="https://github.com/lihaoyun6/AirBattery/releases/download/1.6.3/AirBattery_v1.6.3.dmg" length="9518933" type="application/octet-stream" sparkle:edSignature="NNReGQPLvzll7GrdM5plJat0pYEjR8w1bci8GCAkWyxnt8BGjjSCCOcDpdj2VW5ZN06HL3gl5RloZahzMWeBAg=="/>
             <sparkle:deltas>
