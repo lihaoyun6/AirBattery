@@ -88,15 +88,16 @@ struct mainBatteryView: View {
                                 .frame(width: width, height: 8, alignment: .leading)
                                 .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                                 .offset(x:2)
+                            if item.acPowered {
+                                Image("batt_" + ((item.isCharging || item.isCharged) ? "bolt" : "plug") + "_mask")
+                                    .blendMode(.destinationOut)
+                                    .offset(x:6)
+                                Image("batt_" + ((item.isCharging || item.isCharged) ? "bolt" : "plug"))
+                                    .offset(x:6)
+                                    .foregroundColor(.blackWhite)
+                            }
                         }
-                        if item.acPowered && batteryPercent != "inside" {
-                            Image("batt_" + ((item.isCharging || item.isCharged) ? "bolt" : "plug") + "_mask")
-                                .blendMode(.destinationOut)
-                                .offset(x:6)
-                            Image("batt_" + ((item.isCharging || item.isCharged) ? "bolt" : "plug"))
-                                .offset(x:6)
-                                .foregroundColor(.blackWhite)
-                        }
+                        
                     }.compositingGroup()
                 } else {
                     ZStack(alignment: .leading) {
@@ -128,7 +129,6 @@ struct mainBatteryView: View {
                                 BatteryLevelView(item: item)
                                     .foregroundColor(.white)
                                     .blendMode(.destinationOut)
-                                    //.background(Color.red.opacity(0.5))
                             }
                         } else {
                             if item.acPowered {

@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Foundation
+import IOBluetooth
 
 class SPBluetoothDataModel {
     static var shared: SPBluetoothDataModel = SPBluetoothDataModel()
@@ -40,6 +41,7 @@ class MagicBattery {
     @objc func scanDevices() {
         //Thread.detachNewThread {
             if self.readBTDevice {
+                self.getIOBTBattery()
                 self.getOtherBTBattery()
                 self.getMagicBattery()
                 self.getOldMagicKeyboard()
@@ -131,10 +133,10 @@ class MagicBattery {
         }
         if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryStatusFlags" as CFString, kCFAllocatorDefault, 0) {
             status = percentProperty.takeRetainedValue() as! Int
+            if status == 4 { status = 0 }
         }
         if let percentProperty = IORegistryEntryCreateCFProperty(object, "BatteryPercent" as CFString, kCFAllocatorDefault, 0) {
             percent = percentProperty.takeRetainedValue() as! Int
-            if percent == 4 { percent = 0 }
         }
         if let productProperty = IORegistryEntryCreateCFProperty(object, "Product" as CFString, kCFAllocatorDefault, 0) {
             productName = productProperty.takeRetainedValue() as! String
@@ -324,5 +326,39 @@ class MagicBattery {
                 }
             }
         }
+    }
+    
+    func getIOBTBattery() {
+        if let devices = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] {
+            for device in devices {
+                let name = device.name
+                let address = device.addressString
+                let connected = device.isConnected()
+                //let usb = device.getValue(forKey: "isPluggedOverUSB") as! Bool ?? false
+                
+                if connected && !device.isAppleDevice {
+                    if let battery = device.getValue(forKey: "batteryPercentSingle") as? Int, let name = name, let address = address, battery != 0 {
+                        let type = getDeviceType(address.replacingOccurrences(of: "-", with: ":").uppercased(),"")
+                        AirBatteryModel.updateDevice(Device(deviceID: address, deviceType: type, deviceName: name, batteryLevel: battery, isCharging: 0, lastUpdate: Date().timeIntervalSince1970))
+                    }
+                    //let left = device.getValue(forKey: "batteryPercentLeft") as? Int
+                    //let right = device.getValue(forKey: "batteryPercentRight") as? Int
+                    //let _case = device.getValue(forKey: "batteryPercentCase") as? Int
+                }
+            }
+        }
+    }
+}
+
+extension IOBluetoothDevice {
+    func getValue(forKey: String) -> Any? {
+        if self.responds(to: Selector((forKey))) {
+            return self.value(forKey: forKey)
+        }
+        return nil
+    }
+    
+    var isAppleDevice: Bool {
+        return self.getValue(forKey: "isAppleDevice") as? Bool ?? false
     }
 }

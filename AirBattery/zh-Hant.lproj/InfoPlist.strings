@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  AirBattery
+
+  Created by apple on 2024/2/11.
+  
+*/
+"NSBluetoothAlwaysUsageDescription" = "AirBattery使用藍芽來獲取周邊裝置的電池資訊";
+"NSLocalNetworkUsageDescription" = "AirBattery會透過區域網絡來獲取周邊裝置的電池資訊";

@@ -33,6 +33,7 @@ struct AirBatteryApp: App {
         // If you want to start the updater manually, pass false to startingUpdater and call .startUpdater() later
         // This is where you can also pass an updater delegate if you need one
         updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        registerNotificationCategory()
     }
     
     var body: some Scene {
@@ -70,6 +71,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @AppStorage("alertSound") var alertSound = true
     @AppStorage("readBTHID") var readBTHID = true
     @AppStorage("hideLevel") var hideLevel = 90
+    @AppStorage("disappearTime") var disappearTime = 20
     @AppStorage("whitelistMode") var whitelistMode = false
     @AppStorage("iosBatteryStyle") var iosBatteryStyle = false
     @AppStorage("updateInterval") var updateInterval = 1
@@ -83,6 +85,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     var menu: NSMenu = NSMenu()
     var startTime = Date()
     let nc = NSWorkspace.shared.notificationCenter
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        if response.actionIdentifier == "DELAY_30_MIN" {
+            let deviceName = response.notification.request.content.userInfo["customInfo"] as? String ?? ""
+            lowPowerNoteDelay[deviceName] = Date().timeIntervalSince1970 + 1800
+        }
+        completionHandler()
+    }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         // 用户点击 Dock 图标时会调用这个方法
@@ -307,13 +318,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             if now.timeIntervalSince(startTime) >= 10 {
                 if let name = device.name, let macAdd = device.addressString {
                     if AirBatteryModel.checkIfBlocked(name: name) { return }
-                    if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
+                    //if let prefix = getFirstNCharacters(of: macAdd, count: 8) {
                         print("ℹ️ \(name) (\(macAdd)) connected")
                         DispatchQueue.global(qos: .background).async {
                             usleep(2500000)
-                            if !appleMacPrefix.contains(prefix) {
+                            //if !appleMacPrefix.contains(prefix) {
+                            if !device.isAppleDevice {
                                 SPBluetoothDataModel.shared.refeshData { _ in
                                     BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                                    MagicBattery.shared.getIOBTBattery()
                                     MagicBattery.shared.getOtherBTBattery()
                                 }
                             } else {
@@ -326,7 +339,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                                 }
                             }
                         }
-                    }
+                    //}
                 }
             }
         }

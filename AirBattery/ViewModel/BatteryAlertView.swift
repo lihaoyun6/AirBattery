@@ -210,6 +210,9 @@ class AlertWindowController {
 func batteryAlert() {
     @AppStorage("nearCast") var nearCast = false
     
+    let now = Date()
+    lowPowerNoteDelay = lowPowerNoteDelay.filter { $0.value >= now.timeIntervalSince1970 }
+    
     let alertList = ud.get(objectType: [btAlert].self, forKey: "alertList") ?? []
     var allDevices = AirBatteryModel.getAll()
     allDevices.append(ib2ab(InternalBattery.status))
@@ -219,17 +222,19 @@ func batteryAlert() {
     for device in allDevices.filter({ alertList.map({$0.name}).contains($0.deviceName) }) {
         if let alert = alertList.first(where: { $0.name == device.deviceName }) {
             if device.batteryLevel < alert.low && device.isCharging == 0 && alert.lowOn {
+                if let delay = lowPowerNoteDelay[device.deviceName], delay > now.timeIntervalSince1970 { return }
                 let title = "Low Battery".local
                 let body = String(format: "\"%@\" remaining battery %d%%".local, device.deviceName, device.batteryLevel)
-                createNotification(title: title, message: body, alertSound: alert.lowSound)
+                createNotification(title: title, message: body, alertSound: alert.lowSound, delay: true, info: device.deviceName)
                 if nearCast {
                     if let info = netcastService.createInfo(title: title, info: body) { netcastService.sendMessage(info) }
                 }
             }
             if device.batteryLevel > alert.full && device.isCharging != 0 && alert.fullOn {
+                if let delay = lowPowerNoteDelay[device.deviceName], delay > now.timeIntervalSince1970 { return }
                 let title = "Fully Charged".local
                 let body = String(format: "\"%@\" battery has reached %d%%".local, device.deviceName, device.batteryLevel)
-                createNotification(title: title, message: body, alertSound: alert.fullSound)
+                createNotification(title: title, message: body, alertSound: alert.fullSound, delay: true, info: device.deviceName)
                 if nearCast {
                     if let info = netcastService.createInfo(title: title, info: body) { netcastService.sendMessage(info) }
                 }

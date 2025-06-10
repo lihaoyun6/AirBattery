@@ -43,7 +43,7 @@ struct SettingsView: View {
             .listStyle(.sidebar)
             .padding(.top, 9)
         }
-        .frame(width: 600, height: 430)
+        .frame(width: 600, height: 440)
         .navigationTitle("AirBattery Settings")
     }
 }
@@ -275,36 +275,44 @@ struct DisplayView: View {
     @AppStorage("intBattOnStatusBar") var intBattOnStatusBar = true
     @AppStorage("batteryPercent") var batteryPercent = "outside"
     @AppStorage("hideLevel") var hideLevel = 90
+    @AppStorage("disappearTime") var disappearTime = 20
     @State private var levelList = [95, 90, 80, 70, 60, 50, 40, 30, 20, 10]
     
     var body: some View {
         SForm {
             SGroupBox(label: "Menu Bar") {
-                    SToggle("Dynamic Battery Icon", isOn: $intBattOnStatusBar)
-                    Divider().opacity(0.5)
-                    SToggle("Colorful Battery Icon", isOn: $colorfulBattery)
-                        .disabled(!intBattOnStatusBar)
-                    Divider().opacity(0.5)
-                    SPicker("Battery Icon Style", selection: $iosBatteryStyle) {
-                        Text("macOS").tag(false)
-                        Text("iOS").tag(true)
-                    }.disabled(!intBattOnStatusBar)
-                    Divider().opacity(0.5)
-                    SPicker("Show Percentage", selection: $batteryPercent) {
-                        Text("Hidden").tag("hide")
-                        Text("Inside").tag("inside")
-                        Text("Outside").tag("outside")
-                    }.disabled(!intBattOnStatusBar)
-                    Divider().opacity(0.5)
-                    SPicker("Hide percentage when above", selection: $hideLevel) {
-                        Text("Never").tag(100)
-                        ForEach(levelList, id: \.self) { number in
-                            Text("\(number)%").tag(number)
-                        }
-                        if !levelList.contains(hideLevel) && hideLevel != 100 {
-                            Text("\(hideLevel)%").tag(hideLevel)
-                        }
-                    }.disabled(!intBattOnStatusBar || (batteryPercent == "hide"))
+                SToggle("Dynamic Battery Icon", isOn: $intBattOnStatusBar)
+                Divider().opacity(0.5)
+                SToggle("Colorful Battery Icon", isOn: $colorfulBattery)
+                    .disabled(!intBattOnStatusBar)
+                Divider().opacity(0.5)
+                SPicker("Battery Icon Style", selection: $iosBatteryStyle) {
+                    Text("macOS").tag(false)
+                    Text("iOS").tag(true)
+                }.disabled(!intBattOnStatusBar)
+                Divider().opacity(0.5)
+                SPicker("Show Percentage", selection: $batteryPercent) {
+                    Text("Hidden").tag("hide")
+                    Text("Inside").tag("inside")
+                    Text("Outside").tag("outside")
+                }.disabled(!intBattOnStatusBar)
+                Divider().opacity(0.5)
+                SPicker("Remove Offline Device", selection: $disappearTime) {
+                    Text("Never").tag(UInt32.max)
+                    Text("after 20min").tag(20)
+                    Text("after 40min").tag(40)
+                    Text("after 60min").tag(60)
+                }
+                Divider().opacity(0.5)
+                SPicker("Hide percentage when above", selection: $hideLevel) {
+                    Text("Never").tag(100)
+                    ForEach(levelList, id: \.self) { number in
+                        Text("\(number)%").tag(number)
+                    }
+                    if !levelList.contains(hideLevel) && hideLevel != 100 {
+                        Text("\(hideLevel)%").tag(hideLevel)
+                    }
+                }.disabled(!intBattOnStatusBar || (batteryPercent == "hide"))
             }
             SGroupBox(label: "Dock") {
                     SPicker("Appearance", selection: $appearance) {
@@ -338,32 +346,30 @@ struct WidgetView: View {
     var body: some View {
         SForm {
             SGroupBox(label: "Widget") {
-                    //SToggle("Show Built-in Battery", isOn: $showMacOnWidget)
-                    //Divider().opacity(0.5)
-                    SToggle("Reverse Device List", isOn: $revListOnWidget)
+                SToggle("Reverse Device List", isOn: $revListOnWidget)
+                Divider().opacity(0.5)
+                SPicker("Refresh Interval", selection: $widgetInterval) {
+                    Text("System Default").tag(-1)
+                    Text("Same as Nearbility").tag(0)
+                }
+                if #unavailable(macOS 14) {
                     Divider().opacity(0.5)
-                    SPicker("Refresh Interval", selection: $widgetInterval) {
-                        Text("System Default").tag(-1)
-                        Text("Same as Nearbility").tag(0)
-                    }
-                    if #unavailable(macOS 14) {
-                        Divider().opacity(0.5)
-                        SPicker("Single Device Widget", selection: $deviceOnWidget) {
-                            Text("Not Set").tag("")
-                            if ib { Text(deviceName).tag(deviceName) }
-                            ForEach(devices, id: \.self) { device in
-                                Text(device).tag(device)
-                            }
-                            if !devices.contains(deviceOnWidget) && deviceOnWidget != deviceName && deviceOnWidget != "" {
-                                Text(deviceOnWidget).tag(deviceOnWidget)
-                            }
-                        }.onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
-                    }
-                    Divider().opacity(0.5)
-                    SButton("Reload All Widgets", buttonTitle: "Reload") {
-                        AirBatteryModel.writeData()
-                        WidgetCenter.shared.reloadAllTimelines()
-                    }
+                    SPicker("Single Device Widget", selection: $deviceOnWidget) {
+                        Text("Not Set").tag("")
+                        if ib { Text(deviceName).tag(deviceName) }
+                        ForEach(devices, id: \.self) { device in
+                            Text(device).tag(device)
+                        }
+                        if !devices.contains(deviceOnWidget) && deviceOnWidget != deviceName && deviceOnWidget != "" {
+                            Text(deviceOnWidget).tag(deviceOnWidget)
+                        }
+                    }.onChange(of: deviceOnWidget) { _ in _ = AirBatteryModel.singleDeviceName() }
+                }
+                Divider().opacity(0.5)
+                SButton("Reload All Widgets", buttonTitle: "Reload") {
+                    AirBatteryModel.writeData()
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
             }
         }
         .onAppear { devices = AirBatteryModel.getAll(noFilter: true).filter({ $0.hasBattery }).map({ $0.deviceName }) }

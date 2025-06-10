@@ -5,5 +5,5 @@
   Created by apple on 2024/2/11.
   
 */
-"NSBluetoothAlwaysUsageDescription" = "AirBattery使用蓝牙来获取周边设备的电量信息";
-"NSLocalNetworkUsageDescription" = "AirBattery会通过局域网络来获取周边设备的电量";
+"NSBluetoothAlwaysUsageDescription" = "AirBattery使用蓝牙来获取周边设备的电池信息";
+"NSLocalNetworkUsageDescription" = "AirBattery会通过局域网络来获取周边设备的电池信息";
