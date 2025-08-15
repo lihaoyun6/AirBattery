@@ -141,27 +141,7 @@ struct Supported: ParsableCommand {
         let ideviceOverBLE = ud.bool(forKey: "ideviceOverBLE")
         let readIDevice = ud.bool(forKey: "readIDevice")
 
-        let appleHeadphoneModels: [String: String] = [
-            "2002": "AirPods",
-            "200e": "AirPods Pro",
-            "200a": "AirPods Max", "201f": "AirPods Max",
-            "200f": "AirPods 2",
-            "2013": "AirPods 3",
-            "201B": "AirPods 4 (ANC)", "2019": "AirPods 4",
-            "2014": "AirPods Pro 2", "2024": "AirPods Pro 2",
-            "2003": "PowerBeats 3",
-            "200d": "PowerBeats 4",
-            "200b": "PowerBeats Pro",
-            "200c": "Beats Solo Pro",
-            "2011": "Beats Studio Buds",
-            "2010": "Beats Flex",
-            "2005": "BeatsX",
-            "2006": "Beats Solo 3",
-            "2009": "Beats Studio 3",
-            "2017": "Beats Studio Pro",
-            "2012": "Beats Fit Pro",
-            "2016": "Beats Studio Buds+"
-        ]
+        let appleHeadphoneModels: [String: String] = headphoneModelMap()
 
         struct Category: Codable { let id, name, source, reliability: String; let requires: [String] }
 
