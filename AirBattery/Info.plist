@@ -15,6 +15,10 @@
 	</array>
 	<key>NSAppleScriptEnabled</key>
 	<true/>
+	<key>NSDisableAutomaticTermination</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
 	<key>OSAScriptingDefinition</key>
 	<string>Scriptable</string>
 	<key>SUFeedURL</key>

@@ -24,6 +24,7 @@ var menuPopover = NSPopover()
 let bleBattery = BLEBattery()
 let btdBattery = BTDBattery()
 var updateDelay = 1
+var keepAliveActivity: NSObjectProtocol? = nil
 
 @main
 struct AirBatteryApp: App {
@@ -275,6 +276,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        let opts: ProcessInfo.ActivityOptions = [.automaticTerminationDisabled, .suddenTerminationDisabled]
+        keepAliveActivity = ProcessInfo.processInfo.beginActivity(options: opts, reason: "AirBattery menu bar monitoring")
+
         if showOn == "dock" || showOn == "both" {
             let tipID = "ab.docktile-power.note"
             let never = ud.object(forKey: "neverRemindMe") as! [String]
@@ -295,6 +299,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     }
     
     func applicationWillTerminate(_ notification: Notification) {
+        if let act = keepAliveActivity { ProcessInfo.processInfo.endActivity(act) }
+
         _ = process(path: "/usr/bin/killall", arguments: ["idevicesyslog"])
     }
     
