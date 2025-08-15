@@ -1,6 +1,18 @@
 IFS=$'\n'
 if [ "x$1" = "xmac" ]; then
-    data=`log show --info --predicate 'subsystem=="com.apple.bluetooth" and category=="CBStackDeviceMonitor" or category=="Server.GATT"' --last $2`
+    # Tightened predicate with correct precedence and reduced scope
+    PRED='subsystem == "com.apple.bluetooth" AND (category == "CBStackDeviceMonitor" OR category == "Server.GATT") AND (eventMessage CONTAINS "Battery" OR eventMessage CONTAINS "statedump: 0x001A" OR eventMessage CONTAINS "statedump: 0x001D")'
+    STYLE="--style compact"
+    LVL="--level info"
+
+    # Prefer START_TS (absolute time) if provided; otherwise fall back to a short --last window ($2)
+    if [ -n "$START_TS" ]; then
+        data=$(/usr/bin/nice -n 19 /usr/bin/log show $STYLE $LVL --predicate "$PRED" --start "$START_TS")
+    else
+        WINDOW="${2:-10m}"
+        data=$(/usr/bin/nice -n 19 /usr/bin/log show $STYLE $LVL --predicate "$PRED" --last "$WINDOW")
+    fi
+
     #data=`log show --process bluetoothd --info --last $1|grep -E "com.apple.bluetooth:Server.GATT.*statedump|com.apple.bluetooth:CBStackDeviceMonitor.*Battery"`
     for i in `echo "$data"|grep "Battery"|grep -v "VID 0x004C"`
     do

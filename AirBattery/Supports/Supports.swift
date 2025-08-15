@@ -130,33 +130,38 @@ public func process(path: String, arguments: [String], timeout: Int = 0) -> Stri
     task.launchPath = path
     task.arguments = arguments
     task.standardError = Pipe()
-    
+
     let outputPipe = Pipe()
     defer { outputPipe.fileHandleForReading.closeFile() }
     task.standardOutput = outputPipe
-    
+
     if timeout != 0 {
-        DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(timeout)) {
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(timeout)) {
             if task.isRunning {
-                //print("⚠️ Process Timeout! Killed")
-                //print("[\(path) \(arguments.joined(separator: " "))]")
                 task.terminate()
+                // Escalate if still running shortly after terminate
+                DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(400)) {
+                    if task.isRunning {
+                        let pid = task.processIdentifier
+                        _ = process(path: "/bin/kill", arguments: ["-9", String(pid)], timeout: 1)
+                    }
+                }
             }
         }
     }
-    
+
     do {
         try task.run()
     } catch let error {
         print("\(error.localizedDescription)")
         return nil
     }
-    
+
     let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
     let output = String(decoding: outputData, as: UTF8.self)
-    
+
     if output.isEmpty { return nil }
-    
+
     return output.trimmingCharacters(in: .newlines)
 }
 
