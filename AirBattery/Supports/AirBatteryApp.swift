@@ -502,3 +502,29 @@ func refeshPinnedBar(unpin: String? = nil) {
     DispatchQueue.main.async { for e in expItems { NSStatusBar.system.removeStatusItem(e) } }
     pinnedItems.removeAll{ expNames.contains($0.button?.toolTip ?? "") }
 }
+
+@discardableResult
+func ensureLoginItem(enabled: Bool) -> Bool {
+    let helperBundleIdentifier = "com.lihaoyun6.AirBatteryHelper"
+    if #available(macOS 13.0, *) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+            return true
+        } catch {
+            NSLog("[AirBattery] SMAppService register/unregister failed: \(error.localizedDescription)")
+            return false
+        }
+    } else {
+        let ok = SMLoginItemSetEnabled(helperBundleIdentifier as CFString, enabled)
+        if !ok { NSLog("[AirBattery] SMLoginItemSetEnabled failed for \(helperBundleIdentifier)") }
+        return ok
+    }
+}
+
+func registerDefaults() {
+    UserDefaults.standard.register(defaults: ["LaunchAtLogin": false])
+}
