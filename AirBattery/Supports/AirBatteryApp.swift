@@ -295,6 +295,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                 let alert = createAlert(title: "AirBattery Tips".local, message: "If some of your devices shows battery level in the Bluetooth menu, but AirBattery doesn't find it. Try disconnecting and reconnecting it, and wait a few minutes.".local, button1: "Don't remind me again", button2: "OK")
                 if alert.runModal() == .alertFirstButtonReturn { ud.setValue(never + [tipID], forKey: "neverRemindMe") }
             }
+            // Bootstrap Enhanced HID scan incrementally with a short initial window
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+                LogReader.shared.run(.bootstrap)
+            }
         }
     }
     
@@ -313,7 +317,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     @objc func onDisplayWake() {
         if readBTHID {
             DispatchQueue.global().asyncAfter(deadline: .now() + 10) {
-                BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                LogReader.shared.run(.wake)
             }
         }
     }
@@ -331,7 +335,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                             //if !appleMacPrefix.contains(prefix) {
                             if !device.isAppleDevice {
                                 SPBluetoothDataModel.shared.refeshData { _ in
-                                    BTDBattery.getOtherDevice(last: "2m", timeout: 2)
+                                    LogReader.shared.run(.connect)
                                     MagicBattery.shared.getIOBTBattery()
                                     MagicBattery.shared.getOtherBTBattery()
                                 }
