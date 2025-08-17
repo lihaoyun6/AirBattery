@@ -522,55 +522,36 @@ func getFiles(withExtension fileExtension: String, in directory: URL) -> [URL] {
     }
 }
 
+func headphoneModelMap() -> [String: String] {
+    return [
+        "2002": "AirPods",
+        "200e": "AirPods Pro",
+        // 200a: Lightning, 201f: USB-C
+        "200a": "AirPods Max", "201f": "AirPods Max",
+        "200f": "AirPods 2",
+        "2013": "AirPods 3",
+        // 201B: ANC, 2019: no ANC
+        "201B": "AirPods 4", "2019": "AirPods 4",
+        // 2014: Lightning Case, 2024: USB-C Case
+        "2014": "AirPods Pro 2", "2024": "AirPods Pro 2",
+        "2003": "PowerBeats 3",
+        "200d": "PowerBeats 4",
+        "200b": "PowerBeats Pro",
+        "200c": "Beats Solo Pro",
+        "2011": "Beats Studio Buds",
+        "2010": "Beats Flex",
+        "2005": "BeatsX",
+        "2006": "Beats Solo 3",
+        "2009": "Beats Studio 3",
+        "2017": "Beats Studio Pro",
+        "2012": "Beats Fit Pro",
+        "2016": "Beats Studio Buds+"
+    ]
+}
+
 func getHeadphoneModel(_ model: String) -> String {
-    switch model {
-    case "2002":
-        return "Airpods"
-    case "200e":
-        return "Airpods Pro"
-    case "200a", "201f":
-        ///200a: Lightning
-        ///201f: USB-C
-        return "Airpods Max"
-    case "200f":
-        return "Airpods 2"
-    case "2013":
-        return "Airpods 3"
-    case "201B", "2019":
-        ///201B: ANC
-        ///2019: no ANC
-        return "Airpods 4"
-    case "2014", "2024":
-        ///2014: Lightning Case
-        ///2024: USB-C Case
-        return "Airpods Pro 2"
-    case "2003":
-        return "PowerBeats 3"
-    case "200d":
-        return "PowerBeats 4"
-    case "200b":
-        return "PowerBeats Pro"
-    case "200c":
-        return "Beats Solo Pro"
-    case "2011":
-        return "Beats Studio Buds"
-    case "2010":
-        return "Beats Flex"
-    case "2005":
-        return "BeatsX"
-    case "2006":
-        return "Beats Solo 3"
-    case "2009":
-        return "Beats Studio 3"
-    case "2017":
-        return "Beats Studio Pro"
-    case "2012":
-        return "Beats Fit Pro"
-    case "2016":
-        return "Beats Studio Buds+"
-    default:
-        return "Headphones"
-    }
+    let key = model.uppercased().replacingOccurrences(of: "0x", with: "")
+    return headphoneModelMap()[key] ?? "Headphones"
 }
 
 func getDeviceIcon(_ d: Device) -> String {
