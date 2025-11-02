@@ -168,6 +168,9 @@
 		18EF7E622C1414A50065A9E1 /* BatteryWidget3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryWidget3.swift; sourceTree = "<group>"; };
 		18F615F22B763DD800873AA4 /* BLEBattery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEBattery.swift; sourceTree = "<group>"; };
 		18F615F82B76439300873AA4 /* AirBatteryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirBatteryModel.swift; sourceTree = "<group>"; };
+		3A81647D2E7B3CFB0033B0D7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3A81647F2E7B3D4D0033B0D7 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3A8164802E7B3DA00033B0D7 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = fr; path = fr.lproj/Credits.rtf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -464,6 +467,7 @@
 				Base,
 				"zh-Hans",
 				"zh-Hant",
+				fr,
 			);
 			mainGroup = 1841D4422AA6071C0022A1BE;
 			packageReferences = (
@@ -597,6 +601,8 @@
 			children = (
 				1841D47B2AA8DF0B0022A1BE /* zh-Hans */,
 				1893984D2DF73DF000E7C32E /* zh-Hant */,
+				3A81647D2E7B3CFB0033B0D7 /* en */,
+				3A81647F2E7B3D4D0033B0D7 /* fr */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -617,6 +623,7 @@
 				18A0A9CC2AAE07EA00975B81 /* zh-Hans */,
 				18C7CFDE2AAF842E005898EF /* Base */,
 				1893984B2DF73D6800E7C32E /* zh-Hant */,
+				3A8164802E7B3DA00033B0D7 /* fr */,
 			);
 			name = Credits.rtf;
 			sourceTree = "<group>";
