@@ -42,8 +42,9 @@ struct item: Codable, Equatable {
 }
 
 
-struct airbattery: ParsableCommand {
-    static var configuration = CommandConfiguration(version: "0.1.0")
+// MARK: - List (default) subcommand
+struct List: ParsableCommand {
+    static var configuration = CommandConfiguration(abstract: "List devices AirBattery currently knows about.")
     
     @Flag(name: .shortAndLong, help: "Including Nearcast devices")
     var nearcast: Bool = false
@@ -123,4 +124,79 @@ struct airbattery: ParsableCommand {
     }
 }
 
-airbattery.main()
+// MARK: - Supported subcommand
+struct Supported: ParsableCommand {
+    static var configuration = CommandConfiguration(abstract: "Show supported device families and categories.")
+
+    @Flag(name: .shortAndLong, help: "Output JSON instead of Markdown.")
+    var json: Bool = false
+
+    @Flag(name: .shortAndLong, help: "Show categories enabled by current settings.")
+    var now: Bool = false
+
+    func run() throws {
+        // Read current capability toggles
+        let readBTDevice = ud.bool(forKey: "readBTDevice")
+        let readBLEDevice = ud.bool(forKey: "readBLEDevice")
+        let ideviceOverBLE = ud.bool(forKey: "ideviceOverBLE")
+        let readIDevice = ud.bool(forKey: "readIDevice")
+
+        let appleHeadphoneModels: [String: String] = headphoneModelMap()
+
+        struct Category: Codable { let id, name, source, reliability: String; let requires: [String] }
+
+        let categories: [Category] = [
+            .init(id: "magic", name: "Apple Magic accessories (Trackpad/Keyboard/Mouse)", source: "IOKit", reliability: "stable", requires: []),
+            .init(id: "iobt-thirdparty", name: "Non‑Apple Bluetooth with batteryPercentSingle", source: "IOBluetooth", reliability: "stable", requires: ["Discover BT and BLE devices"]),
+            .init(id: "apple-headphones", name: "Apple/Beats headphones (model codes)", source: "SPBluetooth/BLE", reliability: "stable", requires: ["Discover BT and BLE devices"]),
+            .init(id: "gatt-180F", name: "Generic BLE Battery Service (0x180F)", source: "BLE", reliability: "beta", requires: ["Discover more BLE devices"]),
+            .init(id: "idevice", name: "iPhone/iPad/Watch/Vision Pro", source: "Network/BLE", reliability: "stable", requires: ["Discover iOS devices via Network or Bluetooth"]),
+            .init(id: "pencil", name: "Apple Pencil via iPad", source: "Logs", reliability: "beta", requires: ["Apple Pencil from your iPad"])
+        ]
+
+        // Enabled categories given current toggles
+        let enabled: [String: Bool] = [
+            "magic": true,
+            "iobt-thirdparty": readBTDevice,
+            "apple-headphones": readBTDevice,
+            "gatt-180F": readBLEDevice,
+            "idevice": (readIDevice || ideviceOverBLE),
+            "pencil": ud.bool(forKey: "readPencil")
+        ]
+
+        if json {
+            struct Output: Codable { let categories: [Category]; let enabled: [String: Bool]; let appleHeadphoneModels: [String: String] }
+            let out = Output(categories: categories, enabled: enabled, appleHeadphoneModels: appleHeadphoneModels)
+            let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(out)
+            print(String(data: data, encoding: .utf8)!)
+            return
+        }
+
+        // Markdown output
+        print("# AirBattery Supported Devices\n")
+        print("## Categories\n")
+        for c in categories {
+            let mark = now ? (enabled[c.id] == true ? "[x]" : "[ ]") : "-"
+            let req = c.requires.isEmpty ? "" : " (Requires: \(c.requires.joined(separator: ", ")))"
+            print("- \(mark) \(c.name) — Source: \(c.source), Reliability: \(c.reliability)\(req)")
+        }
+        print("\n## Apple/Beats Headphone Models\n")
+        let sorted = appleHeadphoneModels.keys.sorted()
+        for k in sorted { print("- \(k): \(appleHeadphoneModels[k]!)") }
+        if now { print("\nNote: [x] means enabled with current settings on this Mac.") }
+    }
+}
+
+// MARK: - Root command
+struct AirbatteryCLI: ParsableCommand {
+    static var configuration = CommandConfiguration(
+        commandName: "airbattery",
+        abstract: "AirBattery command-line tool",
+        version: "0.2.0",
+        subcommands: [List.self, Supported.self],
+        defaultSubcommand: List.self
+    )
+}
+
+AirbatteryCLI.main()

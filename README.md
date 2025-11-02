@@ -34,6 +34,17 @@ brew install lihaoyun6/tap/airbattery
 - You can also change the status bar icon to a real-time battery icon in preferences, just like the one that comes with the system.  
 - If necessary, you can hide certain devices in the Dock menu or status bar menu, and unhide them at any time.  
 
+## Supported Devices
+<!-- SUPPORTED_DEVICES:START -->
+You can list supported categories and Apple/Beats model codes from your Mac:
+
+- Run `airbattery supported` to print a Markdown list.
+- Add `--now` to mark categories currently enabled by your settings.
+- Add `--json` to get machine-readable JSON.
+
+This section can be auto-generated from the CLI to avoid documentation drift.
+<!-- SUPPORTED_DEVICES:END -->
+
 ## Q&A
 **1. Why is my iPhone / iPad / Apple Watch not showing up?**
 > Please make sure the iPhone / iPad has trusted this Mac ***(and connected the Mac with a data cable at least once while AirBattery is running to pair)***. Then just make sure it is on the same LAN as the Mac.  

@@ -1,0 +1,51 @@
+name: Update Supported Devices
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'AirBattery/abt/**'
+      - 'AirBattery/AirBattery/Supports/Supports.swift'
+      - '.github/workflows/update-supported-devices.yml'
+
+jobs:
+  update-supported:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build CLI (abt)
+        run: |
+          set -euo pipefail
+          xcodebuild -project AirBattery/AirBattery.xcodeproj -scheme abt -configuration Release -derivedDataPath build clean build
+
+      - name: Generate Supported Devices markdown
+        run: |
+          set -euo pipefail
+          ./build/Build/Products/Release/abt supported > supported.md
+
+      - name: Replace README Supported Devices section
+        run: |
+          set -euo pipefail
+          awk -v repl_file="supported.md" '
+            BEGIN {inblk=0}
+            /^<!-- SUPPORTED_DEVICES:START -->/ {print; inblk=1; while ((getline line < repl_file) > 0) print line; next}
+            /^<!-- SUPPORTED_DEVICES:END -->/ {inblk=0; print; next}
+            inblk==0 {print}
+          ' AirBattery/README.md > AirBattery/README.md.tmp
+          mv AirBattery/README.md.tmp AirBattery/README.md
+
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add AirBattery/README.md
+          git commit -m "docs(readme): auto-update Supported Devices section"
+          git push
+
