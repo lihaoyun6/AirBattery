@@ -279,6 +279,32 @@ struct BlurView: NSViewRepresentable {
     }
 }
 
+private struct PopoverToolbarButton: View {
+    let systemName: String
+    let help: String
+    var hoverColor: Color = .accentColor
+    var action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 15, weight: .regular))
+                .frame(width: 28, height: 28)
+                .foregroundColor(isHovered ? hoverColor : .secondary)
+                .background(
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(isHovered ? hoverColor.opacity(0.12) : Color.clear)
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .help(help)
+        .onHover { isHovered = $0 }
+    }
+}
+
 struct popover: View {
     var fromDock: Bool = false
     var allDevice: [Device]
@@ -287,15 +313,10 @@ struct popover: View {
     
     @State private var allDevices = [Device]()
     @State private var hiddenDevices = AirBatteryModel.getBlackList()
-    @State private var overReloadButton = false
     @State private var overCopyButton = false
     @State private var overHideButton = false
     @State private var overAlertButton = false
     @State private var overPinButton = false
-    @State private var overInfoButton = false
-    @State private var overQuitButton = false
-    @State private var overSettButton = false
-    @State private var overReloButton = false
     @State private var overStack = -1
     @State private var overStack2 = -1
     @State private var overStackNC = -1
@@ -320,69 +341,33 @@ struct popover: View {
                             }
                         }
                 }
-                HStack(spacing: 4){
+                HStack(spacing: 2){
                     if !fromDock {
-                        Button(action: {
+                        PopoverToolbarButton(systemName: "xmark.circle.fill", help: "Quit AirBattery".local, hoverColor: .red) {
                             NSApp.terminate(self)
-                        }, label: {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 14, weight: .light))
-                                .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overQuitButton ? .red : .secondary)
-                                .opacity(overQuitButton ? 1 : 0.7)
-                        })
-                        .focusable(false)
-                        .buttonStyle(PlainButtonStyle())
-                        .onHover{ hovering in overQuitButton = hovering }
+                        }
                     } else {
-                        Button(action: {
+                        PopoverToolbarButton(systemName: "minus.circle.fill", help: "Hide".local, hoverColor: .myYellow) {
                             dockWindow.orderOut(nil)
-                        }, label: {
-                            Image(systemName: "minus.circle")
-                                .font(.system(size: 14, weight: .light))
-                                .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overQuitButton ? .myYellow : .secondary)
-                                .opacity(overQuitButton ? 1 : 0.7)
-                        })
-                        .focusable(false)
-                        .buttonStyle(PlainButtonStyle())
-                        .onHover{ hovering in overQuitButton = hovering }
+                        }
                     }
                     
-                    Button(action: {
+                    PopoverToolbarButton(systemName: "info.circle.fill", help: "About AirBattery".local) {
                         dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
                         openAboutPanel()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
                             NSApp.activate(ignoringOtherApps: true)
                         }
-                    }, label: {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 14, weight: .light))
-                            .frame(width: 14, height: 14, alignment: .center)
-                            .foregroundColor(overInfoButton ? .accentColor : .secondary)
-                            .opacity(overInfoButton ? 1 : 0.7)
-                    })
-                    .focusable(false)
-                    .buttonStyle(PlainButtonStyle())
-                    .onHover{ hovering in overInfoButton = hovering }
-                    Button(action: {
+                    }
+                    PopoverToolbarButton(systemName: "gearshape", help: "Settings".local) {
                         dockWindow.orderOut(nil)
                         statusBarItem.menu?.cancelTracking()
                         openSettingPanel()
-                    }, label: {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 13.6, weight: .light))
-                            .frame(width: 14, height: 14, alignment: .center)
-                            .foregroundColor(overSettButton ? .accentColor : .secondary)
-                            .opacity(overSettButton ? 1 : 0.7)
-                    })
-                    .focusable(false)
-                    .buttonStyle(PlainButtonStyle())
-                    .onHover{ hovering in overSettButton = hovering }
+                    }
                     Spacer()
                     if nearCast {
-                        Button(action: {
+                        PopoverToolbarButton(systemName: "antenna.radiowaves.left.and.right.circle", help: "Refresh Nearcast".local) {
                             netcastService.refeshAll()
                             if fromDock {
                                 dockWindow.orderOut(nil)
@@ -394,20 +379,12 @@ struct popover: View {
                                     allNearcast = getFiles(withExtension: "json", in: ncFolder)
                                 }
                             }
-                        }, label: {
-                            Image(systemName: "antenna.radiowaves.left.and.right.circle")
-                                .font(.system(size: 14, weight: .light))
-                                .frame(width: 14, height: 14, alignment: .center)
-                                .foregroundColor(overReloButton ? .accentColor : .secondary)
-                                .opacity(overReloButton ? 1 : 0.7)
-                        })
-                        .focusable(false)
-                        .buttonStyle(PlainButtonStyle())
-                        .onHover{ hovering in overReloButton = hovering }
+                        }
                     }
                 }
-                .offset(y: -3.5)
-                .padding(.horizontal, 5)
+                .padding(.top, fromDock ? 8 : 6)
+                .padding(.bottom, 4)
+                .padding(.horizontal, 8)
                 .onHover{ hovering in (overStack, overStack2) = (-1, -1) }
                 VStack(alignment:.leading,spacing: 0) {
                     if allDevices.count < 1 && hiddenDevices.count < 1{
@@ -769,6 +746,7 @@ struct popover: View {
                         .padding(.horizontal, 5)
                         .opacity(0.23)
                 )
+                .liquidGlassPanel(cornerRadius: 5, tint: .primary.opacity(0.02))
                 .offset(y: 2.5)
                 if nearCast {
                     ForEach(allNearcast.indices, id: \.self) { index in
@@ -796,6 +774,7 @@ struct popover: View {
             }
         }
         .frame(width: 352)
+        .liquidGlassEffect(cornerRadius: fromDock ? 8 : 10, interactive: true, tint: .primary.opacity(0.04))
         .onAppear { allDevices = allDevice }
         .onReceive(mainTimer) { t in
             if !fromDock && menuPopover.isShown {
@@ -974,6 +953,7 @@ struct nearcastView: View {
                 .padding(.horizontal, 5)
                 .opacity(0.23)
         )
+        .liquidGlassPanel(cornerRadius: 5, tint: .primary.opacity(0.02))
         .offset(y: 2.5)
     }
 

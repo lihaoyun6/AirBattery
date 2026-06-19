@@ -382,7 +382,7 @@ struct batteryWidget2New: Widget {
             batteryWidgetEntryView2(entry: entry)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
-                .widgetBackground(Color("WidgetBackground"))
+                .liquidGlassWidgetBackground()
         }
         .configurationDisplayName("Batteries")
         .description("Displays the battery usage of a specific device")
@@ -399,7 +399,7 @@ struct batteryWidget2: Widget {
             batteryWidgetEntryView2(entry: entry)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
-                .widgetBackground(Color("WidgetBackground"))
+                .liquidGlassWidgetBackground()
         }
         .configurationDisplayName("Batteries")
         .description("More ways to displays battery usage for your devices")

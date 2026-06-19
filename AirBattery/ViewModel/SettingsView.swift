@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import ServiceManagement
 import WidgetKit
+import AppKit
 
 struct SettingsView: View {
     @State private var selectedItem: String? = "General"
@@ -44,6 +44,7 @@ struct SettingsView: View {
             .padding(.top, 9)
         }
         .frame(width: 600, height: 440)
+        .background(Color(nsColor: .windowBackgroundColor))
         .navigationTitle("AirBattery Settings")
     }
 }
@@ -60,7 +61,9 @@ struct GeneralView: View {
             SGroupBox(label: "Startup") {
                 SToggle("Launch at Login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { newValue in
-                        SMLoginItemSetEnabled("com.lihaoyun6.AirBatteryHelper" as CFString, newValue)
+                        if !ensureLoginItem(enabled: newValue) {
+                            DispatchQueue.main.async { launchAtLogin.toggle() }
+                        }
                     }
                 Divider().opacity(0.5)
                 SPicker("Show AirBattery", selection: $showOn) {

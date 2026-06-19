@@ -306,7 +306,7 @@ struct batteryWidget3: Widget {
             batteryWidgetEntryView3(entry: entry)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
-                .widgetBackground(Color("WidgetBackground"))
+                .liquidGlassWidgetBackground()
         }
         .configurationDisplayName("Batteries")
         .description("Displays battery usage for your devices without percentage")

@@ -9,6 +9,7 @@ import SwiftUI
 import WidgetKit
 import UserNotifications
 import IOBluetooth
+import ServiceManagement
 import Sparkle
 
 let fd = FileManager.default
@@ -45,7 +46,10 @@ struct AirBatteryApp: App {
                         onWindowOpen: { w in
                             if let w = w {
                                 //w.level = .floating
-                                w.titlebarSeparatorStyle = .none
+                                w.titlebarSeparatorStyle = .automatic
+                                w.titlebarAppearsTransparent = false
+                                w.isOpaque = true
+                                w.backgroundColor = .windowBackgroundColor
                                 guard let nsSplitView = findNSSplitVIew(view: w.contentView),
                                       let controller = nsSplitView.delegate as? NSSplitViewController else { return }
                                 controller.splitViewItems.first?.canCollapse = false
@@ -121,7 +125,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
                     ncDeviceCount += count
                 }
             }
-            let menuHeight = CGFloat((max(max(allDevices.count,1)+ncDeviceCount,1)+hiddenRow)*37+30+ncCount)
+            let menuHeight = CGFloat((max(max(allDevices.count,1)+ncDeviceCount,1)+hiddenRow)*37+44+ncCount)
             let mouse = NSEvent.mouseLocation
             var menuX = mouse.x
             var menuY = mouse.y
@@ -164,6 +168,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             dockWindow.contentView?.wantsLayer = true
             dockWindow.contentView?.layer?.cornerRadius = 7
             dockWindow.contentView?.layer?.masksToBounds = true
+            if #available(macOS 26.0, *) {
+                dockWindow.backgroundColor = .clear
+                dockWindow.isOpaque = false
+            }
             dockWindow.makeKeyAndOrderFront(nil)
         }
         return true
@@ -393,6 +401,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             if getMenuBarHeight() == 24.0 { bound.origin.y -= 6 }
             menuPopover.show(relativeTo: bound, of: button, preferredEdge: .minY)
             //menuPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if #available(macOS 26.0, *) {
+                menuPopover.contentViewController?.view.window?.isOpaque = false
+                menuPopover.contentViewController?.view.window?.backgroundColor = .clear
+            }
             menuPopover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
         }
     }
@@ -518,10 +530,11 @@ func ensureLoginItem(enabled: Bool) -> Bool {
     let helperBundleIdentifier = "com.lihaoyun6.AirBatteryHelper"
     if #available(macOS 13.0, *) {
         do {
+            let service = SMAppService.loginItem(identifier: helperBundleIdentifier)
             if enabled {
-                try SMAppService.mainApp.register()
+                try service.register()
             } else {
-                try SMAppService.mainApp.unregister()
+                try service.unregister()
             }
             return true
         } catch {

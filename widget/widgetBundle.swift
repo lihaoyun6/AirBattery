@@ -9,12 +9,23 @@ import WidgetKit
 import SwiftUI
 
 extension View {
+    @ViewBuilder
     func widgetBackground(_ backgroundView: some View) -> some View {
-        if #available(macOS 14.0, *) {
-            return containerBackground(for: .widget) { backgroundView }
+        #if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            containerBackground(for: .widget) { Color.clear }
+        } else if #available(macOS 14.0, *) {
+            containerBackground(for: .widget) { backgroundView }
         } else {
-            return background(backgroundView)
+            background(backgroundView)
         }
+        #else
+        if #available(macOS 14.0, *) {
+            containerBackground(for: .widget) { backgroundView }
+        } else {
+            background(backgroundView)
+        }
+        #endif
     }
 }
 

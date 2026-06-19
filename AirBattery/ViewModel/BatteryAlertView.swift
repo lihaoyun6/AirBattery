@@ -157,6 +157,7 @@ struct AlertInputView: View {
         .frame(width: 360)
         .background(BlurView(material: .menu).ignoresSafeArea())
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .liquidGlassEffect(cornerRadius: 14, interactive: true, tint: .primary.opacity(0.04))
     }
     
     func getPowerColor(_ level: Int) -> Color {

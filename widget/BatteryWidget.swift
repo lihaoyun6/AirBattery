@@ -513,7 +513,7 @@ struct batteryWidget: Widget {
             batteryWidgetEntryView(entry: entry)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
-                .widgetBackground(Color("WidgetBackground"))
+                .liquidGlassWidgetBackground()
         }
         .configurationDisplayName("Batteries")
         .description("Displays battery usage for your devices from AirBattery")
