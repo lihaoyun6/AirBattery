@@ -808,7 +808,7 @@ func getDeviceIcon(_ d: Device) -> String {
         return "airpodspro.case.fill"
     case "mac", "applevirtualmachine1":
         return "display"
-    case "macbook", "macbookpro", "macbookair":
+    case "macbook", "macbookpro", "macbookair","macbookneo":
         if let icon = macBookList[macID] { return icon }
         return "macbook"
     case "macmini":
