@@ -71,7 +71,11 @@ class IDeviceBattery {
     func writeBatteryInfo(_ id: String, _ connectType: String) {
         //print("ℹ️ Getting Battery Info for \(id)")
         let lastUpdate = Date().timeIntervalSince1970
-        if connectType == "" { _ = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/wificonnection", arguments: ["-u", id, "true"]) }
+        if connectType == "" {
+            _ = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/wificonnection", arguments: ["-u", id, "true"])
+            // 修复 iOS"私有无线局域网地址"导致配对记录 MAC 与 Bonjour 广播 MAC 不匹配、拔线后无法通过 Wi-Fi 连接的问题
+            _ = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/wificonnection", arguments: ["-u", id, "syncmac"])
+        }
         if let deviceInfo = process(path: "\(Bundle.main.resourcePath!)/libimobiledevice/bin/ideviceinfo", arguments: [connectType, "-u", id]){
             let i = deviceInfo.components(separatedBy: .newlines)
             if let deviceName = i.filter({ $0.contains("DeviceName") }).first?.components(separatedBy: ": ").last,
