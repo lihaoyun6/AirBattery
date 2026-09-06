@@ -28,6 +28,7 @@
 		184ADF012DDB6C9F004791F0 /* AppleScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEF42DDB6C9F004791F0 /* AppleScript.swift */; };
 		184ADF022DDB6C9F004791F0 /* BTTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEF52DDB6C9F004791F0 /* BTTool.swift */; };
 		184ADF032DDB6C9F004791F0 /* CommandLineTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEF62DDB6C9F004791F0 /* CommandLineTool.swift */; };
+		18A9E1002F0D000100000001 /* EnergyMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A9E1002F0D000100000002 /* EnergyMode.swift */; };
 		184ADF042DDB6C9F004791F0 /* GroupForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEF72DDB6C9F004791F0 /* GroupForm.swift */; };
 		184ADF052DDB6C9F004791F0 /* InfoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEF82DDB6C9F004791F0 /* InfoButton.swift */; };
 		184ADF062DDB6C9F004791F0 /* Multipeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184ADEFA2DDB6C9F004791F0 /* Multipeer.swift */; };
@@ -139,6 +140,7 @@
 		184ADEF42DDB6C9F004791F0 /* AppleScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleScript.swift; sourceTree = "<group>"; };
 		184ADEF52DDB6C9F004791F0 /* BTTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTTool.swift; sourceTree = "<group>"; };
 		184ADEF62DDB6C9F004791F0 /* CommandLineTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineTool.swift; sourceTree = "<group>"; };
+		18A9E1002F0D000100000002 /* EnergyMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyMode.swift; sourceTree = "<group>"; };
 		184ADEF72DDB6C9F004791F0 /* GroupForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupForm.swift; sourceTree = "<group>"; };
 		184ADEF82DDB6C9F004791F0 /* InfoButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoButton.swift; sourceTree = "<group>"; };
 		184ADEF92DDB6C9F004791F0 /* logReader.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = logReader.sh; sourceTree = "<group>"; };
@@ -287,6 +289,7 @@
 				184ADEF42DDB6C9F004791F0 /* AppleScript.swift */,
 				184ADEF52DDB6C9F004791F0 /* BTTool.swift */,
 				184ADEF62DDB6C9F004791F0 /* CommandLineTool.swift */,
+				18A9E1002F0D000100000002 /* EnergyMode.swift */,
 				184ADEF72DDB6C9F004791F0 /* GroupForm.swift */,
 				184ADEF82DDB6C9F004791F0 /* InfoButton.swift */,
 				184ADEF92DDB6C9F004791F0 /* logReader.sh */,
@@ -542,6 +545,7 @@
 				184ADF012DDB6C9F004791F0 /* AppleScript.swift in Sources */,
 				184ADF022DDB6C9F004791F0 /* BTTool.swift in Sources */,
 				184ADF032DDB6C9F004791F0 /* CommandLineTool.swift in Sources */,
+				18A9E1002F0D000100000001 /* EnergyMode.swift in Sources */,
 				184ADF042DDB6C9F004791F0 /* GroupForm.swift in Sources */,
 				184ADF052DDB6C9F004791F0 /* InfoButton.swift in Sources */,
 				184ADF062DDB6C9F004791F0 /* Multipeer.swift in Sources */,

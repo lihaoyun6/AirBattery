@@ -155,3 +155,12 @@
 "Uninstall" = "解除安裝";
 "Install" = "安裝";
 "After installation, you can run \"airbattery\" in yor terminal to list all devices." = "安裝此工具後, 在命令列中執行\"airbattery\"即可列出所有裝置.";
+
+/* Energy Mode */
+"Energy Mode" = "能耗模式";
+"Automatic Mode" = "自動";
+"Low Power Mode" = "低耗電";
+"High Power Mode" = "高耗電";
+"Using Significant Energy" = "使用大量能耗";
+"No Significant Energy Use" = "目前無高耗能應用程式";
+"Battery Settings..." = "電池設定...";

@@ -770,6 +770,9 @@ struct popover: View {
                         .opacity(0.23)
                 )
                 .offset(y: 2.5)
+                Spacer().frame(height: 8)
+                EnergyModeSection()
+                Spacer().frame(height: 2)
                 if nearCast {
                     ForEach(allNearcast.indices, id: \.self) { index in
                         let devices = AirBatteryModel.ncGetAll(url: allNearcast[index])
