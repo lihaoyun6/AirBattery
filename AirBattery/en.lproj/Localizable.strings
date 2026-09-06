@@ -6,3 +6,12 @@
   
 */
 
+
+/* Energy Mode */
+"Energy Mode" = "Energy Mode";
+"Automatic Mode" = "Automatic";
+"Low Power Mode" = "Low Power";
+"High Power Mode" = "High Power";
+"Using Significant Energy" = "Using Significant Energy";
+"No Significant Energy Use" = "No Apps Using Significant Energy";
+"Battery Settings..." = "Battery Settings...";
