@@ -9,6 +9,7 @@ import SwiftUI
 import WidgetKit
 import UserNotifications
 import IOBluetooth
+import ServiceManagement
 import Sparkle
 
 let fd = FileManager.default
