@@ -54,37 +54,43 @@ struct Device: Hashable, Codable {
 }
 
 class AirBatteryModel {
-    static var lock = false
-    static var Devices: [Device] = []
+    // Devices is updated from several threads (Bluetooth callbacks, background scans),
+    // so every access goes through a real lock. Unsynchronized access corrupted memory.
+    private static let devicesLock = NSLock()
+    private static var _devices: [Device] = []
+    static var Devices: [Device] {
+        get { devicesLock.lock(); defer { devicesLock.unlock() }; return _devices }
+        set { devicesLock.lock(); defer { devicesLock.unlock() }; _devices = newValue }
+    }
     static let machineType = ud.string(forKey: "machineType") ?? "Mac"
     static let key = "com.lihaoyun6.AirBattery.widget"
-    
+
     static func updateDevice(_ device: Device) {
         //let blockedItems = (ud.object(forKey: "blockedDevices") as? [String]) ?? [String]()
         //if blockedItems.contains(device.deviceName) { return }
-        if lock { return }
-        lock = true
+        devicesLock.lock(); defer { devicesLock.unlock() }
         //self.Devices.removeAll(where: {blockedItems.contains($0.deviceName)})
-        if let index = self.Devices.firstIndex(where: { $0.deviceName == device.deviceName }) {
-            self.Devices[index] = device
+        if let index = _devices.firstIndex(where: { $0.deviceName == device.deviceName }) {
+            _devices[index] = device
         } else {
-            self.Devices.append(device)
+            _devices.append(device)
         }
-        lock = false
     }
-    
+
     static func hideDevice(_ name: String) {
-        for index in Devices.indices {
-            if Devices[index].deviceName == name {
-                Devices[index].isHidden = true
+        devicesLock.lock(); defer { devicesLock.unlock() }
+        for index in _devices.indices {
+            if _devices[index].deviceName == name {
+                _devices[index].isHidden = true
             }
         }
     }
-    
+
     static func unhideDevice(_ name: String) {
-        for index in Devices.indices {
-            if Devices[index].deviceName == name {
-                Devices[index].isHidden = false
+        devicesLock.lock(); defer { devicesLock.unlock() }
+        for index in _devices.indices {
+            if _devices[index].deviceName == name {
+                _devices[index].isHidden = false
             }
         }
     }
